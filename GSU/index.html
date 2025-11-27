@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSU | Geoeconomic Strategy Unit</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #192030;
+            --secondary-bg: #1f283b;
+            --text-white: #ffffff;
+            --accent-gold: #cba84e;
+            --font-head: 'Playfair Display', serif;
+            --font-body: 'EB Garamond', serif;
+            --easing: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-white);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: var(--font-head);
+            font-weight: 400;
+        }
+
+        h1 {
+            font-size: 3.8rem;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 40px;
+            height: 1px;
+            background-color: var(--accent-gold);
+            transition: width 0.6s var(--easing);
+        }
+
+        section:hover h2::after {
+            width: 100%;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-white);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 65ch;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s ease;
+            position: relative;
+        }
+
+        /* Utility */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn {
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 1rem 2.5rem;
+            font-family: var(--font-head);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            margin-top: 1rem;
+            transition: all 0.4s var(--easing);
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-gold);
+            background: rgba(203, 168, 78, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Navigation */
+        nav {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(25, 32, 48, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: padding 0.3s ease;
+        }
+
+        .logo img {
+            height: 50px; 
+            width: auto;
+            display: block;
+        }
+
+        .nav-links a {
+            font-family: var(--font-head);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            margin-left: 2rem;
+            opacity: 0.7;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--accent-gold);
+        }
+
+        /* Hero Section */
+        #hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-layout {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .hero-text {
+            width: 50%;
+            padding-right: 3rem;
+            z-index: 5;
+            position: relative;
+            pointer-events: none; /* Let clicks pass through text to globe if needed */
+        }
+        
+        .hero-text * {
+            pointer-events: auto; /* Re-enable pointer events for buttons/links */
+        }
+
+        /* 3D Container - Now Full Screen but positioned */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60%; /* Occupy right side */
+            height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+        
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        /* Section Layouts */
+        section {
+            padding: 7rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        section:nth-child(even) {
+            background-color: var(--secondary-bg);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: start;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .card {
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.4s var(--easing), box-shadow 0.4s var(--easing);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            border-color: rgba(203, 168, 78, 0.3);
+        }
+
+        .number {
+            font-family: var(--font-head);
+            font-size: 4rem;
+            color: var(--accent-gold);
+            opacity: 0.2;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Deliverables List with SVGs */
+        .deliverables-list {
+            list-style: none;
+        }
+
+        .deliverables-list li {
+            margin-bottom: 2rem;
+            padding-left: 3rem;
+            position: relative;
+            font-size: 1.2rem;
+        }
+
+        .icon-diamond {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            fill: var(--accent-gold);
+        }
+
+        /* Team Carousel */
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 0;
+        }
+
+        .carousel {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 2rem;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .team-card {
+            min-width: 300px;
+            max-width: 300px;
+            background: rgba(255,255,255,0.03);
+            border-top: 3px solid var(--accent-gold);
+            padding: 2rem;
+            scroll-snap-align: start;
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .team-role {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .team-name {
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .team-bio {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            line-height: 1.5;
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .control-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* Footer */
+        footer {
+            padding: 5rem 0;
+            background: #151a28;
+            font-size: 0.95rem;
+        }
+
+        .cta-banner {
+            text-align: center;
+            padding: 5rem 0;
+            margin-bottom: 5rem;
+            border: 1px solid rgba(203, 168, 78, 0.3);
+            background: radial-gradient(circle at center, rgba(203, 168, 78, 0.05) 0%, rgba(25, 32, 48, 0) 70%);
+        }
+
+        .footer-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 3rem;
+        }
+
+        /* Animation Classes */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s var(--easing), transform 1s var(--easing);
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            h1 { font-size: 3rem; }
+            .hero-layout { flex-direction: column; }
+            .hero-text { width: 100%; padding-right: 0; margin-bottom: 2rem; text-align: center; margin-top: 2rem;}
+            #canvas-container { 
+                position: relative;
+                width: 100%; 
+                height: 50vh; 
+            }
+            .grid-2, .grid-4 { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="container">
+        <div class="logo">
+            <img src="logo.png" alt="GSU Logo">
+        </div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#barometer">Barometer</a>
+            <a href="#team">Our Team</a>
+            <a href="mailto:geoecon@16thcouncil.uk?subject=Inquiry regarding Strategic Advice">Contact</a>
+        </div>
+    </nav>
+
+    <header id="hero" class="container">
+        <div class="hero-layout">
+            <div class="hero-text fade-up">
+                <h4>Geoeconomic Strategy Unit</h4>
+                <h1>Mapping the next moves of <br><span style="color:var(--accent-gold); font-style:italic;">capital</span> and <span style="color:var(--accent-gold); font-style:italic;">power</span>.</h1>
+                <p>A practitioner-led intelligence and advisory platform guiding decision-making on critical issues in today’s volatile business environment.</p>
+                <div style="margin-top: 2rem;">
+                    <a href="#barometer" class="btn">View The Risk Barometer</a>
+                </div>
+            </div>
+            
+            <div id="canvas-container"></div>
+        </div>
+    </header>
+
+    <section id="about">
+        <div class="container grid-2">
+            <div class="fade-up">
+                <h2>Who We Are</h2>
+                <p>The <strong>Geoeconomic Strategy Unit</strong> is a practitioner-led, research-driven initiative built by a team of seasoned analysts and thinkers to make geopolitics and global economics approachable in the boardroom.</p>
+                <p>We combine on-the-ground insight, policy analysis, and strategic experience to deliver clear and actionable insights to help you decide where to deploy capital, how to structure business models, and when to exercise strategic patience.</p>
+            </div>
+            <div class="fade-up delay-1">
+                <h2>Our Mission</h2>
+                <p>To improve capital mobility and unlock cross-border growth by highlighting risks, aligning incentives, and sequencing action across high-growth trade corridors.</p>
+                <p>We leverage our network involving long-standing relationships with critical stakeholders—ministries, investors, the media, and corporates—to translate analysis into financing structures and risk-mitigation design.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="barometer">
+        <div class="container">
+            <div class="fade-up" style="max-width: 800px; margin-bottom: 4rem;">
+                <h4>Flagship Research</h4>
+                <h2 style="font-size: 3rem; border: none;">Geoeconomic Risk Barometer</h2>
+                <p><em>Mapping the next moves of capital and power.</em></p>
+            </div>
+
+            <div class="grid-2">
+                <div class="fade-up">
+                    <p>The Barometer provides a decision-grade overview of where execution is most feasible in the near and medium term. It blends hard indicators with regional insights and corridor-level analysis to drive decision-making at the highest levels.</p>
+                    <p>Among its tools is a concise <strong>Risk-Adjusted Opportunity (RAO)</strong> score that supports our country briefs, triggers to watch, and strategic outlook. We publish quarterly with interim updates when conditions change.</p>
+                    <br>
+                    <a href="#" class="btn">Download Quarterly Report (PDF)</a>
+                </div>
+                <div class="fade-up delay-1">
+                    <div class="card">
+                        <h3>Why Leaders Read It</h3>
+                        <p>Analysis grounded in regional realities with a clear line of sight to boardrooms in high-growth regions and beyond.</p>
+                        <ul style="list-style: none; margin-top: 1rem; opacity: 0.8;">
+                            <li style="margin-bottom: 0.8rem; display:flex; align-items:center;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#cba84e" style="margin-right:10px;"><rect width="24" height="24" transform="rotate(45 12 12)"/></svg> 
+                                Quarterly Publication
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display:flex; align-items:center;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#cba84e" style="margin-right:10px;"><rect width="24" height="24" transform="rotate(45 12 12)"/></svg> 
+                                Interim Updates on Market Shifts
+                            </li>
+                            <li style="margin-bottom: 0.8rem; display:flex; align-items:center;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#cba84e" style="margin-right:10px;"><rect width="24" height="24" transform="rotate(45 12 12)"/></svg> 
+                                Decision-Grade Data
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="team">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+                <h2 class="fade-up">Our Team</h2>
+                <div class="carousel-controls fade-up delay-1">
+                    <button class="control-btn" id="prevBtn">&#8592;</button>
+                    <button class="control-btn" id="nextBtn">&#8594;</button>
+                </div>
+            </div>
+
+            <div class="carousel-wrapper fade-up delay-2">
+                <div class="carousel" id="teamCarousel">
+                    <div class="team-card"><span class="team-role">Founder & Chief Analyst</span><span class="team-name">Ishan Jasuja</span><p class="team-bio">Holds a Master's in International Political Economy from King's College London. Experienced in financial services and diplomacy.</p></div>
+                    <div class="team-card"><span class="team-role">Chief Data Officer</span><span class="team-name">Pranoy Roy Choudhury</span><p class="team-bio">Data lead developing quantitative frameworks. Focuses on monetary policy and financial governance at King's College London.</p></div>
+                    <div class="team-card"><span class="team-role">CTO</span><span class="team-name">Adip Krishna Guduru</span><p class="team-bio">Spearheading the technological infrastructure and digital strategy, ensuring secure and scalable delivery of GSU intelligence platforms.</p></div>
+                    <div class="team-card"><span class="team-role">Global Policy Intelligence</span><span class="team-name">Hillary Eyram</span><p class="team-bio">Holds a BSc in Business Administration with a strong interest in tracking development trends in emerging markets.</p></div>
+                    <div class="team-card"><span class="team-role">Research Fellow (GPIU)</span><span class="team-name">Niamh Allen</span><p class="team-bio">MA Social Policy graduate. Tracks geopolitical developments to inform high-level policy for the Global Policy Intelligence Unit.</p></div>
+                    <div class="team-card"><span class="team-role">Regional Policy Fellow</span><span class="team-name">Nurein Akindele</span><p class="team-bio">Focuses on the Europe Program. Contributes to policy briefs and geoeconomic trend analysis.</p></div>
+                    <div class="team-card"><span class="team-role">Strategic Analyst</span><span class="team-name">Liliya Anisimova</span><p class="team-bio">Brings a nuanced understanding of how legal frameworks, economics, and global power dynamics intersect. LSE & KCL Alumna.</p></div>
+                    <div class="team-card"><span class="team-role">Analyst</span><span class="team-name">Sreemayukha Nyayapathi</span><p class="team-bio">Master's in International Relations from Glasgow. Specializes in assessing India's role in a changing global landscape.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="methodology">
+        <div class="container">
+            <h2 class="fade-up">How We Work</h2>
+            <p class="fade-up" style="margin-bottom: 4rem;">We start with analysis; we finish with decisions.</p>
+            <div class="grid-4 fade-up">
+                <div><span class="number">01</span><h3>Field-Informed Analysis</h3><p style="font-size: 1rem;">Signals from ministries, regulators, financiers, and our regional network across high-growth markets.</p></div>
+                <div><span class="number">02</span><h3>Quantitative Assessments</h3><p style="font-size: 1rem;">Risk-Adjusted Opportunity scores blend market opportunity with on-the-ground stability.</p></div>
+                <div><span class="number">03</span><h3>Scenario Design</h3><p style="font-size: 1rem;">Planning for best, base, and worst case scenarios tied to concrete triggers (elections, policy moves).</p></div>
+                <div><span class="number">04</span><h3>Decision Support</h3><p style="font-size: 1rem;">Converting intelligence into strategies and governance steps for varying time horizons.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="deliverables">
+        <div class="container">
+            <div class="grid-2">
+                <div class="fade-up">
+                    <h2>Our Deliverables</h2>
+                    <p>We prioritize business-relevant insights over academic jargon and complex narratives.</p>
+                </div>
+                <div class="fade-up delay-1">
+                    <ul class="deliverables-list">
+                        <li><svg class="icon-diamond" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>Effective stakeholder mapping and engagement strategies</li>
+                        <li><svg class="icon-diamond" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>Built-in structural resilience to emerging risks</li>
+                        <li><svg class="icon-diamond" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>Actionable playbooks for recurring risk patterns</li>
+                        <li><svg class="icon-diamond" viewBox="0 0 24 24"><path d="M12 2L2 12l10 10 10-10L12 2z"/></svg>Data-driven analysis optimizing supply chains</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="container">
+            <div class="cta-banner fade-up">
+                <h3>Interested in bespoke strategic advice?</h3>
+                <a href="mailto:geoecon@16thcouncil.uk?subject=Inquiry regarding Strategic Advice" class="btn">Contact Us</a>
+            </div>
+            <div class="footer-grid">
+                <div>
+                    <strong style="color:var(--accent-gold); text-transform:uppercase; letter-spacing:1px;">The Sixteenth Council</strong><br>
+                    <span style="opacity:0.7;">Office 5336<br>182-184 High Street North<br>East Ham London, E6 2JA<br>United Kingdom</span>
+                </div>
+                <div style="text-align: right;">
+                    <a href="mailto:geoecon@16thcouncil.uk" style="border-bottom: 1px solid var(--accent-gold);">geoecon@16thcouncil.uk</a><br>
+                    <span style="opacity:0.7;">+44 7881 1644457</span><br>
+                    <a href="http://www.16thcouncil.uk" target="_blank" style="opacity:0.7;">www.16thcouncil.uk</a>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; opacity: 0.4; font-size: 0.8rem; text-align: center;">
+                &copy; 2025 Sixteenth Council Geoeconomic Strategic Unit. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import * as THREE from 'https://cdn.skypack.dev/three@0.128.0';
+        import { OrbitControls } from 'https://cdn.skypack.dev/three@0.128.0/examples/jsm/controls/OrbitControls.js';
+
+        // --- SHADERS ---
+        const vertex = `
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          uniform float u_time;
+          
+          void main() {
+            vUv = uv;
+            vPosition = position;
+            // Subtle breathing effect on dots without massive extrusion
+            vec3 newPosition = position + position * (sin(u_time * 2.0) * 0.005); 
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+            gl_PointSize = 3.0; // Fixed size for dots
+          }
+        `;
+        
+        const fragment = `
+          varying vec2 vUv;
+          varying vec3 vPosition;
+          uniform float u_time;
+          
+          // GSU Colors
+          vec3 colorGold = vec3(0.796, 0.658, 0.305); // #cba84e
+          vec3 colorWhite = vec3(0.8, 0.85, 0.9);
+          
+          void main() {
+             // Circular particle
+             float disc = length(gl_PointCoord - vec2(0.5));
+             if (disc > 0.5) discard;
+             
+             // Twinkle effect
+             float pct = abs(sin(u_time * 0.5 + vPosition.x));
+             vec3 color = mix(colorGold, colorWhite, pct);
+             
+             gl_FragColor = vec4(color, 1.0);
+          }
+        `;
+
+        // --- SETUP ---
+        const container = document.querySelector('#canvas-container');
+        let scene, camera, renderer, controls;
+        let materials = [];
+        
+        // Configuration
+        const dotSphereRadius = 16;
+        const routes = [
+            // Europe Hub
+            { start: {lat: 51.5, lon: -0.1}, end: {lat: 40.7, lon: -74.0} }, // Lon -> NY
+            { start: {lat: 51.5, lon: -0.1}, end: {lat: 25.2, lon: 55.2} }, // Lon -> Dubai
+            { start: {lat: 51.5, lon: -0.1}, end: {lat: 1.3, lon: 103.8} }, // Lon -> Sing
+            { start: {lat: 51.5, lon: -0.1}, end: {lat: 19.0, lon: 72.8} }, // Lon -> Mumbai
+            { start: {lat: 48.8, lon: 2.3}, end: {lat: 35.6, lon: 139.6} }, // Paris -> Tokyo
+            
+            // US Hub
+            { start: {lat: 40.7, lon: -74.0}, end: {lat: 34.0, lon: -118.2} }, // NY -> LA
+            { start: {lat: 34.0, lon: -118.2}, end: {lat: 35.6, lon: 139.6} }, // LA -> Tokyo
+            { start: {lat: 40.7, lon: -74.0}, end: {lat: -23.5, lon: -46.6} }, // NY -> Sao Paulo
+            
+            // Asia/MidEast Hub
+            { start: {lat: 25.2, lon: 55.2}, end: {lat: 22.3, lon: 114.1} }, // Dubai -> HK
+            { start: {lat: 19.0, lon: 72.8}, end: {lat: 1.3, lon: 103.8} }, // Mumbai -> Sing
+            { start: {lat: 1.3, lon: 103.8}, end: {lat: -33.8, lon: 151.2} }, // Sing -> Sydney
+            { start: {lat: 35.6, lon: 139.6}, end: {lat: 1.3, lon: 103.8} }, // Tokyo -> Sing
+            { start: {lat: 39.9, lon: 116.4}, end: {lat: 55.7, lon: 37.6} }  // Beijing -> Moscow
+        ];
+
+        function init() {
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+
+            scene = new THREE.Scene();
+
+            // Camera setup - FOV 45
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            
+            // Position camera based on screen size to fix cropping
+            if(window.innerWidth > 900) {
+                 camera.position.set(15, 10, 45); // Offset to right
+            } else {
+                 camera.position.set(0, 0, 60); // Center on mobile
+            }
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = false;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.8;
+
+            // Load Image and Create Globe
+            const imgLoader = new THREE.ImageLoader();
+            imgLoader.load('world_alpha_mini.jpg', (image) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                createGlobeFromData(imageData.data, image.width, image.height);
+            }, undefined, () => {
+                console.warn('Image not found, creating fallback globe');
+                createFallbackGlobe();
+            });
+
+            createLines();
+            animate();
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // --- GLOBE LOGIC ---
+
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+            return new THREE.Vector3(x, y, z);
+        }
+
+        function createGlobeFromData(imageData, imgWidth, imgHeight) {
+            // Pre-process image data into lookup table (like reference code)
+            const activeLatLon = {};
+
+            // Image is 360x180 (width x height)
+            // Map each pixel to lat/lon
+            let darkPixelCount = 0;
+            for(let y = 0; y < imgHeight; y++) {
+                const lat = 90 - y; // Top row is lat 90, bottom is lat -89
+                if(!activeLatLon[lat]) activeLatLon[lat] = [];
+
+                for(let x = 0; x < imgWidth; x++) {
+                    const lon = -180 + x; // Left column is lon -180, right is lon 179
+                    const i = (y * imgWidth + x) * 4;
+
+                    const red = imageData[i];
+                    const green = imageData[i + 1];
+                    const blue = imageData[i + 2];
+
+                    // Dark pixels = continents
+                    if(red < 80 && green < 80 && blue < 80) {
+                        activeLatLon[lat].push(lon);
+                        darkPixelCount++;
+                    }
+                }
+            }
+            console.log('Dark pixels found:', darkPixelCount);
+            console.log('Latitudes with data:', Object.keys(activeLatLon).length);
+
+            // Check if coordinate is near a continent
+            const visibilityForCoordinate = (lon, lat) => {
+                const latKey = Math.round(lat);
+                if(!activeLatLon[latKey] || !activeLatLon[latKey].length) return false;
+
+                const closest = activeLatLon[latKey].reduce((prev, curr) => {
+                    return (Math.abs(curr - lon) < Math.abs(prev - lon) ? curr : prev);
+                });
+
+                return Math.abs(lon - closest) < 1.5;
+            };
+
+            // Create separate dots for continents and oceans
+            const continentPositions = [];
+            const oceanPositions = [];
+            const dotDensity = 2.5;
+
+            for (let lat = 90; lat > -90; lat--) {
+                const radius = Math.cos(Math.abs(lat) * (Math.PI / 180)) * dotSphereRadius;
+                const circumference = radius * Math.PI * 2;
+                const dotsForLat = circumference * dotDensity;
+
+                for (let x = 0; x < dotsForLat; x++) {
+                    const lon = -180 + (x * 360 / dotsForLat);
+                    const pos = latLonToVector3(lat, lon, dotSphereRadius);
+
+                    if(visibilityForCoordinate(lon, lat)) {
+                        // Continent dot
+                        continentPositions.push(pos.x, pos.y, pos.z);
+                    } else {
+                        // Ocean dot
+                        oceanPositions.push(pos.x, pos.y, pos.z);
+                    }
+                }
+            }
+
+            console.log('Continent dots:', continentPositions.length / 3);
+            console.log('Ocean dots:', oceanPositions.length / 3);
+
+            // Create continent points (gold)
+            const continentGeometry = new THREE.BufferGeometry();
+            continentGeometry.setAttribute('position', new THREE.Float32BufferAttribute(continentPositions, 3));
+
+            const continentMaterial = new THREE.ShaderMaterial({
+                uniforms: { u_time: { value: 0 } },
+                vertexShader: vertex,
+                fragmentShader: fragment.replace('vec3 colorGold = vec3(0.796, 0.658, 0.305);', 'vec3 colorGold = vec3(0.796, 0.658, 0.305);')
+                                        .replace('vec3 colorWhite = vec3(0.8, 0.85, 0.9);', 'vec3 colorWhite = vec3(0.796, 0.658, 0.305);'), // Both gold
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const continentPoints = new THREE.Points(continentGeometry, continentMaterial);
+            scene.add(continentPoints);
+            materials.push(continentMaterial);
+
+            // Create ocean points (white/light gray)
+            const oceanGeometry = new THREE.BufferGeometry();
+            oceanGeometry.setAttribute('position', new THREE.Float32BufferAttribute(oceanPositions, 3));
+
+            const oceanMaterial = new THREE.ShaderMaterial({
+                uniforms: { u_time: { value: 0 } },
+                vertexShader: vertex,
+                fragmentShader: fragment.replace('vec3 colorGold = vec3(0.796, 0.658, 0.305);', 'vec3 colorGold = vec3(0.9, 0.9, 0.92);')
+                                        .replace('vec3 colorWhite = vec3(0.8, 0.85, 0.9);', 'vec3 colorWhite = vec3(0.85, 0.85, 0.87);'), // Light gray tones
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const oceanPoints = new THREE.Points(oceanGeometry, oceanMaterial);
+            scene.add(oceanPoints);
+            materials.push(oceanMaterial);
+
+            // Add Inner Dark Sphere to block back dots
+            const innerGeo = new THREE.SphereGeometry(dotSphereRadius - 0.5, 32, 32);
+            const innerMat = new THREE.MeshBasicMaterial({ color: 0x192030 });
+            scene.add(new THREE.Mesh(innerGeo, innerMat));
+        }
+
+        function createFallbackGlobe() {
+            // If image fails, create random dots
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            for(let i=0; i<3000; i++) {
+                const lat = (Math.random() - 0.5) * 180;
+                const lon = (Math.random() - 0.5) * 360;
+                const pos = latLonToVector3(lat, lon, dotSphereRadius);
+                positions.push(pos.x, pos.y, pos.z);
+            }
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const material = new THREE.ShaderMaterial({
+                uniforms: { u_time: { value: 0 } },
+                vertexShader: vertex,
+                fragmentShader: fragment,
+                transparent: true
+            });
+            scene.add(new THREE.Points(geometry, material));
+        }
+
+        // --- ANIMATED LINES ---
+        
+        function createLines() {
+            const lineGroup = new THREE.Group();
+            scene.add(lineGroup);
+
+            routes.forEach(route => {
+                const v1 = latLonToVector3(route.start.lat, route.start.lon, dotSphereRadius);
+                const v2 = latLonToVector3(route.end.lat, route.end.lon, dotSphereRadius);
+                
+                // Curve height based on distance
+                const dist = v1.distanceTo(v2);
+                const mid = v1.clone().add(v2).multiplyScalar(0.5).normalize().multiplyScalar(dotSphereRadius + (dist * 0.3));
+                
+                const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
+                const points = curve.getPoints(50);
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                
+                // Animated Line Shader
+                const lineMaterial = new THREE.ShaderMaterial({
+                    uniforms: {
+                        color: { value: new THREE.Color(0xcba84e) },
+                        uTime: { value: 0 }
+                    },
+                    vertexShader: `
+                        varying float vProgress;
+                        void main() {
+                            vProgress = uv.x;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform vec3 color;
+                        uniform float uTime;
+                        varying float vProgress;
+                        void main() {
+                            // Create a moving dash
+                            float dash = sin(vProgress * 10.0 - uTime * 3.0);
+                            // Only show parts of the sine wave
+                            if(dash < 0.5) discard; 
+                            
+                            // Fade ends
+                            float opacity = smoothstep(0.0, 0.2, vProgress) * smoothstep(1.0, 0.8, vProgress);
+                            
+                            gl_FragColor = vec4(color, opacity);
+                        }
+                    `,
+                    transparent: true
+                });
+                
+                // Add UVs to geometry for shader
+                const uvs = [];
+                for(let i=0; i<=50; i++) uvs.push(i/50, 0);
+                geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+
+                const line = new THREE.Line(geometry, lineMaterial);
+                lineGroup.add(line);
+                materials.push(lineMaterial);
+            });
+        }
+
+        // --- LOOP ---
+
+        function onWindowResize() {
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            
+            // Re-center if mobile
+            if(window.innerWidth < 900) camera.position.set(0, 0, 60);
+            else camera.position.set(15, 10, 45);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now() * 0.001;
+            
+            materials.forEach(mat => {
+                if(mat.uniforms.u_time) mat.uniforms.u_time.value = time;
+                if(mat.uniforms.uTime) mat.uniforms.uTime.value = time;
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Start
+        init();
+        
+        // --- Standard UI Fade Logic ---
+        const observerOptions = { root: null, threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        
+        // --- Carousel Logic ---
+        const carousel = document.getElementById('teamCarousel');
+        document.getElementById('nextBtn').addEventListener('click', () => carousel.scrollBy({ left: 340, behavior: 'smooth' }));
+        document.getElementById('prevBtn').addEventListener('click', () => carousel.scrollBy({ left: -340, behavior: 'smooth' }));
+
+    </script>
+</body>
+</html>
