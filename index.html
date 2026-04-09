@@ -292,6 +292,26 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.
   .cover-status{gap:1rem}
   footer{flex-direction:column;gap:.3rem;text-align:center;padding:1rem 1.5rem}
 }
+/* BOOK CHAPTER MODAL */
+#chapter-modal-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 300ms ease}
+#chapter-modal-overlay.open{opacity:1;pointer-events:all}
+#chapter-modal-overlay::before{content:'';position:absolute;inset:0;background:rgba(11,13,19,.82);backdrop-filter:blur(6px)}
+#chapter-modal{position:relative;z-index:1;background:var(--card);border:1px solid var(--ruleT);padding:2rem;width:min(720px,92vw);transform:translateY(20px) scale(.97);transition:transform 350ms cubic-bezier(.25,.46,.45,.94);max-height:90vh;overflow-y:auto}
+#chapter-modal-overlay.open #chapter-modal{transform:translateY(0) scale(1)}
+.chapter-modal-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.6rem;gap:1rem}
+.chapter-modal-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text);line-height:1.3}
+.chapter-modal-meta{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:.4rem;opacity:.8}
+#chapter-modal-close{background:none;border:1px solid var(--ruleT);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:.7rem;padding:.3em .7em;cursor:pointer;flex-shrink:0;transition:color 200ms,border-color 200ms}
+#chapter-modal-close:hover{color:var(--text);border-color:var(--teal)}
+.chapter-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:540px){.chapter-cards-grid{grid-template-columns:1fr}}
+.chapter-sub-card{background:var(--bg3);border:1px solid var(--rule);padding:1.4rem;cursor:pointer;transition:border-color 300ms,box-shadow 300ms;position:relative;overflow:hidden}
+.chapter-sub-card:hover{border-color:rgba(160,136,64,.4);box-shadow:0 4px 24px rgba(160,136,64,.08)}
+.chapter-sub-card::after{content:'↗';position:absolute;bottom:.8rem;right:.9rem;font-size:.75rem;color:var(--gold);opacity:.4;transition:opacity 250ms,transform 250ms}
+.chapter-sub-card:hover::after{opacity:.9;transform:translate(2px,-2px)}
+.chapter-num{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.7;margin-bottom:.6rem}
+.chapter-sub-title{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--text);line-height:1.35;margin-bottom:.7rem}
+.chapter-sub-desc{font-size:.85rem;color:var(--text2);line-height:1.6}
 </style>
 </head>
 <body>
@@ -503,19 +523,19 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.
         <p class="research-meta">Patent No. 202541121912 · January 2026</p>
         <p class="research-desc">An autonomous agent for market data analysis, trading strategy execution, and portfolio compliance. Filed with the Indian Patent Office in January 2026.</p>
       </div>
-      <div class="research-card reveal reveal-delay-2"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="research-card reveal reveal-delay-2" style="cursor:pointer" onclick="window.open('https://ieeexplore.ieee.org/abstract/document/11423039/','_blank')"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
         <span class="research-badge badge-conf">Conference</span>
         <h3 class="research-title">The D3QN Paradox: Why Combining DQN Enhancements Fails in Intraday Financial Trading</h3>
         <p class="research-meta">RAAI 2025 · December 2025</p>
         <p class="research-desc">D3QN underperforms its individual components in intraday trading. I traced this to optimisation conflicts and plasticity loss — combining improvements doesn't always improve things.</p>
       </div>
-      <div class="research-card reveal reveal-delay-3"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="research-card reveal reveal-delay-3" style="cursor:pointer" onclick="window.open('https://mobility.iiit.ac.in/mobility_fellowship/','_blank')"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
         <span class="research-badge badge-fellow">Fellowship</span>
         <h3 class="research-title">Data-Driven Transportation Analytics</h3>
         <p class="research-meta">iHub-Data Mobility Fellowship · IIIT Hyderabad · June 2024</p>
         <p class="research-desc">Multi-modal data fusion for two-wheeler road safety at IIIT Hyderabad. Worked on rider intention prediction using multi-view video analysis.</p>
       </div>
-      <div class="research-card reveal reveal-delay-4"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
+      <div class="research-card reveal reveal-delay-4" style="cursor:pointer" onclick="document.getElementById('chapter-modal-overlay').classList.add('open')"><div class="card-glow"></div><div class="corner-tl"></div><div class="corner-br"></div>
         <span class="research-badge badge-book">Book Chapter</span>
         <h3 class="research-title">Sustainable Solutions for E-Waste and Development</h3>
         <p class="research-meta">IGI Global · DOI: 10.4018/979-8-3693-1018-2 · February 2024</p>
@@ -574,19 +594,19 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.
         <div class="tech-tags"><span class="tech-tag">R(2+1)D</span><span class="tech-tag">ResNet</span><span class="tech-tag">VGG16</span><span class="tech-tag">PyTorch</span></div></div>
         <div class="project-accent"></div>
       </div>
-      <div class="project-card reveal reveal-delay-2"><div class="card-glow"></div>
+      <div class="project-card reveal reveal-delay-2" style="cursor:pointer" onclick="window.open('https://github.com/adipkg/VerdictAI','_blank')"><div class="card-glow"></div>
         <div class="project-header"><span class="project-num">project_02.py</span><h3 class="project-title">BERT Verdict Duration Prediction</h3></div>
         <div class="project-body"><p class="project-desc">BERT fine-tuned on scraped Indian court data to predict case durations. Built a Streamlit interface and MongoDB backend to make it usable.</p>
         <div class="tech-tags"><span class="tech-tag">BERT</span><span class="tech-tag">Beautiful Soup</span><span class="tech-tag">Streamlit</span><span class="tech-tag">MongoDB</span></div></div>
         <div class="project-accent"></div>
       </div>
-      <div class="project-card reveal reveal-delay-3"><div class="card-glow"></div>
+      <div class="project-card reveal reveal-delay-3" style="cursor:pointer" onclick="window.open('https://github.com/adipkg/Audio-Based-Emotion-Detection','_blank')"><div class="card-glow"></div>
         <div class="project-header"><span class="project-num">project_03.py</span><h3 class="project-title">Emotion Detection via Audio</h3></div>
         <div class="project-body"><p class="project-desc">CNN on Mel spectrograms for emotion classification from raw audio. Combined SAVEE, RAVDESS, and CREMA-D datasets, reached 70% accuracy.</p>
         <div class="tech-tags"><span class="tech-tag">CNN</span><span class="tech-tag">Mel Spectrogram</span><span class="tech-tag">RAVDESS</span><span class="tech-tag">CREMA-D</span></div></div>
         <div class="project-accent"></div>
       </div>
-      <div class="project-card reveal reveal-delay-4"><div class="card-glow"></div>
+      <div class="project-card reveal reveal-delay-4" style="cursor:pointer" onclick="window.open('https://github.com/Jai3405/FinSense','_blank')"><div class="card-glow"></div>
         <div class="project-header"><span class="project-num">project_04.py</span><h3 class="project-title">Deep RL Stock Trading Agent</h3></div>
         <div class="project-body"><p class="project-desc">DQN agent for Buy/Sell/Hold decisions on Yahoo Finance data. Used profit-sensitive reward shaping with inventory penalties. This eventually became the patent.</p>
         <div class="tech-tags"><span class="tech-tag">DQN</span><span class="tech-tag">TensorFlow</span><span class="tech-tag">Yahoo Finance</span><span class="tech-tag">RL</span></div></div>
@@ -618,12 +638,12 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.
       </div>
     </div>
     <div class="comp-grid">
-      <div class="comp-card reveal reveal-delay-2">
+      <div class="comp-card reveal reveal-delay-2" style="cursor:pointer" onclick="window.open('https://github.com/adipkg/Pothole-Detection','_blank')">
         <p class="comp-award">1st_position</p>
         <h3 class="comp-title">VBIT National Hackathon</h3>
         <p class="comp-meta">February 2023 · Real-time pothole detection using YOLOv4 Tiny and MySQL.</p>
       </div>
-      <div class="comp-card reveal reveal-delay-3">
+      <div class="comp-card reveal reveal-delay-3" style="cursor:pointer" onclick="window.open('https://github.com/adipkg/ParQuik','_blank')">
         <p class="comp-award">most_innovative_implementation</p>
         <h3 class="comp-title">OIST National Hackathon</h3>
         <p class="comp-meta">October 2023 · Smart parking system using CVzone and Firebase for real-time slot detection.</p>
@@ -831,6 +851,35 @@ document.querySelectorAll('.research-card,.project-card').forEach(card=>{
   }),{threshold:.4});
   sections.forEach(s=>io.observe(s));
 })();
+</script>
+
+<!-- BOOK CHAPTER MODAL -->
+<div id="chapter-modal-overlay" role="dialog" aria-modal="true" aria-label="Book Chapters">
+  <div id="chapter-modal">
+    <div class="chapter-modal-header">
+      <div>
+        <div class="chapter-modal-title">Sustainable Solutions for E-Waste and Development</div>
+        <div class="chapter-modal-meta">IGI Global · DOI: 10.4018/979-8-3693-1018-2 · February 2024</div>
+      </div>
+      <button id="chapter-modal-close" onclick="document.getElementById('chapter-modal-overlay').classList.remove('open')" aria-label="Close">✕ close</button>
+    </div>
+    <div class="chapter-cards-grid">
+      <div class="chapter-sub-card" onclick="window.open('https://www.igi-global.com/chapter/opportunities-and-challenges-in-solar-photovoltaic-waste-management/338705','_blank')">
+        <div class="chapter-num">Chapter 15</div>
+        <div class="chapter-sub-title">Opportunities and Challenges in Solar Photovoltaic Waste Management</div>
+        <div class="chapter-sub-desc">An analysis of the growing challenge of Solar PV panel end-of-life management, covering recycling pathways, policy gaps, and sustainable disposal strategies.</div>
+      </div>
+      <div class="chapter-sub-card" onclick="window.open('https://www.igi-global.com/chapter/technological-advancements-in-e-waste-management-and-resource-recovery/338708','_blank')">
+        <div class="chapter-num">Chapter 18</div>
+        <div class="chapter-sub-title">Technological Advancements in E-Waste Management and Resource Recovery</div>
+        <div class="chapter-sub-desc">Explores AI-driven approaches to e-waste classification, sorting, and resource recovery — including ML models for component identification and circular economy integration.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('chapter-modal-overlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('chapter-modal-overlay').classList.remove('open')});
 </script>
 </body>
 </html>
