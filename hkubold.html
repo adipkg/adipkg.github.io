@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKU Hub — Adip</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  [hidden]{display:none !important;}
+  button{cursor:pointer;font-family:inherit;border:none;background:none;}
+  input,select,textarea{font-family:inherit;}
+  a{text-decoration:none;color:inherit;}
+
+  :root{
+    --navy:#232632; --navy-2:#2b2f3d; --navy-3:#333748;
+    --cream:#F3EFE4; --cream-dim:rgba(243,239,228,.62); --cream-faint:rgba(243,239,228,.38);
+    --line:rgba(243,239,228,.12); --line-strong:rgba(243,239,228,.24);
+    --mint:#8CE9B4; --sky:#7FC6FF; --pink:#FF9ED2; --amber:#FFD873; --lilac:#C9B6FF;
+    --danger:#FF8FA3;
+    --radius:16px; --radius-sm:10px;
+    --shadow:0 10px 28px rgba(0,0,0,.28);
+    --font-head:'Sora',system-ui,sans-serif; --font-body:'Inter',system-ui,sans-serif;
+    --rail-w:78px; --topbar-h:64px;
+  }
+
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--navy); color:var(--cream); font-family:var(--font-body);
+    font-size:15px; line-height:1.5; min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+
+  /* ── RAIL ─────────────────────────────────────────────── */
+  .rail{
+    position:fixed; top:0; left:0; bottom:0; width:var(--rail-w); z-index:60;
+    background:var(--navy-2); border-right:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; padding:16px 0; gap:6px;
+  }
+  .rail-logo{
+    width:36px; height:36px; border-radius:11px; margin-bottom:16px;
+    background:linear-gradient(135deg,var(--mint),var(--sky));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-head); font-weight:800; font-size:.8rem; color:#1a1d29;
+  }
+  .rail-item{
+    width:56px; height:54px; border-radius:14px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    color:var(--cream-faint); transition:background .15s,color .15s;
+  }
+  .rail-item i{font-size:1.25rem;}
+  .rail-item span{font-size:.53rem; font-weight:600; letter-spacing:.03em; text-transform:uppercase;}
+  .rail-item:hover{background:rgba(243,239,228,.06); color:var(--cream);}
+  .rail-item.active{background:rgba(140,233,180,.15); color:var(--mint);}
+
+  /* ── TOPBAR ───────────────────────────────────────────── */
+  .topbar{
+    position:fixed; top:0; left:var(--rail-w); right:0; height:var(--topbar-h); z-index:50;
+    display:flex; align-items:center; justify-content:space-between; padding:0 30px;
+    background:rgba(35,38,50,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:var(--font-head); font-weight:700; font-size:1.02rem;}
+  .brand-dot{width:9px; height:9px; border-radius:50%; background:linear-gradient(135deg,var(--mint),var(--sky));}
+  .topbar-date{font-size:.8rem; color:var(--cream-dim);}
+
+  /* ── MAIN / VIEWS ─────────────────────────────────────── */
+  .main{margin-left:var(--rail-w); padding-top:var(--topbar-h); min-height:100vh;}
+  .view{display:none; padding:30px 34px 70px; max-width:1180px;}
+  .view.active{display:block;}
+
+  .section-header{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; flex-wrap:wrap;}
+  .section-header h2{font-family:var(--font-head); font-size:1.4rem; font-weight:700;}
+  .section-label{font-family:var(--font-head); font-size:.78rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--cream-dim); margin:26px 0 12px;}
+  .section-label:first-of-type{margin-top:0;}
+
+  /* ── HERO ─────────────────────────────────────────────── */
+  .hero{position:relative; overflow:hidden; padding:8px 0 26px;}
+  .hero .glow{position:absolute; width:240px; height:240px; border-radius:50%; filter:blur(70px); opacity:.32; z-index:0;}
+  .hero .glow-1{background:var(--mint); top:-90px; right:60px;}
+  .hero .glow-2{background:var(--sky); top:20px; right:-60px;}
+  .hero-inner{position:relative; z-index:1;}
+  .hero h1{font-family:var(--font-head); font-size:2.1rem; font-weight:800; letter-spacing:-.01em;}
+  .hero p{color:var(--cream-dim); margin-top:6px; font-size:.94rem;}
+
+  /* ── CARDS ────────────────────────────────────────────── */
+  .card{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px; margin-bottom:18px;}
+  .card-head{display:flex; align-items:center; gap:8px; font-family:var(--font-head); font-weight:700; font-size:.95rem; margin-bottom:14px;}
+  .card-head i{color:var(--mint);}
+
+  /* ── DASHBOARD ────────────────────────────────────────── */
+  .dash-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:18px; align-items:start;}
+  .quick-add{display:flex; gap:8px; margin-bottom:12px;}
+  .quick-add input{flex:1; background:var(--navy-3); border:1px solid var(--line-strong); border-radius:var(--radius-sm); padding:9px 12px; color:var(--cream); font-size:.86rem; outline:none;}
+  .quick-add input:focus{border-color:var(--mint);}
+  .see-all{text-align:center; font-size:.76rem; font-weight:600; color:var(--sky); cursor:pointer; padding-top:10px;}
+
+  .week-strip{display:grid; grid-template-columns:repeat(7,1fr); gap:10px;}
+  .week-col{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:10px; min-height:90px;}
+  .week-col.is-today{border-color:var(--mint); box-shadow:0 0 0 1px var(--mint) inset;}
+  .week-col-head{font-family:var(--font-head); font-weight:700; font-size:.78rem; margin-bottom:8px; display:flex; flex-direction:column; gap:1px;}
+  .week-col-head span{font-weight:400; font-size:.68rem; color:var(--cream-faint);}
+  .week-chip{display:inline-block; font-size:.66rem; font-weight:700; padding:3px 7px; border-radius:7px; margin:0 0 4px; letter-spacing:.02em; line-height:1.3;}
+  .week-chip-time{display:block; font-size:.59rem; font-weight:500; opacity:.75; letter-spacing:0;}
+  .week-empty{color:var(--cream-faint); font-size:.7rem;}
+
+  /* ── SESSIONS / PILLS / TAGS ──────────────────────────── */
+  .pill{display:inline-flex; align-items:center; font-size:.68rem; font-weight:700; letter-spacing:.02em; padding:3px 9px; border-radius:20px; border:1px solid; white-space:nowrap;}
+  .pill-general{background:rgba(243,239,228,.08); color:var(--cream-dim); border:1px solid var(--line-strong);}
+  .kind-tag{font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:20px; color:var(--navy);}
+  .kind-class{background:var(--sky);} .kind-tutorial{background:var(--lilac);} .kind-exam,.kind-final,.kind-midterm{background:var(--danger);} .kind-bootcamp{background:var(--amber);}
+
+  .session-row{background:var(--navy-3); border-left:3px solid; border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+  .session-row-main{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+  .session-title{font-size:.85rem; font-weight:600;}
+  .session-row-sub{display:flex; align-items:center; gap:14px; font-size:.72rem; color:var(--cream-dim); flex-wrap:wrap;}
+  .session-row-sub i{margin-right:3px;}
+  .session-note{color:var(--amber);}
+
+  .empty-state{text-align:center; padding:34px 10px; color:var(--cream-faint); font-size:.85rem;}
+  .empty-state i{display:block; font-size:1.8rem; margin-bottom:8px; color:var(--cream-faint);}
+
+  /* ── CHIPS / FILTERS ──────────────────────────────────── */
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .chip{font-size:.72rem; font-weight:600; padding:6px 13px; border-radius:20px; border:1px solid var(--line-strong); color:var(--cream-dim); cursor:pointer; background:rgba(243,239,228,.04); transition:all .15s;}
+  .chip.active{color:#1a1d29; background:var(--cream); border-color:var(--cream);}
+  .search-input{width:100%; background:var(--navy-2); border:1px solid var(--line-strong); border-radius:var(--radius-sm); padding:10px 14px; color:var(--cream); font-size:.86rem; outline:none; margin-bottom:14px;}
+  .search-input:focus{border-color:var(--sky);}
+
+  /* ── TIMETABLE (monthly calendar) ────────────────────── */
+  .cal-nav{display:flex; align-items:center; gap:10px;}
+  .cal-month-label{font-family:var(--font-head); font-weight:700; font-size:.95rem; min-width:150px; text-align:center;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:20px;}
+  .cal-weekday{text-align:center; font-size:.66rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-faint); padding-bottom:2px;}
+  .cal-day{background:var(--navy-2); border:1px solid var(--line); border-radius:10px; min-height:88px; padding:6px; cursor:pointer; display:flex; flex-direction:column; gap:3px; transition:border-color .15s,background .15s;}
+  .cal-day:hover{border-color:var(--line-strong);}
+  .cal-day.outside{opacity:.32;}
+  .cal-day.is-today{border-color:var(--mint);}
+  .cal-day.is-today .cal-day-num{color:var(--mint); font-weight:800;}
+  .cal-day.is-selected{background:var(--navy-3); border-color:var(--sky); box-shadow:0 0 0 1px var(--sky) inset;}
+  .cal-day-num{font-size:.76rem; font-weight:600; color:var(--cream-dim);}
+  .cal-day-sessions{display:flex; flex-direction:column; gap:2px; overflow:hidden;}
+  .cal-chip{font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;}
+  .cal-chip-time{font-size:.55rem; font-weight:500; opacity:.8; display:block;}
+  .cal-more{font-size:.6rem; color:var(--cream-faint); padding-left:2px;}
+  .preset-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .preset-label{display:flex; align-items:center; gap:5px; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-faint); margin-right:2px;}
+  .preset-chip{background:rgba(201,182,255,.12); border-color:rgba(201,182,255,.35); color:var(--lilac); display:inline-flex; align-items:center; gap:6px;}
+  .preset-x{font-size:.85rem; opacity:.7;}
+  .preset-x:hover{opacity:1; color:var(--danger);}
+  .preset-save{color:var(--cream-dim); border-style:dashed;}
+  .preset-save:hover{color:var(--mint); border-color:var(--mint);}
+
+  /* ── TODOS ────────────────────────────────────────────── */
+  .todo-list.compact .todo-row{padding:8px 10px;}
+  .todo-row{display:flex; align-items:flex-start; gap:10px; background:var(--navy-3); border-radius:10px; padding:11px 13px; margin-bottom:8px;}
+  .todo-row input[type=checkbox]{width:17px; height:17px; margin-top:2px; accent-color:var(--mint); flex-shrink:0;}
+  .todo-row-body{flex:1; min-width:0;}
+  .todo-text{font-size:.86rem; font-weight:500;}
+  .todo-row.is-done .todo-text{text-decoration:line-through; color:var(--cream-faint);}
+  .todo-meta{display:flex; align-items:center; gap:8px; margin-top:5px; flex-wrap:wrap;}
+  .todo-due{font-size:.7rem; color:var(--cream-dim);}
+  .todo-due.overdue{color:var(--danger); font-weight:700;}
+  .priority-dot{width:7px; height:7px; border-radius:50%; display:inline-block;}
+  .priority-dot.p-high{background:var(--danger);} .priority-dot.p-medium{background:var(--amber);} .priority-dot.p-low{background:var(--line-strong);}
+  .row-actions{display:flex; gap:4px; flex-shrink:0;}
+
+  /* ── NOTES ────────────────────────────────────────────── */
+  .notes-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px;}
+  .note-card{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 17px; display:flex; flex-direction:column; gap:8px;}
+  .note-card-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .note-date{font-size:.68rem; color:var(--cream-faint);}
+  .note-title{font-family:var(--font-head); font-weight:700; font-size:.92rem;}
+  .note-preview{font-size:.78rem; color:var(--cream-dim); line-height:1.55; flex:1;}
+
+  /* ── HOLIDAYS ─────────────────────────────────────────── */
+  .holiday-add{margin-bottom:14px;}
+  .holiday-row{display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line);}
+  .holiday-row:last-child{border-bottom:none;}
+  .holiday-name{font-weight:600; font-size:.86rem;}
+  .holiday-range{font-size:.74rem; color:var(--cream-dim); margin-top:2px;}
+  .freeday-chip{font-size:.74rem; font-weight:600; padding:5px 11px; border-radius:20px; background:rgba(140,233,180,.1); color:var(--mint); border:1px solid rgba(140,233,180,.25);}
+  .freeday-group{flex:0 0 100%; display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-radius:12px; border:1px solid rgba(140,233,180,.3); background:rgba(140,233,180,.07); position:relative;}
+  .freeday-group-badge{font-size:.63rem; font-weight:700; color:var(--navy); background:var(--mint); padding:2px 8px; border-radius:20px; margin-left:auto; flex-shrink:0;}
+  .freeblock-items{display:flex; flex-wrap:wrap; gap:5px; margin-top:0;}
+  .freeblock-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;}
+  .freeblock{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px;}
+  .freeblock-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .freeblock-month{font-family:var(--font-head); font-weight:700; font-size:.82rem;}
+  .freeblock-badge{font-size:.6rem; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(243,239,228,.08); border:1px solid var(--line-strong); color:var(--cream-dim);}
+  .freeblock-divider{height:1px; background:var(--line); margin:8px 0;}
+  .mini-cal{display:grid; grid-template-columns:repeat(7,1fr); gap:2px;}
+  .mini-cal-head{text-align:center; font-size:.52rem; font-weight:700; letter-spacing:.04em; color:var(--cream-faint); padding-bottom:3px; text-transform:uppercase;}
+  .mini-cal-day{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:.62rem; font-weight:500; color:var(--cream-faint);}
+  .mini-cal-day.free{background:rgba(140,233,180,.22); color:var(--mint); font-weight:700;}
+  .mini-cal-day.busy{color:rgba(243,239,228,.22);}
+  .mini-cal-day.outside{opacity:.15;}
+  .mini-cal-day.is-today{box-shadow:0 0 0 1.5px var(--mint);}
+  .mini-cal-day.past{opacity:.4;}
+
+  /* ── COURSES ──────────────────────────────────────────── */
+  .course-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:6px;}
+  .course-card{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; display:flex; flex-direction:column; gap:8px;}
+  .course-card-top{display:flex; align-items:center; justify-content:space-between;}
+  .type-tag{font-size:.64rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-faint);}
+  .course-title{font-family:var(--font-head); font-weight:700; font-size:.94rem; line-height:1.3;}
+  .course-sub{font-size:.74rem; color:var(--cream-dim);}
+  .course-blurb{font-size:.78rem; color:var(--cream-dim); line-height:1.55; flex:1;}
+  .course-card-actions{display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;}
+
+  .grading-card{overflow-x:auto;}
+  .grading-table{width:100%; border-collapse:collapse; font-size:.82rem;}
+  .grading-table th{text-align:left; padding:7px 10px; color:var(--cream-faint); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--line);}
+  .grading-table td{padding:7px 10px; border-bottom:1px solid var(--line);}
+  .grading-table tr:last-child td{border-bottom:none;}
+
+  /* ── BUTTONS ──────────────────────────────────────────── */
+  .btn-primary{display:inline-flex; align-items:center; gap:6px; background:var(--mint); color:#12261b; font-weight:700; font-size:.8rem; padding:9px 16px; border-radius:10px; transition:opacity .15s;}
+  .btn-primary:hover{opacity:.86;}
+  .btn-ghost{display:inline-flex; align-items:center; gap:6px; background:rgba(243,239,228,.06); border:1px solid var(--line-strong); color:var(--cream); font-weight:600; font-size:.76rem; padding:7px 13px; border-radius:9px; transition:background .15s;}
+  .btn-ghost:hover{background:rgba(243,239,228,.12);}
+  .btn-icon{width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; color:var(--cream-dim); transition:background .15s,color .15s;}
+  .btn-icon:hover{background:rgba(243,239,228,.1); color:var(--cream);}
+  .btn-icon.danger:hover{background:rgba(255,143,163,.15); color:var(--danger);}
+
+  /* ── MODALS ───────────────────────────────────────────── */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(15,17,23,.6); backdrop-filter:blur(3px); z-index:600; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .modal-box{width:100%; max-width:420px; background:var(--navy-2); border:1px solid var(--line-strong); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line); font-family:var(--font-head); font-weight:700; font-size:1rem;}
+  .modal-body{padding:18px;}
+  .modal-foot{display:flex; gap:8px; padding:0 18px 18px;}
+  .f-label{display:block; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-faint); margin-bottom:6px;}
+  .f-input{width:100%; background:var(--navy-3); border:1px solid var(--line-strong); border-radius:9px; padding:9px 11px; color:var(--cream); font-size:.86rem; outline:none; margin-bottom:14px;}
+  .f-input:focus{border-color:var(--sky);}
+  textarea.f-input{resize:vertical; min-height:90px;}
+  .f-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  /* ── RESPONSIVE ───────────────────────────────────────── */
+  @media (max-width:860px){
+    .dash-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:720px){
+    :root{--rail-w:0px;}
+    .rail{top:auto; bottom:0; left:0; right:0; width:100%; height:62px; flex-direction:row; justify-content:space-evenly; border-right:none; border-top:1px solid var(--line); padding:0;}
+    .rail-logo{display:none;}
+    .rail-item{width:auto; flex:1; height:100%;}
+    .topbar{left:0;}
+    .main{margin-left:0; padding-bottom:80px;}
+    .view{padding:24px 16px 40px;}
+    .week-strip{grid-template-columns:repeat(7,minmax(90px,1fr)); overflow-x:auto;}
+    .f-row{grid-template-columns:1fr;}
+    .topbar-date{font-size:.7rem;}
+    .cal-day{min-height:58px; padding:4px;}
+    .cal-day-num{font-size:.68rem;}
+    .cal-chip{font-size:.52rem; padding:1px 3px;}
+    .cal-month-label{min-width:auto; font-size:.85rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="rail" id="rail">
+  <div class="rail-logo">HK</div>
+  <div class="rail-item active" data-tab="dashboard" onclick="switchTab('dashboard')"><i class="ri-home-5-line"></i><span>Home</span></div>
+  <div class="rail-item" data-tab="timetable" onclick="switchTab('timetable')"><i class="ri-calendar-2-line"></i><span>Timetable</span></div>
+  <div class="rail-item" data-tab="holidays" onclick="switchTab('holidays')"><i class="ri-sun-line"></i><span>Breaks</span></div>
+  <div class="rail-item" data-tab="todos" onclick="switchTab('todos')"><i class="ri-checkbox-line"></i><span>Todos</span></div>
+  <div class="rail-item" data-tab="notes" onclick="switchTab('notes')"><i class="ri-sticky-note-line"></i><span>Notes</span></div>
+  <div class="rail-item" data-tab="courses" onclick="switchTab('courses')"><i class="ri-book-2-line"></i><span>Courses</span></div>
+</div>
+
+<div class="topbar">
+  <div class="brand"><span class="brand-dot"></span> HKU Hub</div>
+  <div class="topbar-date" id="topbar-date"></div>
+</div>
+
+<main class="main">
+  <div class="view active" id="view-dashboard"><div id="dashboard-content"></div></div>
+  <div class="view" id="view-timetable"><div id="timetable-content"></div></div>
+  <div class="view" id="view-holidays"><div id="holidays-content"></div></div>
+  <div class="view" id="view-todos"><div id="todos-content"></div></div>
+  <div class="view" id="view-notes"><div id="notes-content"></div></div>
+  <div class="view" id="view-courses"><div id="courses-content"></div></div>
+</main>
+
+<!-- ── TODO MODAL ─────────────────────────────────────────── -->
+<div id="todo-modal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><span id="todo-modal-title">New Todo</span><button class="btn-icon" onclick="closeModal('todo-modal')"><i class="ri-close-line"></i></button></div>
+    <div class="modal-body">
+      <label class="f-label">Task</label>
+      <input type="text" id="todo-text" class="f-input" placeholder="What needs doing?">
+      <div class="f-row">
+        <div><label class="f-label">Due date</label><input type="date" id="todo-due" class="f-input"></div>
+        <div><label class="f-label">Priority</label>
+          <select id="todo-priority" class="f-input">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+      <label class="f-label">Course (optional)</label>
+      <select id="todo-course" class="f-input"></select>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary" onclick="saveTodo()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('todo-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── NOTE MODAL ─────────────────────────────────────────── -->
+<div id="note-modal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><span id="note-modal-title">New Note</span><button class="btn-icon" onclick="closeModal('note-modal')"><i class="ri-close-line"></i></button></div>
+    <div class="modal-body">
+      <label class="f-label">Title</label>
+      <input type="text" id="note-title" class="f-input" placeholder="Note title">
+      <label class="f-label">Course (blank = general note)</label>
+      <select id="note-course" class="f-input"></select>
+      <label class="f-label">Note</label>
+      <textarea id="note-body" class="f-input" placeholder="Write your note…"></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary" onclick="saveNote()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('note-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOLIDAY MODAL ──────────────────────────────────────── -->
+<div id="holiday-modal" class="modal-backdrop" hidden>
+  <div class="modal-box">
+    <div class="modal-head"><span id="holiday-modal-title">Add Break</span><button class="btn-icon" onclick="closeModal('holiday-modal')"><i class="ri-close-line"></i></button></div>
+    <div class="modal-body">
+      <label class="f-label">Name</label>
+      <input type="text" id="holiday-name" class="f-input" placeholder="e.g. Career &amp; Enrichment Week">
+      <div class="f-row">
+        <div><label class="f-label">Start date</label><input type="date" id="holiday-start" class="f-input"></div>
+        <div><label class="f-label">End date</label><input type="date" id="holiday-end" class="f-input"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary" onclick="saveHoliday()">Save</button>
+      <button class="btn-ghost" onclick="closeModal('holiday-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, push, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ⚠️  PLACEHOLDER FIREBASE CONFIG — replace before this app will actually sync.
+//     Firebase console → Project settings → General → SDK setup and configuration.
+//     Then set Realtime Database rules to: {"rules": {".read": true, ".write": true}}
+//     (open rules — fine for a personal single-user tool, not for anything sensitive)
+// ─────────────────────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCu3igiyMcHc79z7xr6DSQ29OBPUf3pDJ0",
+  authDomain: "adip-hku.firebaseapp.com",
+  databaseURL: "https://adip-hku-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "adip-hku",
+  storageBucket: "adip-hku.firebasestorage.app",
+  messagingSenderId: "45076390506",
+  appId: "1:45076390506:web:ff0f00a2f04bca0f432013"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const todosRef = ref(db, 'todos');
+const notesRef = ref(db, 'notes');
+const holidaysRef = ref(db, 'holidays');
+const presetsRef = ref(db, 'presets');
+
+// ─── Static data: courses ───────────────────────────────────────────────────
+const COURSES = {
+  Pyth:  { title:'Python Programming', type:'Boot Camp', credits:null, instructor:'Prof. Michael Chau', module:'Boot Camp', window:'Aug 17 – 30, 2026', blurb:'4 sessions building core Python skills ahead of the programme.' },
+  AAI:   { title:'Agentic AI Workshop', type:'Boot Camp', credits:null, instructor:'Prof. Minje Park', module:'Boot Camp', window:'Aug 17 – 30, 2026', blurb:'2 sessions introducing agentic AI systems.' },
+  GAI:   { title:'Generative AI Workshop', type:'Boot Camp', credits:null, instructor:'Mr. Yip Chun Au Yeung', module:'Boot Camp', window:'Aug 17 – 30, 2026', blurb:'2 sessions on generative AI foundations.' },
+  BC:    { title:'Business Consulting', type:'Boot Camp', credits:null, instructor:'Mr. Albert Lau', module:'Boot Camp', window:'Aug 17 – 30, 2026', blurb:'1 session on business consulting fundamentals.' },
+
+  MAIB7001: { title:'Artificial Intelligence in Business', type:'Core', credits:6, instructor:'Prof. Zhepeng Li', module:'Module 1', window:'Sep 5 – Oct 21, 2026', blurb:'Applications of AI in business — market analysis, CRM, HR, robo-advisors, algorithmic trading, risk management and economic prediction, via case studies.' },
+  MAIB7002: { title:'Fundamentals of AI Models and Technologies', type:'Core', credits:6, instructor:'Dr. Schnieders Dirk', module:'Module 1', window:'Sep 5 – Oct 21, 2026', blurb:'Foundational AI knowledge: definitions, theory, models/techniques and their limits, with hands-on model design practice.' },
+  MAIB7003: { title:'AI Transformation and Organizational Change', type:'Core', credits:6, instructor:'Prof. Yulin Fang', module:'Module 2', window:'Oct 22 – Nov 30, 2026', blurb:'How AI and digital platforms transform business/organizational structure; case-based analysis of successful and unsuccessful AI transformations.' },
+  MAIB7005: { title:'Advanced Machine Learning and Deep Learning', type:'Core', credits:6, instructor:'Prof. Difan Zou', module:'Module 2', window:'Oct 22 – Nov 30, 2026', blurb:'Ensemble learning and deep neural networks (CNNs, RNNs, transformers, GANs, deep RL), their strengths/weaknesses, and model evaluation. Pre-req: MAIB7002.' },
+  MAIB7011: { title:'Generative Artificial Intelligence and Prompt Engineering', type:'Elective', credits:6, instructor:'Prof. Dawei Wang', module:'Module 3', window:'Dec 1, 2026 – Jan 21, 2027', blurb:'Evolution of generative AI in business decision-making, its risks/opportunities, and hands-on prompt engineering and fine-tuning.' },
+  MAIB7012: { title:'Managing AI Projects and Products', type:'Elective', credits:6, instructor:'Prof. Alan Chow', module:'Module 3', window:'Dec 1, 2026 – Jan 21, 2027', blurb:'Project and product management principles for AI initiatives — planning through deployment/maintenance, cost, stakeholders and risk.' },
+  MAIB7013: { title:'Smart Manufacturing and Operations Management', type:'Elective', credits:6, instructor:'Prof. Zhixi Wan / Prof. Huiyin Ouyang', module:'Module 3', window:'Dec 1, 2026 – Jan 21, 2027', blurb:'AI in manufacturing and operations — robotics, logistics, demand forecasting, IoT factories, supply chain and predictive maintenance.' },
+  MAIB7008: { title:'Strategic Management and Leadership in the AI Era', type:'Elective', credits:6, instructor:'Prof. Matthias Fahn', module:'Module 4', window:'Jan 22 – Mar 10, 2027', blurb:'Effective management and leadership as AI reshapes individuals, teams and organizations.' },
+  MAIB7009: { title:'AI Marketing Strategy', type:'Elective', credits:6, instructor:'Prof. Tuan Phan', module:'Module 4', window:'Jan 22 – Mar 10, 2027', blurb:'Using AI to optimize campaigns, personalize content, analyse consumer behaviour and predict market trends.' },
+  MAIB7007: { title:'Accounting and Audit Automation', type:'Elective', credits:6, instructor:'Prof. Peeyush Taori', module:'Module 4', window:'Jan 22 – Mar 10, 2027', blurb:'AI integration in accounting — streamlining processes, reducing error, and improving decision-making, via case studies.' },
+  MAIB7901: { title:'AI Entrepreneurship', type:'Capstone', credits:6, instructor:'Prof. Michael Chau', module:'Module 4–5', window:'Jan 22 – May 4, 2027', blurb:'Capstone: identify market opportunities, build a business model, and pitch an AI-focused venture to investors.' },
+  LLAW6334: { title:'Artificial Intelligence and Digital Governance', type:'Core', credits:6, instructor:'Dr. Angus Young', module:'Module 5', window:'Mar 18 – May 4, 2027', blurb:'Governance of AI and digital platforms — the human-AI governance nexus and consumer protection, combining law, business and ethics.' },
+  MAIB7014: { title:'Human-AI Interaction and Collaboration', type:'Elective', credits:6, instructor:'Prof. Jack Jiang', module:'Module 5', window:'Mar 18 – May 4, 2027', blurb:'Cognitive, social, technical and ethical dimensions of human-AI interaction — UX for AI, explainability, human-robot collaboration.' },
+  MAIB7010: { title:'Algorithmic Trading, Blockchains, and Cryptocurrencies', type:'Elective', credits:6, instructor:'Prof. Alan Kwan & Prof. Weichen Wang', module:'Module 5', window:'Mar 18 – May 4, 2027', blurb:'AI/ML, NLP and data analytics applied to algorithmic trading, blockchains, cryptocurrencies, fraud detection and robo-advisors.' },
+};
+const COURSE_ORDER = Object.keys(COURSES);
+const PALETTE = ['#8CE9B4','#7FC6FF','#FF9ED2','#FFD873','#C9B6FF'];
+function courseColor(code){ const i = COURSE_ORDER.indexOf(code); return PALETTE[i>=0 ? i%PALETTE.length : 0]; }
+
+const KIND_LABEL = { bootcamp:'Boot Camp', class:'Class', tutorial:'Tutorial', exam:'Exam', midterm:'Midterm', final:'Final Exam' };
+
+const GRADES = [
+  ['A+',4.3,'Excellent'],['A',4.0,'Excellent'],['A-',3.7,'Excellent'],
+  ['B+',3.3,'Good'],['B',3.0,'Good'],['B-',2.7,'Good'],
+  ['C+',2.3,'Satisfactory'],['C',2.0,'Satisfactory'],['C-',1.7,'Satisfactory'],
+  ['D+',1.3,'Pass'],['D',1.0,'Pass'],['F',0,'Fail'],
+];
+
+// ─── Static data: sessions (from Boot Camp + Teaching Plan PDFs) ────────────
+const LOC = 'Cyberport 4';
+const PROGRAM_START = '2026-08-17';
+const PROGRAM_END = '2027-05-12';
+
+function seshList(code, kind, list, defStart, defEnd, location, defaultNote){
+  return list.map(item => {
+    if (typeof item === 'string') return { code, kind, date:item, start:defStart, end:defEnd, location, note: defaultNote||'' };
+    const [date, start, end, note] = item;
+    return { code, kind, date, start: start||defStart, end: end||defEnd, location, note: note||defaultNote||'' };
+  });
+}
+
+const SESSIONS = [
+  // Boot Camp, Aug 17–30, 2026
+  ...seshList('GAI','bootcamp', [['2026-08-17','14:00','17:00']], null,null,'CP4-ABC'),
+  ...seshList('GAI','bootcamp', [['2026-08-25','09:30','12:30']], null,null,'CP4-H'),
+  ...seshList('Pyth','bootcamp', [['2026-08-20','09:30','12:30'],['2026-08-20','14:00','17:00'],['2026-08-27','09:30','12:30'],['2026-08-27','14:00','17:00']], null,null,'CP4-ABC'),
+  ...seshList('AAI','bootcamp', [['2026-08-24','14:00','17:00'],['2026-08-25','14:00','17:00']], null,null,'CP4-H'),
+  ...seshList('BC','bootcamp', [['2026-08-26','09:30','12:30']], null,null,'CP4-LT-104'),
+
+  // Module 1, Sep 5 – Oct 21, 2026
+  ...seshList('MAIB7001','class', ['2026-09-07','2026-09-10','2026-09-14','2026-09-17','2026-09-21','2026-09-24','2026-09-28','2026-10-05','2026-10-08','2026-10-12'], '09:30','12:30', LOC),
+  ...seshList('MAIB7001','tutorial', [['2026-09-12','18:30','19:30'],['2026-09-19','18:30','19:30'],['2026-09-28','14:00','15:00'],['2026-10-08','14:00','15:00']], null,null, LOC),
+  ...seshList('MAIB7002','class', ['2026-09-08','2026-09-15','2026-09-22','2026-09-29','2026-10-02','2026-10-06','2026-10-09','2026-10-13',['2026-10-16','14:00','17:00'],['2026-10-16','18:30','21:30']], '18:30','21:30', LOC),
+  ...seshList('MAIB7002','final', [['2026-10-17','18:30','20:30']], null,null, LOC),
+
+  // Module 2, Oct 22 – Nov 30, 2026
+  ...seshList('MAIB7003','class', [['2026-10-25','18:30','21:30'],'2026-10-27','2026-10-30','2026-11-03','2026-11-06','2026-11-10','2026-11-17',['2026-11-18','18:30','21:30'],['2026-11-21','18:30','21:30'],'2026-11-24'], '09:30','12:30', LOC),
+  ...seshList('MAIB7003','tutorial', [['2026-11-04','18:30','20:30'],['2026-11-11','18:30','20:30'],['2026-11-22','18:30','20:30']], null,null, LOC),
+  ...seshList('MAIB7003','final', [['2026-11-30','18:30','20:30']], null,null, LOC),
+  ...seshList('MAIB7005','class', ['2026-10-22','2026-10-26','2026-10-29','2026-11-02','2026-11-05','2026-11-09','2026-11-12','2026-11-16','2026-11-19','2026-11-23','2026-11-25'], '18:30','21:30', LOC),
+  ...seshList('MAIB7005','tutorial', [['2026-10-28','18:30','21:30'],['2026-10-31','18:30','20:30'],['2026-11-07','18:30','20:30'],['2026-11-14','18:30','20:30']], null,null, LOC),
+
+  // Module 3, Dec 1, 2026 – Jan 21, 2027
+  ...seshList('MAIB7011','class', ['2026-12-03','2026-12-07',['2026-12-10','18:30','21:30'],'2026-12-14',['2026-12-17','18:30','21:30'],'2026-12-21','2027-01-04','2027-01-07','2027-01-11',['2027-01-14','18:30','21:30']], '09:30','12:30', LOC),
+  ...seshList('MAIB7011','midterm', [['2027-01-06','18:30','21:30']], null,null, LOC),
+  ...seshList('MAIB7012','class', ['2026-12-03','2026-12-07',['2026-12-13','18:30','21:30'],'2026-12-14',['2026-12-20','18:30','21:30'],'2026-12-21','2027-01-04','2027-01-07','2027-01-11',['2027-01-16','18:30','21:30'],'2027-01-18'], '14:00','17:00', LOC),
+  ...seshList('MAIB7013','class', [['2026-12-01',null,null,'Tentative company site visit for some sessions'],'2026-12-04','2026-12-08','2026-12-15','2027-01-05','2027-01-08','2027-01-12',['2027-01-15','18:30','21:30']], '09:30','12:30', LOC),
+
+  // Module 4, Jan 22 – Mar 10, 2027
+  ...seshList('MAIB7008','class', ['2027-01-22','2027-01-26','2027-01-29','2027-02-02','2027-02-12','2027-02-16','2027-02-19','2027-02-23','2027-02-26','2027-03-02'], '14:00','17:00', LOC),
+  ...seshList('MAIB7008','final', [['2027-03-10','14:00','17:00']], null,null, LOC),
+  ...seshList('MAIB7009','class', [['2027-01-24','09:30','12:30'],['2027-01-24','14:00','17:00'],['2027-01-31','09:30','12:30'],['2027-01-31','14:00','17:00'],['2027-02-14','09:30','12:30'],['2027-02-14','14:00','17:00'],['2027-02-21','09:30','12:30'],['2027-02-21','14:00','17:00'],['2027-02-28','09:30','12:30'],['2027-02-28','14:00','17:00']], null,null, LOC),
+  ...seshList('MAIB7007','class', ['2027-01-22','2027-01-26','2027-01-29','2027-02-02','2027-02-12','2027-02-16','2027-02-19','2027-02-23','2027-02-26','2027-03-02'], '09:30','12:30', LOC),
+
+  // Capstone, Jan 22 – May 4, 2027
+  ...seshList('MAIB7901','class', ['2027-01-28','2027-02-11','2027-02-18','2027-02-25','2027-03-04','2027-03-18','2027-03-25','2027-04-08','2027-04-15','2027-04-22'], '09:30','12:30', LOC),
+
+  // Module 5, Mar 18 – May 4, 2027
+  ...seshList('LLAW6334','class', ['2027-03-20','2027-03-24','2027-03-31','2027-04-03','2027-04-07','2027-04-10','2027-04-14','2027-04-17','2027-04-21','2027-04-24',['2027-05-04','14:00','17:00']], '09:30','12:30', LOC),
+  ...seshList('LLAW6334','exam', [['2027-05-05','00:00','23:59','Home examination window — submit by May 12, 2027']], null,null, LOC),
+  ...seshList('MAIB7014','class', ['2027-03-22','2027-03-24','2027-03-31','2027-04-07','2027-04-12','2027-04-14','2027-04-19','2027-04-21','2027-04-30','2027-05-03'], '18:30','21:30', LOC),
+  ...seshList('MAIB7010','class', ['2027-03-19','2027-03-23','2027-03-30','2027-04-02','2027-04-06','2027-04-09','2027-04-13','2027-04-16','2027-04-20','2027-04-23'], '14:00','17:00', LOC),
+];
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmtISO(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function todayISO(){ return fmtISO(new Date()); }
+function escHtml(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtTime(hhmm){
+  const [h,m] = hhmm.split(':').map(Number);
+  return new Date(2000,0,1,h,m).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function fmtTimeRange(start,end){
+  if (start==='00:00' && end==='23:59') return 'All day';
+  return `${fmtTime(start)} – ${fmtTime(end)}`;
+}
+function fmtDateShort(iso){ return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
+function fmtDateLong(iso){ return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
+function sessionsOnDate(iso){ return SESSIONS.filter(s=>s.date===iso).sort((a,b)=>a.start.localeCompare(b.start)); }
+function weekRange(todayIso){
+  const d = new Date(todayIso+'T00:00:00');
+  const dow = (d.getDay()+6)%7; // 0=Mon
+  const monday = new Date(d); monday.setDate(d.getDate()-dow);
+  return Array.from({length:7}, (_,i)=>{ const dd=new Date(monday); dd.setDate(monday.getDate()+i); return fmtISO(dd); });
+}
+function computeFreeDays(fromIso, days, courseSet){
+  const out = []; let d = new Date(fromIso+'T00:00:00');
+  for(let i=0;i<days;i++){
+    const iso = fmtISO(d);
+    const sessions = courseSet
+      ? sessionsOnDate(iso).filter(s => courseSet.has(s.code))
+      : sessionsOnDate(iso);
+    if (iso>=PROGRAM_START && iso<=PROGRAM_END && sessions.length===0) out.push(iso);
+    d.setDate(d.getDate()+1);
+  }
+  return out;
+}
+function emptyState(icon,text){ return `<div class="empty-state"><i class="${icon}"></i>${escHtml(text)}</div>`; }
+function miniCalHtml(yearNum, monIdx, freeDaySet, todayIso){
+  const firstDow = (new Date(yearNum, monIdx, 1).getDay()+6)%7; // Mon=0
+  const numDays  = new Date(yearNum, monIdx+1, 0).getDate();
+  const heads = ['M','T','W','T','F','S','S'].map(d=>`<div class="mini-cal-head">${d}</div>`).join('');
+  let cells = '';
+  for(let i=0;i<firstDow;i++) cells += '<div class="mini-cal-day outside"></div>';
+  for(let d=1;d<=numDays;d++){
+    const iso = `${yearNum}-${pad2(monIdx+1)}-${pad2(d)}`;
+    const isFree = freeDaySet.has(iso);
+    const inProg = iso>=PROGRAM_START && iso<=PROGRAM_END;
+    const isPast = iso<todayIso;
+    const cls = ['mini-cal-day',
+      isFree ? 'free' : (inProg ? 'busy' : 'outside'),
+      iso===todayIso ? 'is-today' : '',
+      isPast ? 'past' : ''
+    ].filter(Boolean).join(' ');
+    cells += `<div class="${cls}">${d}</div>`;
+  }
+  return `<div class="mini-cal">${heads}${cells}</div>`;
+}
+function groupConsecutiveDays(days){
+  if (!days.length) return [];
+  const groups = [];
+  let runStart = days[0], runEnd = days[0], count = 1;
+  for (let i = 1; i < days.length; i++) {
+    const diff = (new Date(days[i]+'T00:00:00') - new Date(days[i-1]+'T00:00:00')) / 86400000;
+    if (diff === 1) { runEnd = days[i]; count++; }
+    else { groups.push(count===1 ? {type:'single',date:runStart} : {type:'run',from:runStart,to:runEnd,count}); runStart=days[i]; runEnd=days[i]; count=1; }
+  }
+  groups.push(count===1 ? {type:'single',date:runStart} : {type:'run',from:runStart,to:runEnd,count});
+  return groups;
+}
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let todos = {}, notes = {}, holidays = {}, presets = {};
+let activeTab = 'dashboard';
+let holidaysSeeded = false;
+let presetsSeeded = false;
+let courseFilter = new Set(['Pyth','AAI','GAI','BC','MAIB7001','MAIB7002','MAIB7003','MAIB7005','MAIB7008','MAIB7010','MAIB7011','MAIB7013','MAIB7014','MAIB7901','LLAW6334']);
+const _todayD = new Date();
+let calendarMonth = { y: _todayD.getFullYear(), m: _todayD.getMonth() };
+let selectedDate = todayISO();
+let todosFilter = 'active';
+let notesCourseFilter = null;
+let notesSearch = '';
+let editingTodoId = null, editingNoteId = null, editingHolidayId = null;
+
+// ─── Firebase listeners ─────────────────────────────────────────────────────
+onValue(todosRef, snap => {
+  todos = snap.val() || {};
+  if (activeTab==='dashboard') renderDashboard();
+  if (activeTab==='todos') renderTodos();
+});
+onValue(notesRef, snap => {
+  notes = snap.val() || {};
+  if (activeTab==='notes') renderNotes();
+  if (activeTab==='courses') renderCourses();
+});
+onValue(holidaysRef, snap => {
+  holidays = snap.val() || {};
+  if (!holidaysSeeded) {
+    holidaysSeeded = true;
+    const hasData = Object.keys(holidays).length > 0;
+    if (!hasData && !localStorage.getItem('hkub_seeded_v1')) {
+      push(holidaysRef, { name:'Career & Enrichment Week', start:'2027-03-11', end:'2027-03-17' });
+    }
+    localStorage.setItem('hkub_seeded_v1','1');
+  }
+  if (activeTab==='holidays') renderHolidays();
+});
+onValue(presetsRef, snap => {
+  presets = snap.val() || {};
+  if (!presetsSeeded) {
+    presetsSeeded = true;
+    const hasData = Object.keys(presets).length > 0;
+    if (!hasData && !localStorage.getItem('hkub_preset_seeded_v3')) {
+      push(presetsRef, { name:'My Registered Courses', courses:['Pyth','AAI','GAI','BC','MAIB7001','MAIB7002','MAIB7003','MAIB7005','MAIB7008','MAIB7010','MAIB7011','MAIB7013','MAIB7014','MAIB7901','LLAW6334'] });
+    }
+    localStorage.setItem('hkub_preset_seeded_v3','1');
+  }
+  if (activeTab==='timetable') renderTimetable();
+});
+
+// ─── Nav ─────────────────────────────────────────────────────────────────────
+function switchTab(tab){
+  activeTab = tab;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  document.querySelectorAll('.rail-item').forEach(r=>r.classList.toggle('active', r.dataset.tab===tab));
+  renderTab(tab);
+}
+function renderTab(tab){
+  if (tab==='dashboard') renderDashboard();
+  else if (tab==='timetable') renderTimetable();
+  else if (tab==='holidays') renderHolidays();
+  else if (tab==='todos') renderTodos();
+  else if (tab==='notes') renderNotes();
+  else if (tab==='courses') renderCourses();
+}
+function closeModal(id){ document.getElementById(id).hidden = true; }
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+function sessionCardHtml(s){
+  const c = courseColor(s.code);
+  const meta = COURSES[s.code] || {};
+  return `<div class="session-row" style="border-left-color:${c}">
+    <div class="session-row-main">
+      <span class="pill" style="background:${c}22;color:${c};border-color:${c}55">${escHtml(s.code)}</span>
+      <span class="session-title">${escHtml(meta.title||s.code)}</span>
+      <span class="kind-tag kind-${s.kind}">${KIND_LABEL[s.kind]||s.kind}</span>
+    </div>
+    <div class="session-row-sub">
+      <span><i class="ri-time-line"></i>${fmtTimeRange(s.start,s.end)}</span>
+      <span><i class="ri-map-pin-line"></i>${escHtml(s.location)}</span>
+      ${s.note?`<span class="session-note">${escHtml(s.note)}</span>`:''}
+    </div>
+  </div>`;
+}
+function weekDayColHtml(iso,isToday){
+  const sess = sessionsOnDate(iso).filter(s => courseFilter.has(s.code));
+  const d = new Date(iso+'T00:00:00');
+  return `<div class="week-col ${isToday?'is-today':''}">
+    <div class="week-col-head">${d.toLocaleDateString('en-US',{weekday:'short'})}<span>${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
+    ${sess.length ? sess.map(s=>`<div class="week-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}<span class="week-chip-time">${s.start!=='00:00'?fmtTimeRange(s.start,s.end):''}</span></div>`).join('') : '<div class="week-empty">—</div>'}
+  </div>`;
+}
+function dashboardTodoListHtml(){
+  const today = todayISO();
+  const list = Object.entries(todos||{}).filter(([,t])=>!t.done)
+    .sort((a,b)=>(a[1].due||'9999').localeCompare(b[1].due||'9999'))
+    .slice(0,6);
+  if (!list.length) return emptyState('ri-checkbox-circle-line','No open todos — nice.');
+  return `<div class="todo-list compact">${list.map(([id,t])=>todoRowHtml(id,t,today,true)).join('')}</div>
+    <div class="see-all" onclick="switchTab('todos')">See all todos →</div>`;
+}
+function renderDashboard(){
+  const el = document.getElementById('dashboard-content');
+  const today = todayISO();
+  const todaysSessions = sessionsOnDate(today).filter(s => courseFilter.has(s.code));
+  const weekDates = weekRange(today);
+  const nextWeekStart = fmtISO(new Date(new Date(weekDates[0]+'T00:00:00').setDate(new Date(weekDates[0]+'T00:00:00').getDate()+7)));
+  const nextWeekDates = weekRange(nextWeekStart);
+  const dateLabel = new Date(today+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  el.innerHTML = `
+    <div class="hero">
+      <div class="glow glow-1"></div><div class="glow glow-2"></div>
+      <div class="hero-inner">
+        <h1>Hi Adip! 👋</h1>
+        <p>${dateLabel} — here's what's on today and this week.</p>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-head"><i class="ri-calendar-check-line"></i> Today</div>
+        ${todaysSessions.length ? todaysSessions.map(sessionCardHtml).join('') : emptyState('ri-cup-line','No classes today — enjoy the free day.')}
+      </div>
+      <div class="card">
+        <div class="card-head"><i class="ri-list-check-3"></i> Todo</div>
+        <div class="quick-add">
+          <input type="text" id="quick-todo-input" placeholder="Add a quick todo…" onkeydown="if(event.key==='Enter') quickAddTodo()">
+          <button class="btn-icon" onclick="quickAddTodo()"><i class="ri-add-line"></i></button>
+        </div>
+        ${dashboardTodoListHtml()}
+      </div>
+    </div>
+    <div class="section-label">This week</div>
+    <div class="week-strip">${weekDates.map(d=>weekDayColHtml(d, d===today)).join('')}</div>
+    <div class="section-label">Next week</div>
+    <div class="week-strip">${nextWeekDates.map(d=>weekDayColHtml(d, false)).join('')}</div>
+  `;
+}
+
+// ─── Timetable (monthly calendar) ───────────────────────────────────────────
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+function cellIso(c){ return `${c.y}-${pad2(c.m+1)}-${pad2(c.day)}`; }
+function buildCalendarCells(y,m){
+  const firstDow = (new Date(y,m,1).getDay()+6)%7; // Monday=0
+  const numDays = daysInMonth(y,m);
+  const prevM = m-1<0 ? 11 : m-1, prevY = m-1<0 ? y-1 : y;
+  const prevMonthDays = daysInMonth(prevY,prevM);
+  const nextM = m+1>11 ? 0 : m+1, nextY = m+1>11 ? y+1 : y;
+  const cells = [];
+  for (let i=0;i<firstDow;i++) cells.push({ y:prevY, m:prevM, day:prevMonthDays-firstDow+1+i, outside:true });
+  for (let d=1; d<=numDays; d++) cells.push({ y, m, day:d, outside:false });
+  let nd = 1;
+  while (cells.length % 7 !== 0) cells.push({ y:nextY, m:nextM, day:nd++, outside:true });
+  return cells;
+}
+function calDayCellHtml(c, todayIso, selIso){
+  const iso = cellIso(c);
+  const sess = sessionsOnDate(iso).filter(s=>courseFilter.has(s.code));
+  const maxShow = 3;
+  const shown = sess.slice(0,maxShow);
+  const extra = sess.length - shown.length;
+  return `<div class="cal-day ${c.outside?'outside':''} ${iso===todayIso?'is-today':''} ${iso===selIso?'is-selected':''}" onclick="selectCalendarDay('${iso}')">
+    <div class="cal-day-num">${c.day}</div>
+    <div class="cal-day-sessions">
+      ${shown.map(s=>`<div class="cal-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}<span class="cal-chip-time">${s.start!=='00:00'?fmtTimeRange(s.start,s.end):''}</span></div>`).join('')}
+      ${extra>0 ? `<div class="cal-more">+${extra} more</div>` : ''}
+    </div>
+  </div>`;
+}
+function renderTimetable(){
+  const el = document.getElementById('timetable-content');
+  const today = todayISO();
+  const { y, m } = calendarMonth;
+  const cells = buildCalendarCells(y,m);
+  const monthLabel = new Date(y,m,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const allSelected = courseFilter.size===COURSE_ORDER.length;
+  const weekdayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const selSessions = selectedDate ? sessionsOnDate(selectedDate).filter(s=>courseFilter.has(s.code)) : [];
+
+  el.innerHTML = `
+    <div class="section-header">
+      <h2>Timetable</h2>
+      <div class="cal-nav">
+        <button class="btn-icon" onclick="shiftCalendarMonth(-1)"><i class="ri-arrow-left-s-line"></i></button>
+        <span class="cal-month-label">${monthLabel}</span>
+        <button class="btn-icon" onclick="shiftCalendarMonth(1)"><i class="ri-arrow-right-s-line"></i></button>
+        <button class="btn-ghost" onclick="goToTodayMonth()">Today</button>
+      </div>
+    </div>
+    <div class="chip-row">
+      <span class="chip ${allSelected?'active':''}" onclick="setAllCourseFilters()">All</span>
+      ${COURSE_ORDER.map(code=>{
+        const c = courseColor(code); const on = courseFilter.has(code);
+        return `<span class="chip ${on?'active':''}" style="${on?`background:${c};border-color:${c};color:#1a1d29`:`border-color:${c}55;color:${c}`}" onclick="toggleCourseFilter('${code}')">${code}</span>`;
+      }).join('')}
+    </div>
+    <div class="preset-row">
+      <span class="preset-label"><i class="ri-bookmark-line"></i> Presets</span>
+      ${Object.entries(presets||{}).map(([id,p])=>`
+        <span class="chip preset-chip" onclick="loadPreset('${id}')">${escHtml(p.name)}<i class="ri-close-line preset-x" onclick="event.stopPropagation();deletePreset('${id}')"></i></span>
+      `).join('')}
+      <span class="chip preset-save" onclick="savePreset()"><i class="ri-add-line"></i> Save current</span>
+    </div>
+    <div class="cal-grid">
+      ${weekdayHeaders.map(w=>`<div class="cal-weekday">${w}</div>`).join('')}
+      ${cells.map(c=>calDayCellHtml(c, today, selectedDate)).join('')}
+    </div>
+    <div class="card">
+      <div class="card-head"><i class="ri-calendar-event-line"></i> ${selectedDate ? fmtDateLong(selectedDate) : 'Select a day'}</div>
+      ${selectedDate ? (selSessions.length ? selSessions.map(sessionCardHtml).join('') : emptyState('ri-cup-line','No classes on this day.')) : emptyState('ri-cursor-line','Click a date on the calendar to see details.')}
+    </div>
+  `;
+}
+function toggleCourseFilter(code){
+  if (courseFilter.has(code)) courseFilter.delete(code); else courseFilter.add(code);
+  if (courseFilter.size===0) courseFilter = new Set(COURSE_ORDER);
+  renderTimetable();
+}
+function setAllCourseFilters(){ courseFilter = new Set(COURSE_ORDER); renderTimetable(); }
+function shiftCalendarMonth(delta){
+  let { y, m } = calendarMonth;
+  m += delta;
+  if (m<0) { m=11; y--; } else if (m>11) { m=0; y++; }
+  calendarMonth = { y, m };
+  renderTimetable();
+}
+function goToTodayMonth(){
+  const d = new Date();
+  calendarMonth = { y: d.getFullYear(), m: d.getMonth() };
+  selectedDate = todayISO();
+  renderTimetable();
+}
+function selectCalendarDay(iso){
+  const d = new Date(iso+'T00:00:00');
+  calendarMonth = { y: d.getFullYear(), m: d.getMonth() };
+  selectedDate = iso;
+  renderTimetable();
+}
+function goToCourseTimetable(code){
+  courseFilter = new Set([code]);
+  const today = todayISO();
+  const sess = SESSIONS.filter(s=>s.code===code).sort((a,b)=>a.date.localeCompare(b.date));
+  const target = sess.find(s=>s.date>=today) || sess[sess.length-1];
+  if (target) {
+    const d = new Date(target.date+'T00:00:00');
+    calendarMonth = { y: d.getFullYear(), m: d.getMonth() };
+    selectedDate = target.date;
+  }
+  switchTab('timetable');
+}
+function savePreset(){
+  const name = prompt('Name this preset:');
+  if (!name || !name.trim()) return;
+  push(presetsRef, { name: name.trim(), courses: [...courseFilter] });
+}
+function loadPreset(id){
+  const p = presets[id];
+  if (!p) return;
+  courseFilter = new Set(p.courses||[]);
+  renderTimetable();
+}
+function deletePreset(id){
+  const p = presets[id];
+  if (confirm(`Delete preset "${p ? p.name : ''}"?`)) remove(ref(db,'presets/'+id));
+}
+
+// ─── Holidays & days off ────────────────────────────────────────────────────
+function holidayRowHtml(id,h){
+  const range = h.start===h.end ? fmtDateLong(h.start) : `${fmtDateLong(h.start)} – ${fmtDateLong(h.end)}`;
+  return `<div class="holiday-row">
+    <div><div class="holiday-name">${escHtml(h.name)}</div><div class="holiday-range">${range}</div></div>
+    <div class="row-actions">
+      <button class="btn-icon" onclick="openHolidayModal('${id}')"><i class="ri-pencil-line"></i></button>
+      <button class="btn-icon danger" onclick="deleteHoliday('${id}')"><i class="ri-delete-bin-line"></i></button>
+    </div>
+  </div>`;
+}
+function renderHolidays(){
+  const el = document.getElementById('holidays-content');
+  const list = Object.entries(holidays||{}).sort((a,b)=>a[1].start.localeCompare(b[1].start));
+  const _today = new Date(); const _end = new Date(PROGRAM_END+'T00:00:00');
+  const _daysLeft = Math.max(0, Math.ceil((_end - _today) / 86400000) + 1);
+  const freeDays = computeFreeDays(todayISO(), _daysLeft, courseFilter);
+
+  // Group by month
+  const byMonth = {};
+  freeDays.forEach(d => { const m = d.slice(0,7); (byMonth[m]=byMonth[m]||[]).push(d); });
+  const months = Object.keys(byMonth).sort();
+  const monthLabel = iso => new Date(iso+'-01T00:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const freeDaysHtml = months.length
+    ? months.map(m => {
+        const groups   = groupConsecutiveDays(byMonth[m]);
+        const total    = byMonth[m].length;
+        const [yr, mn] = m.split('-').map(Number);
+        const freeDaySet = new Set(byMonth[m]);
+        const today    = todayISO();
+
+        // Chronological: singles = chip, runs = bordered group of individual day chips
+        const itemsHtml = groups.map(g => {
+          if (g.type === 'single') {
+            return `<div class="freeday-chip">${escHtml(new Date(g.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`;
+          }
+          // Expand run into individual day chips
+          const dayChips = [];
+          let d = new Date(g.from+'T00:00:00');
+          const end = new Date(g.to+'T00:00:00');
+          while (d <= end) { dayChips.push(fmtISO(d)); d.setDate(d.getDate()+1); }
+          const chips = dayChips.map(iso =>
+            `<div class="freeday-chip">${escHtml(new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`
+          ).join('');
+          return `<div class="freeday-group">${chips}<span class="freeday-group-badge">${g.count} days</span></div>`;
+        }).join('');
+
+        return `<div class="freeblock">
+          <div class="freeblock-head">
+            <span class="freeblock-month">${monthLabel(m)}</span>
+            <span class="freeblock-badge">${total} free day${total!==1?'s':''}</span>
+          </div>
+          ${miniCalHtml(yr, mn-1, freeDaySet, today)}
+          <div class="freeblock-divider"></div>
+          <div class="freeblock-items">${itemsHtml}</div>
+        </div>`;
+      }).join('')
+    : emptyState('ri-calendar-check-line','No upcoming free days.');
+
+  el.innerHTML = `
+    <div class="section-header"><h2>Holidays &amp; Days Off</h2><button class="btn-primary" onclick="openHolidayModal()"><i class="ri-add-line"></i> Add break</button></div>
+    <div class="card">
+      <div class="card-head"><i class="ri-sun-line"></i> Named breaks</div>
+      ${list.length ? list.map(([id,h])=>holidayRowHtml(id,h)).join('') : emptyState('ri-sun-line','No breaks added yet.')}
+    </div>
+    <div class="section-label" style="margin:22px 0 12px">Free days by month</div>
+    ${freeDays.length ? `<div class="freeblock-grid">${freeDaysHtml}</div>` : emptyState('ri-calendar-check-line','No upcoming free days.')}
+  `;
+}
+function openHolidayModal(id){
+  editingHolidayId = id || null;
+  const h = id ? holidays[id] : null;
+  document.getElementById('holiday-modal-title').textContent = id ? 'Edit Break' : 'Add Break';
+  document.getElementById('holiday-name').value = h ? h.name : '';
+  document.getElementById('holiday-start').value = h ? h.start : '';
+  document.getElementById('holiday-end').value = h ? h.end : '';
+  document.getElementById('holiday-modal').hidden = false;
+}
+function saveHoliday(){
+  const name = document.getElementById('holiday-name').value.trim();
+  const start = document.getElementById('holiday-start').value;
+  const end = document.getElementById('holiday-end').value || start;
+  if (!name || !start) return;
+  const data = { name, start, end };
+  if (editingHolidayId) update(ref(db,'holidays/'+editingHolidayId), data);
+  else push(holidaysRef, data);
+  closeModal('holiday-modal');
+}
+function deleteHoliday(id){ if (confirm('Delete this break?')) remove(ref(db,'holidays/'+id)); }
+
+// ─── Todos ───────────────────────────────────────────────────────────────────
+function todoRowHtml(id,t,today,compact){
+  const overdue = t.due && t.due<today && !t.done;
+  const c = t.course ? courseColor(t.course) : null;
+  return `<div class="todo-row ${t.done?'is-done':''}">
+    <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodoDone('${id}')">
+    <div class="todo-row-body">
+      <div class="todo-text">${escHtml(t.text)}</div>
+      <div class="todo-meta">
+        ${t.due?`<span class="todo-due ${overdue?'overdue':''}"><i class="ri-calendar-line"></i> ${fmtDateShort(t.due)}</span>`:''}
+        <span class="priority-dot p-${t.priority||'low'}"></span>
+        ${t.course?`<span class="pill" style="background:${c}22;color:${c};border-color:${c}55">${escHtml(t.course)}</span>`:''}
+      </div>
+    </div>
+    ${compact ? '' : `<div class="row-actions">
+      <button class="btn-icon" onclick="openTodoModal('${id}')"><i class="ri-pencil-line"></i></button>
+      <button class="btn-icon danger" onclick="deleteTodo('${id}')"><i class="ri-delete-bin-line"></i></button>
+    </div>`}
+  </div>`;
+}
+function renderTodos(){
+  const el = document.getElementById('todos-content');
+  const today = todayISO();
+  let list = Object.entries(todos||{});
+  if (todosFilter==='today') list = list.filter(([,t])=>t.due===today && !t.done);
+  else if (todosFilter==='overdue') list = list.filter(([,t])=>t.due && t.due<today && !t.done);
+  else if (todosFilter==='done') list = list.filter(([,t])=>t.done);
+  else list = list.filter(([,t])=>!t.done);
+  list.sort((a,b)=>{
+    if ((a[1].due||'9999')!==(b[1].due||'9999')) return (a[1].due||'9999').localeCompare(b[1].due||'9999');
+    return (b[1].createdAt||0)-(a[1].createdAt||0);
+  });
+
+  el.innerHTML = `
+    <div class="section-header"><h2>Todos</h2><button class="btn-primary" onclick="openTodoModal()"><i class="ri-add-line"></i> Add todo</button></div>
+    <div class="chip-row">
+      ${['active','today','overdue','done'].map(f=>`<span class="chip ${todosFilter===f?'active':''}" onclick="setTodoFilter('${f}')">${f[0].toUpperCase()+f.slice(1)}</span>`).join('')}
+    </div>
+    <div class="todo-list">${list.length ? list.map(([id,t])=>todoRowHtml(id,t,today,false)).join('') : emptyState('ri-checkbox-circle-line','Nothing here.')}</div>
+  `;
+}
+function setTodoFilter(f){ todosFilter = f; renderTodos(); }
+function quickAddTodo(){
+  const input = document.getElementById('quick-todo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  push(todosRef, { text, due:null, priority:'medium', course:null, done:false, createdAt:Date.now() });
+  input.value = '';
+}
+function openTodoModal(id){
+  editingTodoId = id || null;
+  const t = id ? todos[id] : null;
+  document.getElementById('todo-modal-title').textContent = id ? 'Edit Todo' : 'New Todo';
+  document.getElementById('todo-text').value = t ? t.text : '';
+  document.getElementById('todo-due').value = t ? (t.due||'') : '';
+  document.getElementById('todo-priority').value = t ? (t.priority||'medium') : 'medium';
+  document.getElementById('todo-course').value = t ? (t.course||'') : '';
+  document.getElementById('todo-modal').hidden = false;
+}
+function saveTodo(){
+  const text = document.getElementById('todo-text').value.trim();
+  if (!text) return;
+  const existing = editingTodoId ? todos[editingTodoId] : null;
+  const data = {
+    text,
+    due: document.getElementById('todo-due').value || null,
+    priority: document.getElementById('todo-priority').value,
+    course: document.getElementById('todo-course').value || null,
+    done: existing ? !!existing.done : false,
+    createdAt: existing ? (existing.createdAt||Date.now()) : Date.now(),
+  };
+  if (editingTodoId) update(ref(db,'todos/'+editingTodoId), data);
+  else push(todosRef, data);
+  closeModal('todo-modal');
+}
+function toggleTodoDone(id){ update(ref(db,'todos/'+id), { done: !todos[id].done }); }
+function deleteTodo(id){ if (confirm('Delete this todo?')) remove(ref(db,'todos/'+id)); }
+
+// ─── Notes ───────────────────────────────────────────────────────────────────
+function noteCardHtml(id,n){
+  const c = n.course ? courseColor(n.course) : null;
+  const body = n.body || '';
+  const preview = body.slice(0,140) + (body.length>140 ? '…' : '');
+  return `<div class="note-card">
+    <div class="note-card-top">
+      ${n.course ? `<span class="pill" style="background:${c}22;color:${c};border-color:${c}55">${escHtml(n.course)}</span>` : `<span class="pill pill-general">General</span>`}
+      <span class="note-date">${n.updatedAt ? fmtDateShort(fmtISO(new Date(n.updatedAt))) : ''}</span>
+    </div>
+    <div class="note-title">${escHtml(n.title||'Untitled note')}</div>
+    <div class="note-preview">${escHtml(preview)}</div>
+    <div class="row-actions">
+      <button class="btn-icon" onclick="openNoteModal('${id}')"><i class="ri-pencil-line"></i></button>
+      <button class="btn-icon danger" onclick="deleteNote('${id}')"><i class="ri-delete-bin-line"></i></button>
+    </div>
+  </div>`;
+}
+function notesGridHtml(){
+  let list = Object.entries(notes||{});
+  if (notesCourseFilter) list = list.filter(([,n]) => notesCourseFilter==='__general__' ? !n.course : n.course===notesCourseFilter);
+  if (notesSearch) { const s=notesSearch.toLowerCase(); list = list.filter(([,n])=>(n.title||'').toLowerCase().includes(s)||(n.body||'').toLowerCase().includes(s)); }
+  list.sort((a,b)=>(b[1].updatedAt||0)-(a[1].updatedAt||0));
+  return list.length ? list.map(([id,n])=>noteCardHtml(id,n)).join('') : emptyState('ri-sticky-note-line','No notes yet.');
+}
+function renderNotes(){
+  const el = document.getElementById('notes-content');
+  el.innerHTML = `
+    <div class="section-header"><h2>Notes</h2><button class="btn-primary" onclick="openNoteModal()"><i class="ri-add-line"></i> Add note</button></div>
+    <input type="text" class="search-input" placeholder="Search notes…" value="${escHtml(notesSearch)}" oninput="handleNotesSearch(this.value)">
+    <div class="chip-row">
+      <span class="chip ${!notesCourseFilter?'active':''}" onclick="setNotesCourseFilter(null)">All</span>
+      <span class="chip ${notesCourseFilter==='__general__'?'active':''}" onclick="setNotesCourseFilter('__general__')">General</span>
+      ${COURSE_ORDER.map(code=>{
+        const c=courseColor(code); const on=notesCourseFilter===code;
+        return `<span class="chip ${on?'active':''}" style="${on?`background:${c};border-color:${c};color:#1a1d29`:`border-color:${c}55;color:${c}`}" onclick="setNotesCourseFilter('${code}')">${code}</span>`;
+      }).join('')}
+    </div>
+    <div class="notes-grid" id="notes-grid-inner">${notesGridHtml()}</div>
+  `;
+}
+function handleNotesSearch(v){ notesSearch = v; const g = document.getElementById('notes-grid-inner'); if (g) g.innerHTML = notesGridHtml(); }
+function setNotesCourseFilter(code){ notesCourseFilter = code; renderNotes(); }
+function goToCourseNotes(code){ notesCourseFilter = code; switchTab('notes'); }
+function openNoteModal(id){
+  editingNoteId = id || null;
+  const n = id ? notes[id] : null;
+  document.getElementById('note-modal-title').textContent = id ? 'Edit Note' : 'New Note';
+  document.getElementById('note-title').value = n ? (n.title||'') : '';
+  document.getElementById('note-course').value = n ? (n.course||'') : '';
+  document.getElementById('note-body').value = n ? (n.body||'') : '';
+  document.getElementById('note-modal').hidden = false;
+}
+function saveNote(){
+  const title = document.getElementById('note-title').value.trim() || 'Untitled note';
+  const body = document.getElementById('note-body').value.trim();
+  const course = document.getElementById('note-course').value || null;
+  if (!body) return;
+  const now = Date.now();
+  const existing = editingNoteId ? notes[editingNoteId] : null;
+  const data = { title, body, course, updatedAt: now, createdAt: existing ? (existing.createdAt||now) : now };
+  if (editingNoteId) update(ref(db,'notes/'+editingNoteId), data);
+  else push(notesRef, data);
+  closeModal('note-modal');
+}
+function deleteNote(id){ if (confirm('Delete this note?')) remove(ref(db,'notes/'+id)); }
+
+// ─── Courses ─────────────────────────────────────────────────────────────────
+function courseCardHtml(code){
+  const m = COURSES[code]; const c = courseColor(code);
+  const noteCount = Object.values(notes||{}).filter(n=>n.course===code).length;
+  return `<div class="course-card" style="border-top:4px solid ${c}">
+    <div class="course-card-top">
+      <span class="pill" style="background:${c}22;color:${c};border-color:${c}55">${escHtml(code)}</span>
+      <span class="type-tag">${escHtml(m.type)}</span>
+    </div>
+    <div class="course-title">${escHtml(m.title)}</div>
+    <div class="course-sub">${escHtml(m.instructor)}${m.credits?` · ${m.credits} credits`:''}</div>
+    <div class="course-sub">${escHtml(m.window)}</div>
+    <div class="course-blurb">${escHtml(m.blurb)}</div>
+    <div class="course-card-actions">
+      <button class="btn-ghost" onclick="goToCourseTimetable('${code}')"><i class="ri-calendar-2-line"></i> Timetable</button>
+      <button class="btn-ghost" onclick="goToCourseNotes('${code}')"><i class="ri-sticky-note-line"></i> Notes (${noteCount})</button>
+    </div>
+  </div>`;
+}
+function renderCourses(){
+  const el = document.getElementById('courses-content');
+  const groups = {};
+  COURSE_ORDER.forEach(code=>{ const m=COURSES[code].module; (groups[m]=groups[m]||[]).push(code); });
+  const moduleOrder = ['Boot Camp','Module 1','Module 2','Module 3','Module 4','Module 4–5','Module 5'];
+
+  let html = `<div class="section-header"><h2>Courses</h2></div>`;
+  moduleOrder.forEach(m=>{
+    if (!groups[m]) return;
+    html += `<div class="section-label">${escHtml(m)}</div><div class="course-grid">${groups[m].map(courseCardHtml).join('')}</div>`;
+  });
+  html += `
+    <div class="section-label">Grading Scale</div>
+    <div class="card grading-card">
+      <table class="grading-table">
+        <thead><tr><th>Grade</th><th>Points</th><th>Standard</th></tr></thead>
+        <tbody>${GRADES.map(g=>`<tr><td>${g[0]}</td><td>${g[1]}</td><td>${g[2]}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  el.innerHTML = html;
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+function populateCourseSelects(){
+  const opts = '<option value="">— None —</option>' + COURSE_ORDER.map(c=>`<option value="${c}">${escHtml(c)} — ${escHtml(COURSES[c].title)}</option>`).join('');
+  ['todo-course','note-course'].forEach(id=>{ const elx = document.getElementById(id); if (elx) elx.innerHTML = opts; });
+}
+function updateTopbarDate(){
+  const elx = document.getElementById('topbar-date');
+  if (elx) elx.textContent = new Date().toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  m.addEventListener('click', e=>{ if (e.target===m) m.hidden = true; });
+});
+
+populateCourseSelects();
+updateTopbarDate();
+setInterval(updateTopbarDate, 60000);
+switchTab('dashboard');
+
+Object.assign(window, {
+  switchTab, quickAddTodo,
+  openTodoModal, saveTodo, toggleTodoDone, deleteTodo, setTodoFilter,
+  openNoteModal, saveNote, deleteNote, handleNotesSearch, setNotesCourseFilter,
+  openHolidayModal, saveHoliday, deleteHoliday,
+  toggleCourseFilter, setAllCourseFilters, shiftCalendarMonth, goToTodayMonth, selectCalendarDay,
+  savePreset, loadPreset, deletePreset,
+  goToCourseTimetable, goToCourseNotes, closeModal,
+});
+</script>
+</body>
+</html>
