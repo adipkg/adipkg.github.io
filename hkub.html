@@ -183,14 +183,13 @@
   .holiday-name{font-weight:600; font-size:.86rem;}
   .holiday-range{font-size:.74rem; color:var(--cream-dim); margin-top:2px;}
   .freeday-chip{font-size:.74rem; font-weight:600; padding:5px 11px; border-radius:20px; background:rgba(140,233,180,.1); color:var(--mint); border:1px solid rgba(140,233,180,.25);}
-  .freeday-run{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 14px; border-radius:10px; background:linear-gradient(90deg,rgba(140,233,180,.13),rgba(127,198,255,.08)); border:1px solid rgba(140,233,180,.3);}
-  .freeday-run-range{font-size:.82rem; font-weight:700; color:var(--mint);}
-  .freeday-run-badge{font-size:.67rem; font-weight:700; color:var(--navy); background:var(--mint); padding:2px 9px; border-radius:20px; white-space:nowrap; flex-shrink:0;}
+  .freeday-group{flex:0 0 100%; display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-radius:12px; border:1px solid rgba(140,233,180,.3); background:rgba(140,233,180,.07); position:relative;}
+  .freeday-group-badge{font-size:.63rem; font-weight:700; color:var(--navy); background:var(--mint); padding:2px 8px; border-radius:20px; margin-left:auto; flex-shrink:0;}
+  .freeblock-items{display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;}
   .freeblock{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px;}
   .freeblock-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .freeblock-month{font-family:var(--font-head); font-weight:700; font-size:.95rem;}
   .freeblock-badge{font-size:.67rem; font-weight:700; padding:2px 10px; border-radius:20px; background:rgba(243,239,228,.08); border:1px solid var(--line-strong); color:var(--cream-dim);}
-  .freeblock-runs{display:flex; flex-direction:column; gap:7px; margin-top:14px;}
   .freeblock-divider{height:1px; background:var(--line); margin:12px 0;}
   .mini-cal{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
   .mini-cal-head{text-align:center; font-size:.58rem; font-weight:700; letter-spacing:.06em; color:var(--cream-faint); padding-bottom:4px; text-transform:uppercase;}
@@ -831,16 +830,25 @@ function renderHolidays(){
   const freeDaysHtml = months.length
     ? months.map(m => {
         const groups   = groupConsecutiveDays(byMonth[m]);
-        const runs     = groups.filter(g => g.type==='run');
         const total    = byMonth[m].length;
         const [yr, mn] = m.split('-').map(Number);
         const freeDaySet = new Set(byMonth[m]);
         const today    = todayISO();
 
-        const runsHtml = runs.map(g => {
-          const fromStr = new Date(g.from+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-          const toStr   = new Date(g.to  +'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-          return `<div class="freeday-run"><span class="freeday-run-range">${escHtml(fromStr)} &rarr; ${escHtml(toStr)}</span><span class="freeday-run-badge">${g.count} days</span></div>`;
+        // Chronological: singles = chip, runs = bordered group of individual day chips
+        const itemsHtml = groups.map(g => {
+          if (g.type === 'single') {
+            return `<div class="freeday-chip">${escHtml(new Date(g.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`;
+          }
+          // Expand run into individual day chips
+          const dayChips = [];
+          let d = new Date(g.from+'T00:00:00');
+          const end = new Date(g.to+'T00:00:00');
+          while (d <= end) { dayChips.push(fmtISO(d)); d.setDate(d.getDate()+1); }
+          const chips = dayChips.map(iso =>
+            `<div class="freeday-chip">${escHtml(new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`
+          ).join('');
+          return `<div class="freeday-group">${chips}<span class="freeday-group-badge">${g.count} days</span></div>`;
         }).join('');
 
         return `<div class="freeblock">
@@ -849,7 +857,8 @@ function renderHolidays(){
             <span class="freeblock-badge">${total} free day${total!==1?'s':''}</span>
           </div>
           ${miniCalHtml(yr, mn-1, freeDaySet, today)}
-          ${runs.length ? `<div class="freeblock-divider"></div><div class="freeblock-runs">${runsHtml}</div>` : ''}
+          <div class="freeblock-divider"></div>
+          <div class="freeblock-items">${itemsHtml}</div>
         </div>`;
       }).join('')
     : emptyState('ri-calendar-check-line','No upcoming free days.');
