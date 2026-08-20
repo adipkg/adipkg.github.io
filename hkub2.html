@@ -69,37 +69,27 @@ em,i,b,strong{font-style:normal;font-weight:400;}
 
   --font:'PB Pixel','Courier New',monospace;
   --bar-h:42px; --rail-w:98px; --status-h:30px;
+  font-size:20px;
 }
+@media (min-width:1024px){ :root{ font-size:25px; --rail-w:112px; } }
+@media (min-width:1440px){ :root{ font-size:29px; --rail-w:128px; } }
 
+/* Dark mode only swaps the page/paper background to navy — every window,
+   card, folder and stat tile keeps its cream light-mode colouring so text,
+   borders and shadows stay exactly as designed. */
 html[data-theme="dark"]{
   --bg:#12202E;
-  --panel:#1E344A;
-  --panel-2:#182A3B;
-  --ink:#E8DDCB;
-  --ink-soft:rgba(232,221,203,.68);
-  --ink-faint:rgba(232,221,203,.38);
-  --line:rgba(232,221,203,.28);
-  --primary:#4A7A9E;
-  --accent:#D2724A;
-  --deep:#0B1725;
-  --on-deep:#E8DDCB;
-  --chip-fg:#F4EEE3;
-  --title:#93C0DD;
-  --shadow:#070E17;
-  --bevel-hi:rgba(232,221,203,.20);
-  --bevel-lo:rgba(0,0,0,.5);
   --grid:rgba(232,221,203,.05);
-  --glow-1:rgba(74,122,158,.16);
-  --glow-2:rgba(210,114,74,.12);
-  --busy:rgba(232,221,203,.13);
+  --glow-1:rgba(74,122,158,.18);
+  --glow-2:rgba(210,114,74,.14);
   --grain-blend:screen;
-  --grain-op:.07;
+  --grain-op:.10;
 }
 
 /* ── PAPER ──────────────────────────────────────────────────────────────── */
 html{scroll-behavior:smooth;}
 body{
-  font-family:var(--font); font-size:20px; line-height:1.35; color:var(--ink);
+  font-family:var(--font); font-size:1rem; line-height:1.35; color:var(--ink);
   font-weight:400; font-synthesis:none; letter-spacing:0;
   -webkit-font-smoothing:none; font-smooth:never; text-rendering:geometricPrecision;
   min-height:100vh; background-color:var(--bg);
@@ -117,6 +107,9 @@ body::before{
 }
 
 .pix{display:inline-block; vertical-align:-.18em; shape-rendering:crispEdges; flex:none;}
+@media (min-width:1024px){
+  body{ -webkit-font-smoothing:antialiased; font-smooth:auto; text-rendering:optimizeLegibility; }
+}
 .pix path,.pix rect,.pix circle{shape-rendering:crispEdges;}
 .up{text-transform:uppercase; letter-spacing:1px;}
 
@@ -150,7 +143,7 @@ body::before{
 
 /* ── HEADERS / RULES ────────────────────────────────────────────────────── */
 .view-head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px;}
-.view-title{font-size:40px; line-height:1.1; text-transform:uppercase; letter-spacing:2px; color:var(--ink);}
+.view-title{font-size:2rem; line-height:1.1; text-transform:uppercase; letter-spacing:2px; color:var(--ink);}
 .view-title em{color:var(--title);}
 .view-kicker{
   text-transform:uppercase; letter-spacing:2px; color:var(--accent);
@@ -246,7 +239,7 @@ body::before{
 .rail-item.active{background:var(--bg); color:var(--ink); border-left-color:var(--accent);}
 .rail-item.active::after{content:''; position:absolute; right:-3px; top:0; bottom:0; width:3px; background:var(--bg);}
 .rail-foot{margin-top:auto; padding:10px 6px 0; text-align:center;}
-.rail-foot div{color:var(--chip-fg); opacity:.7; letter-spacing:1px;}
+.rail-foot div{color:var(--chip-fg); opacity:.7; letter-spacing:.5px; font-size:.62rem; white-space:nowrap;}
 
 .statusbar{
   position:fixed; left:var(--rail-w); right:0; bottom:0; height:var(--status-h); z-index:65;
@@ -278,7 +271,7 @@ body::before{
   gap:9px; margin-bottom:14px; flex-wrap:wrap;
 }
 .hero-eyebrow b{background:var(--accent); color:var(--chip-fg); padding:2px 8px; letter-spacing:1px;}
-.hero h1{font-size:60px; line-height:.95; letter-spacing:2px; text-transform:uppercase;}
+.hero h1{font-size:3rem; line-height:.95; letter-spacing:2px; text-transform:uppercase;}
 .hero h1 .dim{color:rgba(255,255,255,.42); display:block;}
 .hero h1 em{display:block;}
 .hero p{margin-top:18px; max-width:52ch; line-height:1.4; opacity:.88;}
@@ -290,8 +283,8 @@ body::before{
 .stat{background:var(--panel); border:2px solid var(--ink); box-shadow:var(--sh-sm); padding:11px 13px 13px;}
 .stat:nth-child(2n){background:var(--panel-2);}
 .stat-k{text-transform:uppercase; letter-spacing:1px; color:var(--ink-soft); display:flex; align-items:center; gap:7px;}
-.stat-v{font-size:40px; line-height:1.15; margin-top:8px;}
-.stat-v small{font-size:20px; color:var(--ink-faint);}
+.stat-v{font-size:2rem; line-height:1.15; margin-top:8px;}
+.stat-v small{font-size:1rem; color:var(--ink-faint);}
 .stat--accent .stat-v{color:var(--accent);}
 .stat--blue .stat-v{color:var(--primary);}
 .pbar{display:flex; gap:2px; margin-top:10px;}
@@ -339,10 +332,10 @@ body::before{
 .wday.today .wday-head i{color:rgba(255,255,255,.75);}
 .wday-body{padding:6px; display:flex; flex-direction:column; gap:5px;}
 .wchip{
-  border:2px solid var(--ink); padding:2px 5px; color:var(--chip-fg); letter-spacing:.5px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  border:2px solid var(--ink); padding:3px 5px; color:var(--chip-fg); letter-spacing:.5px;
+  overflow:hidden;
 }
-.wchip b{opacity:.78;}
+.wchip b{display:block; opacity:.78; font-size:.75em; white-space:nowrap;}
 .wnone{color:var(--ink-faint); padding:2px;}
 
 /* ── CALENDAR ───────────────────────────────────────────────────────────── */
@@ -365,10 +358,10 @@ body::before{
 .cday.sel .cday-n{color:var(--chip-fg);}
 .cday.sel .cmore{color:rgba(255,255,255,.72);}
 .cchip{
-  border:2px solid var(--ink); padding:1px 4px; color:var(--chip-fg); letter-spacing:.5px;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  border:2px solid var(--ink); padding:2px 4px; color:var(--chip-fg); letter-spacing:.5px;
+  overflow:hidden;
 }
-.cchip b{opacity:.78;}
+.cchip b{display:block; opacity:.78; font-size:.72em; white-space:nowrap;}
 .cmore{color:var(--ink-faint);}
 
 /* ── TASKS ──────────────────────────────────────────────────────────────── */
@@ -495,7 +488,7 @@ textarea.f-input{resize:vertical; min-height:120px; line-height:1.5;}
   .taskbar .rail-item span{letter-spacing:0;}
   .main{margin-left:0; padding-bottom:78px;}
   .view{padding:20px 14px 30px;}
-  .view-title,.hero h1{font-size:40px;}
+  .view-title,.hero h1{font-size:2rem;}
   .hero-inner{padding:20px 18px;}
   .f-row{grid-template-columns:1fr;}
   .cday{min-height:78px; padding:3px;}
@@ -658,7 +651,6 @@ const ICONS = {
   cup:'<path fill-rule="evenodd" d="M2 4h10v9H2zm2 2v5h6V6z"/><path d="M12 5h3v5h-3v-2h1V7h-1z"/><path d="M2 14h11v2H2zM4 0h1v3H4zM7 0h1v3H7zM10 0h1v3h-1z"/>',
   alert:'<path d="M7 1h2v2H7zM6 3h4v3H6zM5 6h6v4H5zM4 10h8v3H4zM3 13h10v2H3z" fill="none"/><path fill-rule="evenodd" d="M7 0h2l6 15H1zm1 4L4 13h8z"/><path d="M7 6h2v4H7zM7 11h2v2H7z"/>',
   bookmark:'<path d="M3 1h10v14l-5-4-5 4z"/>',
-  moon:'<path fill-rule="evenodd" d="M13 1v2h-2v2H9v6h2v2h2v2h-3v-2H7v-2H5V5h2V3h3V1z"/><path d="M10 1h3v2h-2v2H9v6h2v2h2v2h-3v-1h2v-1h-2v-1H8V4h1V2h1z"/>',
   moon:'<path fill-rule="evenodd" d="M6 1h7v2h-2v2H9v6h2v2h2v2H6v-2H4v-2H2V5h2V3h2z"/><path d="M6 3h3v10H6zM4 5h2v6H4z" fill="none"/>',
   grid:'<path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/>',
   monitor:'<path fill-rule="evenodd" d="M0 1h16v11H0zm2 2v7h12V3z"/><path d="M6 12h4v2H6zM3 14h10v2H3z"/>',
@@ -667,8 +659,15 @@ const ICONS = {
   max:'<path fill-rule="evenodd" d="M2 2h12v12H2zm2 3v7h8V5z"/>',
   x:'<path d="M3 3h2v2H3zM5 5h2v2H5zM7 7h2v2H7zM9 5h2v2H9zM11 3h2v2h-2zM9 9h2v2H9zM11 11h2v2h-2zM5 9h2v2H5zM3 11h2v2H3z"/>',
 };
+const ICON_SCALE = (function(){
+  const w = window.innerWidth || 1024;
+  if (w >= 1440) return 1.45;
+  if (w >= 1024) return 1.25;
+  return 1;
+})();
 function ic(name, size=16, cls=''){
-  return `<svg class="pix ${cls}" width="${size}" height="${size}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${ICONS[name]||''}</svg>`;
+  const s = Math.round(size * ICON_SCALE);
+  return `<svg class="pix ${cls}" width="${s}" height="${s}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${ICONS[name]||''}</svg>`;
 }
 const winBtns = `<span class="wbtn" title="decorative">${ic('min',9)}</span><span class="wbtn" title="decorative">${ic('max',9)}</span><span class="wbtn" title="decorative">${ic('x',9)}</span>`;
 
@@ -695,11 +694,9 @@ const COURSES = {
   MAIB7010: { title:'Algorithmic Trading, Blockchains, and Cryptocurrencies', type:'Elective', credits:6, instructor:'Prof. Alan Kwan & Prof. Weichen Wang', module:'Module 5', window:'Mar 18 – May 4, 2027', blurb:'AI/ML, NLP and data analytics applied to algorithmic trading, blockchains, cryptocurrencies, fraud detection and robo-advisors.' },
 };
 const COURSE_ORDER = Object.keys(COURSES);
-const PALETTE_LIGHT = ['#355C7D','#1A2F45','#C15F3C','#5F7A5A','#6E5578','#A8823C'];
-const PALETTE_DARK  = ['#4A7A9E','#2C4C6B','#C6704A','#67865F','#7B5C85','#A9863F'];
+const PALETTE = ['#355C7D','#1A2F45','#C15F3C','#5F7A5A','#6E5578','#A8823C'];
 function isDark(){ return document.documentElement.dataset.theme === 'dark'; }
-function palette(){ return isDark() ? PALETTE_DARK : PALETTE_LIGHT; }
-function courseColor(code){ const p = palette(); const i = COURSE_ORDER.indexOf(code); return p[i>=0 ? i%p.length : 0]; }
+function courseColor(code){ const i = COURSE_ORDER.indexOf(code); return PALETTE[i>=0 ? i%PALETTE.length : 0]; }
 
 const KIND_LABEL = { bootcamp:'Boot Camp', class:'Class', tutorial:'Tutorial', exam:'Exam', midterm:'Midterm', final:'Final Exam' };
 const TYPE_ICON = { 'Boot Camp':'floppy', Core:'folder', Elective:'file', Capstone:'star' };
@@ -779,10 +776,6 @@ function fmtTime(hhmm){
 function fmtTimeRange(start,end){
   if (start==='00:00' && end==='23:59') return 'All day';
   return `${fmtTime(start)} – ${fmtTime(end)}`;
-}
-function fmtTimeShort(hhmm){
-  const [h,m] = hhmm.split(':').map(Number);
-  return `${h%12||12}:${pad2(m)}${h<12?'a':'p'}`;
 }
 function fmtDateShort(iso){ return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
 function fmtDateLong(iso){ return new Date(iso+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}); }
@@ -943,7 +936,7 @@ function renderNav(){
     </div>`).join('');
   document.getElementById('rail').innerHTML = items + `
     <div class="rail-foot">
-      <div>MAIB</div><div>26/27</div>
+      <div>MAIB</div><div>2026-2028</div>
     </div>`;
   document.getElementById('taskbar').innerHTML = TABS.map(t=>`
     <div class="rail-item ${t.id===activeTab?'active':''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">
@@ -1061,7 +1054,7 @@ function weekDayColHtml(iso,isToday){
       <i>${d.getDate()}</i>
     </div>
     <div class="wday-body">
-      ${sess.length ? sess.map(s=>`<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start!=='00:00'?` <b>${fmtTimeShort(s.start)}</b>`:''}</div>`).join('') : '<div class="wnone">— free —</div>'}
+      ${sess.length ? sess.map(s=>`<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start!=='00:00'?`<b>${fmtTime(s.start)}</b>`:''}</div>`).join('') : '<div class="wnone">— free —</div>'}
     </div>
   </div>`;
 }
@@ -1143,7 +1136,7 @@ function calDayCellHtml(c, todayIso, selIso){
   const extra = sess.length - shown.length;
   return `<div class="cday ${c.outside?'out':''} ${iso===todayIso?'today':''} ${iso===selIso?'sel':''}" onclick="selectCalendarDay('${iso}')">
     <div class="cday-n">${pad2(c.day)}</div>
-    ${shown.map(s=>`<div class="cchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start!=='00:00'?` <b>${fmtTimeShort(s.start)}</b>`:''}</div>`).join('')}
+    ${shown.map(s=>`<div class="cchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start!=='00:00'?`<b>${fmtTime(s.start)}</b>`:''}</div>`).join('')}
     ${extra>0 ? `<div class="cmore">+${extra} more</div>` : ''}
   </div>`;
 }
