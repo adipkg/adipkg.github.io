@@ -489,7 +489,7 @@ let todos = {}, notes = {}, holidays = {}, presets = {};
 let activeTab = 'dashboard';
 let holidaysSeeded = false;
 let presetsSeeded = false;
-let courseFilter = new Set(COURSE_ORDER);
+let courseFilter = new Set(['MAIB7001','MAIB7002','MAIB7003','MAIB7005','MAIB7008','MAIB7010','MAIB7011','MAIB7013','MAIB7014','MAIB7901','LLAW6334']);
 const _todayD = new Date();
 let calendarMonth = { y: _todayD.getFullYear(), m: _todayD.getMonth() };
 let selectedDate = todayISO();
@@ -526,10 +526,10 @@ onValue(presetsRef, snap => {
   if (!presetsSeeded) {
     presetsSeeded = true;
     const hasData = Object.keys(presets).length > 0;
-    if (!hasData && !localStorage.getItem('hkub_preset_seeded_v1')) {
-      push(presetsRef, { name:'My Courses', courses:['MAIB7001','MAIB7002','MAIB7003','MAIB7005','MAIB7013','MAIB7008','MAIB7010'] });
+    if (!hasData && !localStorage.getItem('hkub_preset_seeded_v2')) {
+      push(presetsRef, { name:'My Registered Courses', courses:['MAIB7001','MAIB7002','MAIB7003','MAIB7005','MAIB7008','MAIB7010','MAIB7011','MAIB7013','MAIB7014','MAIB7901','LLAW6334'] });
     }
-    localStorage.setItem('hkub_preset_seeded_v1','1');
+    localStorage.setItem('hkub_preset_seeded_v2','1');
   }
   if (activeTab==='timetable') renderTimetable();
 });
