@@ -500,7 +500,6 @@ let todosFilter = 'active';
 let notesCourseFilter = null;
 let notesSearch = '';
 let editingTodoId = null, editingNoteId = null, editingHolidayId = null;
-let freeDaysMonthFilter = null; // 'YYYY-MM' or null = all
 
 // ─── Firebase listeners ─────────────────────────────────────────────────────
 onValue(todosRef, snap => {
@@ -773,20 +772,18 @@ function renderHolidays(){
   const _daysLeft = Math.max(0, Math.ceil((_end - _today) / 86400000) + 1);
   const freeDays = computeFreeDays(todayISO(), _daysLeft, courseFilter);
 
-  // Build sorted unique months from all free days
-  const months = [...new Set(freeDays.map(d => d.slice(0,7)))].sort();
-
-  // Validate stored filter still exists
-  if (freeDaysMonthFilter && !months.includes(freeDaysMonthFilter)) freeDaysMonthFilter = null;
-
-  const filtered = freeDaysMonthFilter ? freeDays.filter(d => d.startsWith(freeDaysMonthFilter)) : freeDays;
-
+  // Group by month
+  const byMonth = {};
+  freeDays.forEach(d => { const m = d.slice(0,7); (byMonth[m]=byMonth[m]||[]).push(d); });
+  const months = Object.keys(byMonth).sort();
   const monthLabel = iso => new Date(iso+'-01T00:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
-  const monthChips = [
-    `<span class="chip ${!freeDaysMonthFilter?'active':''}" onclick="setFreeDaysMonth(null)">All</span>`,
-    ...months.map(m => `<span class="chip ${freeDaysMonthFilter===m?'active':''}" onclick="setFreeDaysMonth('${m}')">${monthLabel(m)}</span>`)
-  ].join('');
+  const freeDaysHtml = months.length
+    ? months.map(m => `
+        <div class="section-label" style="margin-top:16px;margin-bottom:8px">${monthLabel(m)}</div>
+        <div class="freeday-grid">${byMonth[m].map(d=>`<div class="freeday-chip">${escHtml(new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',day:'numeric'}))}</div>`).join('')}</div>
+      `).join('')
+    : emptyState('ri-calendar-check-line','No upcoming free days.');
 
   el.innerHTML = `
     <div class="section-header"><h2>Holidays &amp; Days Off</h2><button class="btn-primary" onclick="openHolidayModal()"><i class="ri-add-line"></i> Add break</button></div>
@@ -796,14 +793,10 @@ function renderHolidays(){
     </div>
     <div class="card">
       <div class="card-head"><i class="ri-calendar-close-line"></i> All upcoming days without class</div>
-      <div class="chip-row" style="margin-bottom:14px">${monthChips}</div>
-      <div id="freeday-grid-inner">
-        ${filtered.length ? `<div class="freeday-grid">${filtered.map(d=>`<div class="freeday-chip">${escHtml(new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`).join('')}</div>` : emptyState('ri-calendar-check-line','No free days in this month.')}
-      </div>
+      ${freeDaysHtml}
     </div>
   `;
 }
-function setFreeDaysMonth(m){ freeDaysMonthFilter = m; renderHolidays(); }
 function openHolidayModal(id){
   editingHolidayId = id || null;
   const h = id ? holidays[id] : null;
@@ -1033,7 +1026,7 @@ Object.assign(window, {
   switchTab, quickAddTodo,
   openTodoModal, saveTodo, toggleTodoDone, deleteTodo, setTodoFilter,
   openNoteModal, saveNote, deleteNote, handleNotesSearch, setNotesCourseFilter,
-  openHolidayModal, saveHoliday, deleteHoliday, setFreeDaysMonth,
+  openHolidayModal, saveHoliday, deleteHoliday,
   toggleCourseFilter, setAllCourseFilters, shiftCalendarMonth, goToTodayMonth, selectCalendarDay,
   savePreset, loadPreset, deletePreset,
   goToCourseTimetable, goToCourseNotes, closeModal,
