@@ -761,7 +761,9 @@ function holidayRowHtml(id,h){
 function renderHolidays(){
   const el = document.getElementById('holidays-content');
   const list = Object.entries(holidays||{}).sort((a,b)=>a[1].start.localeCompare(b[1].start));
-  const freeDays = computeFreeDays(todayISO(), 21);
+  const _today = new Date(); const _end = new Date(PROGRAM_END+'T00:00:00');
+  const _daysLeft = Math.max(0, Math.ceil((_end - _today) / 86400000) + 1);
+  const freeDays = computeFreeDays(todayISO(), _daysLeft);
   el.innerHTML = `
     <div class="section-header"><h2>Holidays &amp; Days Off</h2><button class="btn-primary" onclick="openHolidayModal()"><i class="ri-add-line"></i> Add break</button></div>
     <div class="card">
@@ -769,7 +771,7 @@ function renderHolidays(){
       ${list.length ? list.map(([id,h])=>holidayRowHtml(id,h)).join('') : emptyState('ri-sun-line','No breaks added yet.')}
     </div>
     <div class="card">
-      <div class="card-head"><i class="ri-calendar-close-line"></i> Upcoming days without class (next 3 weeks)</div>
+      <div class="card-head"><i class="ri-calendar-close-line"></i> All upcoming days without class</div>
       ${freeDays.length ? `<div class="freeday-grid">${freeDays.map(d=>`<div class="freeday-chip">${escHtml(new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`).join('')}</div>` : emptyState('ri-calendar-check-line','Fully booked for the next few weeks!')}
     </div>
   `;
