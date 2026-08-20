@@ -74,16 +74,44 @@ em,i,b,strong{font-style:normal;font-weight:400;}
 @media (min-width:1024px){ :root{ font-size:25px; --rail-w:112px; } }
 @media (min-width:1440px){ :root{ font-size:29px; --rail-w:128px; } }
 
-/* Dark mode only swaps the page/paper background to navy — every window,
-   card, folder and stat tile keeps its cream light-mode colouring so text,
-   borders and shadows stay exactly as designed. */
+/* ── DARK MODE — full surface/ink remap ─────────────────────────────────── */
 html[data-theme="dark"]{
-  --bg:#12202E;
-  --grid:rgba(232,221,203,.05);
-  --glow-1:rgba(74,122,158,.18);
-  --glow-2:rgba(210,114,74,.14);
+  /* page canvas */
+  --bg:#0B1725;
+
+  /* surfaces: three tiers of dark navy */
+  --panel:#1A2F45;
+  --panel-2:#12202E;
+
+  /* ink → cream */
+  --ink:#E8DDCB;
+  --ink-soft:rgba(232,221,203,.68);
+  --ink-faint:rgba(232,221,203,.38);
+  --line:rgba(232,221,203,.20);
+
+  /* accent / primary / deep stay the same, just tweak chip text */
+  --primary:#355C7D;
+  --deep:#233F59;
+  --on-deep:#E8DDCB;
+  --chip-fg:#E8DDCB;
+  --title:#8AB4D4;
+
+  /* shadow → translucent black */
+  --shadow:rgba(0,0,0,.70);
+  --bevel-hi:rgba(255,255,255,.12);
+  --bevel-lo:rgba(0,0,0,.55);
+
+  /* grid / glows */
+  --grid:rgba(232,221,203,.045);
+  --glow-1:rgba(74,122,158,.22);
+  --glow-2:rgba(210,114,74,.16);
+
+  /* calendar / free-day */
+  --busy:rgba(53,92,125,.30);
+
+  /* grain */
   --grain-blend:screen;
-  --grain-op:.10;
+  --grain-op:.08;
 }
 
 /* ── PAPER ──────────────────────────────────────────────────────────────── */
