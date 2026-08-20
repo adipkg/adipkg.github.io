@@ -473,11 +473,14 @@ function weekRange(todayIso){
   const monday = new Date(d); monday.setDate(d.getDate()-dow);
   return Array.from({length:7}, (_,i)=>{ const dd=new Date(monday); dd.setDate(monday.getDate()+i); return fmtISO(dd); });
 }
-function computeFreeDays(fromIso, days){
+function computeFreeDays(fromIso, days, courseSet){
   const out = []; let d = new Date(fromIso+'T00:00:00');
   for(let i=0;i<days;i++){
     const iso = fmtISO(d);
-    if (iso>=PROGRAM_START && iso<=PROGRAM_END && sessionsOnDate(iso).length===0) out.push(iso);
+    const sessions = courseSet
+      ? sessionsOnDate(iso).filter(s => courseSet.has(s.code))
+      : sessionsOnDate(iso);
+    if (iso>=PROGRAM_START && iso<=PROGRAM_END && sessions.length===0) out.push(iso);
     d.setDate(d.getDate()+1);
   }
   return out;
@@ -764,7 +767,7 @@ function renderHolidays(){
   const list = Object.entries(holidays||{}).sort((a,b)=>a[1].start.localeCompare(b[1].start));
   const _today = new Date(); const _end = new Date(PROGRAM_END+'T00:00:00');
   const _daysLeft = Math.max(0, Math.ceil((_end - _today) / 86400000) + 1);
-  const freeDays = computeFreeDays(todayISO(), _daysLeft);
+  const freeDays = computeFreeDays(todayISO(), _daysLeft, courseFilter);
 
   // Build sorted unique months from all free days
   const months = [...new Set(freeDays.map(d => d.slice(0,7)))].sort();
