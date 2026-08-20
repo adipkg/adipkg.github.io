@@ -185,20 +185,21 @@
   .freeday-chip{font-size:.74rem; font-weight:600; padding:5px 11px; border-radius:20px; background:rgba(140,233,180,.1); color:var(--mint); border:1px solid rgba(140,233,180,.25);}
   .freeday-group{flex:0 0 100%; display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-radius:12px; border:1px solid rgba(140,233,180,.3); background:rgba(140,233,180,.07); position:relative;}
   .freeday-group-badge{font-size:.63rem; font-weight:700; color:var(--navy); background:var(--mint); padding:2px 8px; border-radius:20px; margin-left:auto; flex-shrink:0;}
-  .freeblock-items{display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;}
-  .freeblock{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px;}
-  .freeblock-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-  .freeblock-month{font-family:var(--font-head); font-weight:700; font-size:.95rem;}
-  .freeblock-badge{font-size:.67rem; font-weight:700; padding:2px 10px; border-radius:20px; background:rgba(243,239,228,.08); border:1px solid var(--line-strong); color:var(--cream-dim);}
-  .freeblock-divider{height:1px; background:var(--line); margin:12px 0;}
-  .mini-cal{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
-  .mini-cal-head{text-align:center; font-size:.58rem; font-weight:700; letter-spacing:.06em; color:var(--cream-faint); padding-bottom:4px; text-transform:uppercase;}
-  .mini-cal-day{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:6px; font-size:.72rem; font-weight:500; color:var(--cream-faint);}
+  .freeblock-items{display:flex; flex-wrap:wrap; gap:5px; margin-top:0;}
+  .freeblock-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;}
+  .freeblock{background:var(--navy-2); border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px;}
+  .freeblock-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .freeblock-month{font-family:var(--font-head); font-weight:700; font-size:.82rem;}
+  .freeblock-badge{font-size:.6rem; font-weight:700; padding:2px 8px; border-radius:20px; background:rgba(243,239,228,.08); border:1px solid var(--line-strong); color:var(--cream-dim);}
+  .freeblock-divider{height:1px; background:var(--line); margin:8px 0;}
+  .mini-cal{display:grid; grid-template-columns:repeat(7,1fr); gap:2px;}
+  .mini-cal-head{text-align:center; font-size:.52rem; font-weight:700; letter-spacing:.04em; color:var(--cream-faint); padding-bottom:3px; text-transform:uppercase;}
+  .mini-cal-day{aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:.62rem; font-weight:500; color:var(--cream-faint);}
   .mini-cal-day.free{background:rgba(140,233,180,.22); color:var(--mint); font-weight:700;}
-  .mini-cal-day.busy{color:rgba(243,239,228,.28);}
-  .mini-cal-day.outside{opacity:.18;}
+  .mini-cal-day.busy{color:rgba(243,239,228,.22);}
+  .mini-cal-day.outside{opacity:.15;}
   .mini-cal-day.is-today{box-shadow:0 0 0 1.5px var(--mint);}
-  .mini-cal-day.past{opacity:.45;}
+  .mini-cal-day.past{opacity:.4;}
 
   /* ── COURSES ──────────────────────────────────────────── */
   .course-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:6px;}
@@ -870,7 +871,7 @@ function renderHolidays(){
       ${list.length ? list.map(([id,h])=>holidayRowHtml(id,h)).join('') : emptyState('ri-sun-line','No breaks added yet.')}
     </div>
     <div class="section-label" style="margin:22px 0 12px">Free days by month</div>
-    ${freeDays.length ? freeDaysHtml : emptyState('ri-calendar-check-line','No upcoming free days.')}
+    ${freeDays.length ? `<div class="freeblock-grid">${freeDaysHtml}</div>` : emptyState('ri-calendar-check-line','No upcoming free days.')}
   `;
 }
 function openHolidayModal(id){
