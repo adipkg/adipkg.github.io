@@ -574,7 +574,7 @@ function sessionCardHtml(s){
   </div>`;
 }
 function weekDayColHtml(iso,isToday){
-  const sess = sessionsOnDate(iso);
+  const sess = sessionsOnDate(iso).filter(s => courseFilter.has(s.code));
   const d = new Date(iso+'T00:00:00');
   return `<div class="week-col ${isToday?'is-today':''}">
     <div class="week-col-head">${d.toLocaleDateString('en-US',{weekday:'short'})}<span>${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
@@ -593,8 +593,10 @@ function dashboardTodoListHtml(){
 function renderDashboard(){
   const el = document.getElementById('dashboard-content');
   const today = todayISO();
-  const todaysSessions = sessionsOnDate(today);
+  const todaysSessions = sessionsOnDate(today).filter(s => courseFilter.has(s.code));
   const weekDates = weekRange(today);
+  const nextWeekStart = fmtISO(new Date(new Date(weekDates[0]+'T00:00:00').setDate(new Date(weekDates[0]+'T00:00:00').getDate()+7)));
+  const nextWeekDates = weekRange(nextWeekStart);
   const dateLabel = new Date(today+'T00:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 
   el.innerHTML = `
@@ -621,6 +623,8 @@ function renderDashboard(){
     </div>
     <div class="section-label">This week</div>
     <div class="week-strip">${weekDates.map(d=>weekDayColHtml(d, d===today)).join('')}</div>
+    <div class="section-label">Next week</div>
+    <div class="week-strip">${nextWeekDates.map(d=>weekDayColHtml(d, false)).join('')}</div>
   `;
 }
 
