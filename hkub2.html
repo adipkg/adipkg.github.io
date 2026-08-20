@@ -2460,7 +2460,7 @@
       <i>${d.getDate()}</i>
     </div>
     <div class="wday-body">
-      ${sess.length ? sess.map(s => `<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTime(s.start)}</b>` : ''}</div>`).join('') : '<div class="wnone">— free —</div>'}
+      ${sess.length ? sess.map(s => `<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTimeRange(s.start, s.end)}</b>` : ''}</div>`).join('') : '<div class="wnone">— free —</div>'}
     </div>
   </div>`;
     }
@@ -2542,7 +2542,7 @@
       const extra = sess.length - shown.length;
       return `<div class="cday ${c.outside ? 'out' : ''} ${iso === todayIso ? 'today' : ''} ${iso === selIso ? 'sel' : ''}" onclick="selectCalendarDay('${iso}')">
     <div class="cday-n">${pad2(c.day)}</div>
-    ${shown.map(s => `<div class="cchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTime(s.start)}</b>` : ''}</div>`).join('')}
+    ${shown.map(s => `<div class="cchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTimeRange(s.start, s.end)}</b>` : ''}</div>`).join('')}
     ${extra > 0 ? `<div class="cmore">+${extra} more</div>` : ''}
   </div>`;
     }
