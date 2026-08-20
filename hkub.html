@@ -142,7 +142,8 @@
   .cal-day.is-selected{background:var(--navy-3); border-color:var(--sky); box-shadow:0 0 0 1px var(--sky) inset;}
   .cal-day-num{font-size:.76rem; font-weight:600; color:var(--cream-dim);}
   .cal-day-sessions{display:flex; flex-direction:column; gap:2px; overflow:hidden;}
-  .cal-chip{font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .cal-chip{font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3;}
+  .cal-chip-time{font-size:.55rem; font-weight:500; opacity:.8; display:block;}
   .cal-more{font-size:.6rem; color:var(--cream-faint); padding-left:2px;}
   .preset-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
   .preset-label{display:flex; align-items:center; gap:5px; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--cream-faint); margin-right:2px;}
@@ -182,6 +183,9 @@
   .holiday-range{font-size:.74rem; color:var(--cream-dim); margin-top:2px;}
   .freeday-grid{display:flex; flex-wrap:wrap; gap:8px;}
   .freeday-chip{font-size:.74rem; font-weight:600; padding:6px 12px; border-radius:20px; background:rgba(140,233,180,.12); color:var(--mint); border:1px solid rgba(140,233,180,.3);}
+  .freeday-run{flex:0 0 100%; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; border-radius:12px; background:linear-gradient(90deg,rgba(140,233,180,.15),rgba(127,198,255,.10)); border:1px solid rgba(140,233,180,.35);}
+  .freeday-run-range{font-size:.82rem; font-weight:700; color:var(--mint);}
+  .freeday-run-badge{font-size:.68rem; font-weight:700; color:var(--navy); background:var(--mint); padding:2px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;}
 
   /* ── COURSES ──────────────────────────────────────────── */
   .course-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-bottom:6px;}
@@ -486,6 +490,18 @@ function computeFreeDays(fromIso, days, courseSet){
   return out;
 }
 function emptyState(icon,text){ return `<div class="empty-state"><i class="${icon}"></i>${escHtml(text)}</div>`; }
+function groupConsecutiveDays(days){
+  if (!days.length) return [];
+  const groups = [];
+  let runStart = days[0], runEnd = days[0], count = 1;
+  for (let i = 1; i < days.length; i++) {
+    const diff = (new Date(days[i]+'T00:00:00') - new Date(days[i-1]+'T00:00:00')) / 86400000;
+    if (diff === 1) { runEnd = days[i]; count++; }
+    else { groups.push(count===1 ? {type:'single',date:runStart} : {type:'run',from:runStart,to:runEnd,count}); runStart=days[i]; runEnd=days[i]; count=1; }
+  }
+  groups.push(count===1 ? {type:'single',date:runStart} : {type:'run',from:runStart,to:runEnd,count});
+  return groups;
+}
 
 // ─── State ──────────────────────────────────────────────────────────────────
 let todos = {}, notes = {}, holidays = {}, presets = {};
@@ -652,7 +668,7 @@ function calDayCellHtml(c, todayIso, selIso){
   return `<div class="cal-day ${c.outside?'outside':''} ${iso===todayIso?'is-today':''} ${iso===selIso?'is-selected':''}" onclick="selectCalendarDay('${iso}')">
     <div class="cal-day-num">${c.day}</div>
     <div class="cal-day-sessions">
-      ${shown.map(s=>`<div class="cal-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}</div>`).join('')}
+      ${shown.map(s=>`<div class="cal-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}<span class="cal-chip-time">${s.start!=='00:00'?fmtTimeRange(s.start,s.end):''}</span></div>`).join('')}
       ${extra>0 ? `<div class="cal-more">+${extra} more</div>` : ''}
     </div>
   </div>`;
@@ -779,10 +795,18 @@ function renderHolidays(){
   const monthLabel = iso => new Date(iso+'-01T00:00:00').toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
   const freeDaysHtml = months.length
-    ? months.map(m => `
-        <div class="section-label" style="margin-top:16px;margin-bottom:8px">${monthLabel(m)}</div>
-        <div class="freeday-grid">${byMonth[m].map(d=>`<div class="freeday-chip">${escHtml(new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',day:'numeric'}))}</div>`).join('')}</div>
-      `).join('')
+    ? months.map(m => {
+        const groups = groupConsecutiveDays(byMonth[m]);
+        const items = groups.map(g => {
+          if (g.type === 'single') {
+            return `<div class="freeday-chip">${escHtml(new Date(g.date+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}))}</div>`;
+          }
+          const fromStr = new Date(g.from+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+          const toStr   = new Date(g.to  +'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+          return `<div class="freeday-run"><span class="freeday-run-range">${escHtml(fromStr)} → ${escHtml(toStr)}</span><span class="freeday-run-badge">${g.count} days</span></div>`;
+        }).join('');
+        return `<div class="section-label" style="margin-top:16px;margin-bottom:8px">${monthLabel(m)}</div><div class="freeday-grid">${items}</div>`;
+      }).join('')
     : emptyState('ri-calendar-check-line','No upcoming free days.');
 
   el.innerHTML = `
