@@ -103,7 +103,8 @@
   .week-col.is-today{border-color:var(--mint); box-shadow:0 0 0 1px var(--mint) inset;}
   .week-col-head{font-family:var(--font-head); font-weight:700; font-size:.78rem; margin-bottom:8px; display:flex; flex-direction:column; gap:1px;}
   .week-col-head span{font-weight:400; font-size:.68rem; color:var(--cream-faint);}
-  .week-chip{display:inline-block; font-size:.66rem; font-weight:700; padding:3px 7px; border-radius:7px; margin:0 0 4px; letter-spacing:.02em;}
+  .week-chip{display:inline-block; font-size:.66rem; font-weight:700; padding:3px 7px; border-radius:7px; margin:0 0 4px; letter-spacing:.02em; line-height:1.3;}
+  .week-chip-time{display:block; font-size:.59rem; font-weight:500; opacity:.75; letter-spacing:0;}
   .week-empty{color:var(--cream-faint); font-size:.7rem;}
 
   /* ── SESSIONS / PILLS / TAGS ──────────────────────────── */
@@ -593,7 +594,7 @@ function weekDayColHtml(iso,isToday){
   const d = new Date(iso+'T00:00:00');
   return `<div class="week-col ${isToday?'is-today':''}">
     <div class="week-col-head">${d.toLocaleDateString('en-US',{weekday:'short'})}<span>${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
-    ${sess.length ? sess.map(s=>`<div class="week-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}</div>`).join('') : '<div class="week-empty">—</div>'}
+    ${sess.length ? sess.map(s=>`<div class="week-chip" style="background:${courseColor(s.code)}22;color:${courseColor(s.code)}">${escHtml(s.code)}<span class="week-chip-time">${s.start!=='00:00'?fmtTimeRange(s.start,s.end):''}</span></div>`).join('') : '<div class="week-empty">—</div>'}
   </div>`;
 }
 function dashboardTodoListHtml(){
