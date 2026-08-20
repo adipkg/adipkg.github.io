@@ -923,28 +923,51 @@
 
     .sesh-top {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 6px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
+    .sesh-left { flex: 1; min-width: 0; }
+
     .sesh-title {
+      font-size: 1.15rem;
       letter-spacing: .5px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .sesh-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      flex: none;
     }
 
     .sesh-meta {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
-      color: var(--ink-soft);
     }
 
     .sesh-meta span {
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+
+    .sesh-time {
+      font-size: 1.05rem;
+      color: var(--ink) !important;
+    }
+
+    .sesh-loc {
+      color: var(--ink-soft) !important;
     }
 
     .sesh-note {
@@ -2352,13 +2375,17 @@
     <span class="sesh-stripe" style="background:${c}"></span>
     <div class="sesh-body">
       <div class="sesh-top">
-        ${codePill(s.code)}
-        <span class="sesh-title">${escHtml(meta.title || s.code)}</span>
-        <span class="kind kind-${s.kind}">${KIND_LABEL[s.kind] || s.kind}</span>
-      </div>
-      <div class="sesh-meta">
-        <span>${ic('clock', 12)} ${fmtTimeRange(s.start, s.end)}</span>
-        <span>${ic('pin', 12)} ${escHtml(s.location)}</span>
+        <div class="sesh-left">
+          <div class="sesh-title">${escHtml(meta.title || s.code)}</div>
+          <div class="sesh-meta">
+            <span class="sesh-time">${ic('clock', 12)} ${fmtTimeRange(s.start, s.end)}</span>
+            <span class="sesh-loc">${ic('pin', 12)} ${escHtml(s.location)}</span>
+          </div>
+        </div>
+        <div class="sesh-right">
+          ${codePill(s.code)}
+          <span class="kind kind-${s.kind}">${KIND_LABEL[s.kind] || s.kind}</span>
+        </div>
       </div>
       ${s.note ? `<div class="sesh-note">${ic('alert', 11)} ${escHtml(s.note)}</div>` : ''}
     </div>
