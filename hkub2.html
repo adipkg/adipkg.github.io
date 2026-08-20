@@ -1810,7 +1810,9 @@
         left: 0;
         right: 0;
         bottom: 0;
-        height: 64px;
+        height: auto;
+        min-height: 64px;
+        padding-bottom: max(env(safe-area-inset-bottom), 8px);
         z-index: 70;
         background: var(--primary);
         border-top: 3px solid var(--ink);
@@ -1840,7 +1842,7 @@
 
       .main {
         margin-left: 0;
-        padding-bottom: 78px;
+        padding-bottom: calc(72px + max(env(safe-area-inset-bottom), 8px));
       }
 
       .view {
@@ -1863,10 +1865,20 @@
       .cday {
         min-height: 78px;
         padding: 3px;
+        min-width: 88px;  /* prevents cells collapsing to 0 */
       }
 
       .cal {
         gap: 1px;
+        min-width: 616px; /* 7 × 88px */
+      }
+
+      /* horizontal scroll wrapper for the calendar grid */
+      .cal-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -4px;
+        padding: 0 4px 6px;
       }
 
       .win {
@@ -2583,9 +2595,11 @@
       </div>`, { tone: 'win--deep', hint: `${courseFilter.size}/${COURSE_ORDER.length}` })}
 
     ${win(`${ic('calendar', 13)} ${escHtml(monthLabel.toUpperCase())}`, `
-      <div class="cal">
-        ${weekdayHeaders.map(w => `<div class="cal-wd">${w}</div>`).join('')}
-        ${cells.map(c => calDayCellHtml(c, today, selectedDate)).join('')}
+      <div class="cal-scroll">
+        <div class="cal">
+          ${weekdayHeaders.map(w => `<div class="cal-wd">${w}</div>`).join('')}
+          ${cells.map(c => calDayCellHtml(c, today, selectedDate)).join('')}
+        </div>
       </div>`, { bodyClass: 'win-body win-body--tight' })}
 
     ${win(`${ic('file', 13)} ${selectedDate ? escHtml(fmtDateLong(selectedDate).toUpperCase()) : 'SELECT A DAY'}`,
