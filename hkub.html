@@ -895,9 +895,20 @@
 
     .dash-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1fr;
       gap: 22px;
       align-items: start;
+    }
+
+    .tgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .tgrid .trow {
+      margin-bottom: 0;
     }
 
     /* ── SESSION ROWS ───────────────────────────────────────────────────────── */
@@ -2679,7 +2690,7 @@
       const toggle = shown.length > DASH_TASKS_COLLAPSED_COUNT
         ? `<button class="btn btn--ghost" style="width:100%; justify-content:center; margin-top:6px" onclick="toggleDashTasks()">${dashTasksCollapsed ? `Show ${shown.length - DASH_TASKS_COLLAPSED_COUNT} more` : 'Show less'} ${ic('arrow', 12)}</button>`
         : '';
-      return list.map(([id, t]) => todoRowHtml(id, t, today, true)).join('') + toggle +
+      return `<div class="tgrid">${list.map(([id, t]) => todoRowHtml(id, t, today, true)).join('')}</div>` + toggle +
         `<button class="btn btn--ghost" style="width:100%; justify-content:center; margin-top:6px" onclick="switchTab('todos')">Open task list ${ic('arrow', 12)}</button>`;
     }
     function toggleDashTasks() { dashTasksCollapsed = !dashTasksCollapsed; renderDashboard(); }
