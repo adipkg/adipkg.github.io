@@ -123,7 +123,8 @@ ${body.slice(0, 4000)}
 
 Return ONLY valid JSON matching this exact schema, or the word null (no markdown, no explanation):
 {
-  "text": "<concise task description, max 80 characters>",
+  "text": "<concise task title, max 80 characters>",
+  "description": "<optional longer explanation of what the task involves; if the email mentions a registration page, form, portal or any other relevant link, include the full URL(s) verbatim in this field so the student can click through — otherwise null>",
   "due": "<YYYY-MM-DD if a deadline is mentioned, otherwise null>",
   "priority": "<high if urgent/due soon, medium if important, low otherwise>",
   "course": "<one of: ${COURSE_CODES.join(', ')} — if the email is clearly about that course, otherwise null>",

@@ -1277,6 +1277,22 @@
       color: var(--ink-faint);
     }
 
+    .tdesc {
+      color: var(--ink-soft);
+      line-height: 1.4;
+      word-break: break-word;
+      margin-top: 6px;
+    }
+
+    .tdesc a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .trow.done .tdesc {
+      color: var(--ink-faint);
+    }
+
     .tmeta {
       display: flex;
       align-items: center;
@@ -1953,6 +1969,8 @@
       <div class="win-body">
         <label class="f-label">Task</label>
         <input type="text" id="todo-text" class="f-input" placeholder="What needs doing?">
+        <label class="f-label">Description (optional)</label>
+        <textarea id="todo-description" class="f-input" placeholder="More detail — links (e.g. registration pages) are shown as clickable."></textarea>
         <div class="f-row">
           <div><label class="f-label">Due date</label><input type="date" id="todo-due" class="f-input"></div>
           <div><label class="f-label">Priority</label>
@@ -2183,6 +2201,20 @@
     function fmtISO(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
     function todayISO() { return fmtISO(new Date()); }
     function escHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function linkifyHtml(s) {
+      const str = String(s ?? '');
+      const urlRe = /https?:\/\/[^\s<>"']+/g;
+      let out = '', last = 0, m;
+      while ((m = urlRe.exec(str))) {
+        out += escHtml(str.slice(last, m.index));
+        const url = m[0].replace(/[.,;:!?)]+$/, '');
+        const trail = m[0].slice(url.length);
+        out += `<a href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(url)}</a>${escHtml(trail)}`;
+        last = m.index + m[0].length;
+      }
+      out += escHtml(str.slice(last));
+      return out;
+    }
     function fmtTime(hhmm) {
       const [h, m] = hhmm.split(':').map(Number);
       return new Date(2000, 0, 1, h, m).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
@@ -2765,6 +2797,7 @@
     <span class="tbox" onclick="toggleTodoDone('${id}')">${t.done ? ic('check', 12) : ''}</span>
     <div class="tbody">
       <div class="ttext">${escHtml(t.text)}</div>
+      ${t.description ? `<div class="tdesc">${linkifyHtml(t.description)}</div>` : ''}
       <div class="tmeta">
         ${t.due ? `<span class="tdue ${overdue ? 'late' : ''}">${ic('calendar', 10)} ${overdue ? 'OVERDUE · ' : ''}${fmtDateShort(t.due)}</span>` : ''}
         <span class="prio p-${t.priority || 'low'}" title="${t.priority || 'low'} priority"><i></i><i></i><i></i></span>
@@ -2822,6 +2855,7 @@
       const t = id ? todos[id] : null;
       document.getElementById('todo-modal-title').textContent = id ? 'EDIT TASK' : 'NEW TASK';
       document.getElementById('todo-text').value = t ? t.text : '';
+      document.getElementById('todo-description').value = t ? (t.description || '') : '';
       document.getElementById('todo-due').value = t ? (t.due || '') : '';
       document.getElementById('todo-priority').value = t ? (t.priority || 'medium') : 'medium';
       document.getElementById('todo-course').value = t ? (t.course || '') : '';
@@ -2833,6 +2867,7 @@
       const existing = editingTodoId ? todos[editingTodoId] : null;
       const data = {
         text,
+        description: document.getElementById('todo-description').value.trim() || null,
         due: document.getElementById('todo-due').value || null,
         priority: document.getElementById('todo-priority').value,
         course: document.getElementById('todo-course').value || null,
