@@ -2,8 +2,9 @@
  * hku-email-worker
  * ────────────────
  * Receives Resend `email.received` webhooks, fetches the full email body,
- * sends it to Gemini Flash for task extraction, and writes the result to
- * the Firebase Realtime Database /todos path.
+ * sends it to Gemini Flash to extract a task and/or an event, and writes
+ * each (if present) to the Firebase Realtime Database /todos and /events
+ * paths respectively.
  *
  * Required secrets (set via `wrangler secret put`):
  *   RESEND_API_KEY          — re_xxxxxxxx from Resend dashboard
@@ -40,20 +41,31 @@ export default {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    let event;
+    let webhookEvent;
     try {
-      event = JSON.parse(body);
+      webhookEvent = JSON.parse(body);
     } catch {
       return new Response('Bad Request', { status: 400 });
     }
 
     // Only handle inbound emails
-    if (event.type !== 'email.received') {
+    if (webhookEvent.type !== 'email.received') {
       return new Response('ok');
     }
 
-    const { email_id, subject, from } = event.data;
+    const { email_id, subject, from } = webhookEvent.data;
     console.log(`Received email: ${subject} from ${from} (id: ${email_id})`);
+
+    // ── Idempotency: Resend may redeliver the same webhook (e.g. if this
+    // Worker is slow to respond), which would otherwise create duplicate
+    // task/event records. Mark the email_id as processed up front, before
+    // the slow Gemini/Firebase work below, so a near-simultaneous retry
+    // sees it and skips.
+    if (await alreadyProcessed(email_id, env.FIREBASE_SECRET)) {
+      console.log('Already processed this email_id, skipping (likely a webhook retry):', email_id);
+      return new Response('ok');
+    }
+    await markProcessed(email_id, env.FIREBASE_SECRET);
 
     // ── 2. Fetch full email body from Resend ───────────────────────────────
     let emailText = '';
@@ -72,65 +84,120 @@ export default {
       return new Response('ok'); // don't block Resend retries
     }
 
-    // ── 3. Gemini extracts a structured task ───────────────────────────────
-    let task;
+    // ── 3. Gemini extracts a task and/or an event ──────────────────────────
+    let extraction;
     try {
-      task = await geminiExtract(subject, emailText, from, env.GEMINI_API_KEY);
+      extraction = await geminiExtract(subject, emailText, from, env.GEMINI_API_KEY);
     } catch (err) {
       console.error('Gemini error:', err.message);
       return new Response('ok');
     }
 
-    if (!task) {
-      console.log('Gemini: not a task email, skipping');
+    if (!extraction) {
+      console.log('Gemini: no actionable task or event, skipping');
       return new Response('ok');
     }
 
-    // ── 4. Write task to Firebase RTDB /todos ─────────────────────────────
-    try {
-      const fbResp = await fetch(
-        `${FIREBASE_URL}/todos.json?auth=${env.FIREBASE_SECRET}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(task),
-        }
-      );
-      if (!fbResp.ok) throw new Error(`Firebase ${fbResp.status}`);
-      const fbResult = await fbResp.json();
-      console.log('Task written to Firebase:', fbResult.name, '→', task.text);
-    } catch (err) {
-      console.error('Firebase write failed:', err.message);
-      return new Response('Internal Error', { status: 500 });
+    const { task, event } = extraction;
+
+    // ── 4. Write task (if any) to /todos, event (if any) to /events ───────
+    let taskOk = true, eventOk = true;
+    if (task) {
+      try {
+        const r = await firebasePost('todos', task, env.FIREBASE_SECRET);
+        console.log('Task written to Firebase:', r.name, '→', task.text);
+      } catch (err) {
+        console.error('Firebase task write failed:', err.message);
+        taskOk = false;
+      }
+    }
+    if (event) {
+      try {
+        const r = await firebasePost('events', event, env.FIREBASE_SECRET);
+        console.log('Event written to Firebase:', r.name, '→', event.title);
+      } catch (err) {
+        console.error('Firebase event write failed:', err.message);
+        eventOk = false;
+      }
+    }
+    if (!taskOk || !eventOk) {
+      return new Response('Internal Error', { status: 500 }); // worth Resend retrying
     }
 
     return new Response('ok');
   },
 };
 
-// ── Gemini 1.5 Flash: extract a task from the email ───────────────────────
-async function geminiExtract(subject, body, from, apiKey) {
-  const prompt = `You are a task extractor for a Hong Kong University MAIB (Master in AI in Business) student.
+// ── Idempotency tracking: /processedEmails/{email_id} ──────────────────────
+async function alreadyProcessed(emailId, secret) {
+  const resp = await fetch(`${FIREBASE_URL}/processedEmails/${emailId}.json?auth=${secret}`);
+  if (!resp.ok) return false; // fail open — don't block processing on a transient read error
+  const val = await resp.json();
+  return val !== null;
+}
+async function markProcessed(emailId, secret) {
+  try {
+    await fetch(`${FIREBASE_URL}/processedEmails/${emailId}.json?auth=${secret}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Date.now()),
+    });
+  } catch (err) {
+    console.error('Failed to mark email as processed (continuing anyway):', err.message);
+  }
+}
 
-Analyse this forwarded email and extract ONE actionable task if present.
-If the email is a newsletter, marketing email, notification with no action required,
-or contains no clear task, return exactly: null
+// ── Firebase RTDB write helper ─────────────────────────────────────────────
+async function firebasePost(path, data, secret) {
+  const resp = await fetch(`${FIREBASE_URL}/${path}.json?auth=${secret}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!resp.ok) throw new Error(`Firebase ${resp.status}`);
+  return resp.json();
+}
+
+// ── Gemini 1.5 Flash: extract a task and/or an event from the email ───────
+async function geminiExtract(subject, body, from, apiKey) {
+  const prompt = `You are an assistant for a Hong Kong University MAIB (Master in AI in Business) student that reads forwarded emails and extracts TWO independent things if present:
+
+1. A TASK — something the student must personally do (register, submit, RSVP, pay, complete a form), optionally with a deadline.
+2. An EVENT — something happening on a specific date or date range worth seeing on a calendar (info session, workshop, orientation, career fair, deadline day), whether or not it also implies a task.
+
+An email can contain a task only, an event only, both, or neither. Do not invent either if it is not clearly present in the email. If the email is a newsletter, marketing email, or notification with no task and no dated event, return exactly: null
 
 Email from: ${from}
 Subject: ${subject}
 Body:
 ${body.slice(0, 4000)}
 
-Return ONLY valid JSON matching this exact schema, or the word null (no markdown, no explanation):
+Return ONLY valid JSON (no markdown, no explanation) matching exactly this schema, or the literal word null if there is neither a task nor an event:
 {
-  "text": "<concise task title, max 80 characters>",
-  "description": "<optional longer explanation of what the task involves; if the email mentions a registration page, form, portal or any other relevant link, include the full URL(s) verbatim in this field so the student can click through — otherwise null>",
-  "due": "<YYYY-MM-DD if a deadline is mentioned, otherwise null>",
-  "priority": "<high if urgent/due soon, medium if important, low otherwise>",
-  "course": "<one of: ${COURSE_CODES.join(', ')} — if the email is clearly about that course, otherwise null>",
-  "done": false,
-  "createdAt": ${Date.now()},
-  "source": "email"
+  "task": {
+    "text": "<concise task title, max 80 characters>",
+    "description": "<optional longer explanation of what the task involves; if the email mentions a registration page, form, portal or any other relevant link, include the full URL(s) verbatim in this field so the student can click through — otherwise null>",
+    "due": "<YYYY-MM-DD if a deadline is mentioned, otherwise null>",
+    "priority": "<high if urgent/due soon, medium if important, low otherwise>",
+    "course": "<must be EXACTLY one of these codes: ${COURSE_CODES.join(', ')} — only if the email is clearly about that specific course, otherwise null. Do not use a general programme name like 'MAIB' — that is not a valid code.>",
+    "done": false,
+    "createdAt": ${Date.now()},
+    "source": "email"
+  } | null,
+  "event": {
+    "title": "<concise event name, max 80 characters>",
+    "description": "<optional longer explanation; include relevant URLs verbatim, otherwise null>",
+    "start": "<YYYY-MM-DD, first/only day of the event>",
+    "end": "<YYYY-MM-DD, last day of the event — same as start if single-day>",
+    "allDay": "<true if no specific time is mentioned, false if a specific start/end time is given>",
+    "startTime": "<HH:MM 24-hour, or null if allDay>",
+    "endTime": "<HH:MM 24-hour, or null if allDay>",
+    "venue": "<location/room, or null>",
+    "course": "<must be EXACTLY one of these codes: ${COURSE_CODES.join(', ')} — only if clearly tied to that specific course, otherwise null. Do not use a general programme name like 'MAIB' — that is not a valid code.>",
+    "type": "<short free-text category like Career, Orientation, Workshop, Social, Info Session, or null>",
+    "source": "email",
+    "createdAt": ${Date.now()}
+  } | null
 }`;
 
   const resp = await fetch(
@@ -163,12 +230,20 @@ Return ONLY valid JSON matching this exact schema, or the word null (no markdown
 
   if (cleaned === 'null') return null;
 
+  let parsed;
   try {
-    return JSON.parse(cleaned);
+    parsed = JSON.parse(cleaned);
   } catch {
     console.error('Gemini returned invalid JSON:', cleaned);
     return null;
   }
+
+  // Defensive: guard against Gemini emitting a string "null" for one half
+  // instead of a bare null.
+  const task = (parsed && typeof parsed.task === 'object' && parsed.task) || null;
+  const event = (parsed && typeof parsed.event === 'object' && parsed.event) || null;
+  if (!task && !event) return null;
+  return { task, event };
 }
 
 // ── Verify Resend webhook signature (svix HMAC-SHA256) ────────────────────

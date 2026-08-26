@@ -1,14 +1,14 @@
 # hku-email-worker
 
-Cloudflare Worker that bridges **Resend inbound email → Gemini 1.5 Flash → Firebase RTDB tasks**.
+Cloudflare Worker that bridges **Resend inbound email → Gemini 1.5 Flash → Firebase RTDB tasks and events**.
 
 ## How it works
 
 1. You forward an email to `hku@seluesilun.resend.app`
 2. Resend fires an `email.received` webhook to this Worker
 3. Worker fetches the full email body via Resend API
-4. Gemini extracts a structured task (or returns null if not actionable)
-5. Task is written to Firebase `/todos` — appears instantly in hkub.html
+4. Gemini extracts a structured task and/or event (or returns null if neither is present — an email can yield a task only, an event only, both, or neither)
+5. Task (if any) is written to Firebase `/todos`, event (if any) to `/events` — both appear instantly in hkub.html
 
 ## Files
 
@@ -58,7 +58,7 @@ Copy the Worker URL it prints: `https://hku-email-worker.YOUR.workers.dev`
 
 Forward any email to `hku@seluesilun.resend.app`.
 Check Worker logs: `wrangler tail`
-Check Firebase: open hkub.html → Tasks tab.
+Check Firebase: open hkub.html → Tasks tab and Events tab.
 
 ## Firebase config (already in worker.js)
 
@@ -71,4 +71,4 @@ Project: adip-hku
 
 `Pyth` `AAI` `GAI` `BC` `MAIB7001` `MAIB7002` `MAIB7003` `MAIB7005` `MAIB7011` `MAIB7012` `MAIB7013` `MAIB7008` `MAIB7009` `MAIB7007` `MAIB7901` `LLAW6334` `MAIB7014` `MAIB7010`
 
-(kept in sync with the `COURSES` object in `hkub.html`)
+(kept in sync with the `COURSES` object in `hkub.html`; used for tagging both a task's `course` and an event's `course` field)

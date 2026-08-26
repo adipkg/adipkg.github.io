@@ -87,6 +87,7 @@
       --line: rgba(26, 47, 69, .26);
       --primary: #355C7D;
       --accent: #C15F3C;
+      --event: #2E7D6B;
       --deep: #1A2F45;
       --on-deep: #E8DDCB;
       --chip-fg: #F7F4EE;
@@ -909,6 +910,11 @@
       align-items: stretch;
     }
 
+    .sesh--event {
+      border-style: dashed;
+      border-color: var(--event);
+    }
+
     .sesh-stripe {
       width: 10px;
       flex: none;
@@ -1006,6 +1012,11 @@
     .kind-bootcamp {
       background: var(--deep);
       color: var(--on-deep);
+    }
+
+    .kind-event {
+      background: var(--event);
+      color: var(--chip-fg);
     }
 
     .empty {
@@ -1116,6 +1127,26 @@
       white-space: nowrap;
     }
 
+    .wchip--event {
+      background: var(--panel-2);
+      color: var(--ink);
+      border-style: dashed;
+      border-color: var(--event);
+    }
+
+    .wchip--event b {
+      color: var(--event);
+      opacity: 1;
+    }
+
+    .wchip--task {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px dotted var(--ink-faint);
+      font-size: .85em;
+      padding: 2px 4px;
+    }
+
     .wnone {
       color: var(--ink-faint);
       padding: 2px;
@@ -1219,6 +1250,26 @@
       opacity: .78;
       font-size: .72em;
       white-space: nowrap;
+    }
+
+    .cchip--event {
+      background: var(--panel-2);
+      color: var(--ink);
+      border-style: dashed;
+      border-color: var(--event);
+    }
+
+    .cchip--event b {
+      color: var(--event);
+      opacity: 1;
+    }
+
+    .cchip--task {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1px dotted var(--ink-faint);
+      font-size: .85em;
+      padding: 2px 4px;
     }
 
     .cmore {
@@ -1941,6 +1992,9 @@
     <section class="view" id="view-timetable">
       <div id="timetable-content"></div>
     </section>
+    <section class="view" id="view-events">
+      <div id="events-content"></div>
+    </section>
     <section class="view" id="view-holidays">
       <div id="holidays-content"></div>
     </section>
@@ -2035,6 +2089,50 @@
     </div>
   </div>
 
+  <div id="event-modal" class="backdrop" hidden>
+    <div class="dialog">
+      <div class="win-bar" style="background:var(--event)">
+        <span class="win-title" id="event-modal-title">ADD EVENT</span>
+        <span class="spacer"></span>
+        <span class="win-btns" data-close="event-modal"></span>
+      </div>
+      <div class="win-body">
+        <label class="f-label">Title</label>
+        <input type="text" id="event-title" class="f-input" placeholder="e.g. Career Fair">
+        <label class="f-label">Description (optional)</label>
+        <textarea id="event-description" class="f-input" placeholder="Details — links are shown as clickable."></textarea>
+        <div class="f-row">
+          <div><label class="f-label">Start date</label><input type="date" id="event-start" class="f-input"></div>
+          <div><label class="f-label">End date</label><input type="date" id="event-end" class="f-input"></div>
+        </div>
+        <label class="f-label" style="display:flex; align-items:center; gap:8px">
+          <input type="checkbox" id="event-allday" checked onchange="document.getElementById('event-times').style.display = this.checked ? 'none' : ''"> All day
+        </label>
+        <div class="f-row" id="event-times" style="display:none">
+          <div><label class="f-label">Start time</label><input type="time" id="event-start-time" class="f-input"></div>
+          <div><label class="f-label">End time</label><input type="time" id="event-end-time" class="f-input"></div>
+        </div>
+        <label class="f-label">Venue (optional)</label>
+        <input type="text" id="event-venue" class="f-input" placeholder="e.g. Cyberport 4">
+        <div class="f-row">
+          <div><label class="f-label">Course (optional)</label><select id="event-course" class="f-input"></select></div>
+          <div><label class="f-label">Type (optional)</label><input type="text" id="event-type" class="f-input" list="event-type-options" placeholder="Career, Orientation…"></div>
+        </div>
+        <datalist id="event-type-options">
+          <option value="Career"></option>
+          <option value="Orientation"></option>
+          <option value="Workshop"></option>
+          <option value="Social"></option>
+          <option value="Info Session"></option>
+        </datalist>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn--accent" onclick="saveEvent()">Save</button>
+        <button class="btn btn--ghost" onclick="closeModal('event-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getDatabase, ref, push, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
@@ -2055,6 +2153,7 @@
     const notesRef = ref(db, 'notes');
     const holidaysRef = ref(db, 'holidays');
     const presetsRef = ref(db, 'presets');
+    const eventsRef = ref(db, 'events');
 
     /* ═══ PIXEL ICON SET ═══════════════════════════════════════════════════════
        16×16 grid, integer coords, crispEdges → chunky retro glyphs.           */
@@ -2226,6 +2325,14 @@
     function fmtDateShort(iso) { return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
     function fmtDateLong(iso) { return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
     function sessionsOnDate(iso) { return SESSIONS.filter(s => s.date === iso).sort((a, b) => a.start.localeCompare(b.start)); }
+    function eventsOnDate(iso) {
+      return Object.entries(events || {})
+        .filter(([, e]) => e.start <= iso && iso <= e.end && (!e.course || !COURSE_ORDER.includes(e.course) || courseFilter.has(e.course)))
+        .map(([id, e]) => ({ id, ...e }));
+    }
+    function tasksDueOnDate(iso) {
+      return Object.entries(todos || {}).filter(([, t]) => t.due === iso && !t.done).map(([id, t]) => ({ id, ...t }));
+    }
     function weekRange(todayIso) {
       const d = new Date(todayIso + 'T00:00:00');
       const dow = (d.getDay() + 6) % 7; // 0=Mon
@@ -2313,7 +2420,7 @@
     }
 
     /* ═══ STATE ═══════════════════════════════════════════════════════════════ */
-    let todos = {}, notes = {}, holidays = {}, presets = {};
+    let todos = {}, notes = {}, holidays = {}, presets = {}, events = {};
     let activeTab = 'dashboard';
     let holidaysSeeded = false;
     let presetsSeeded = false;
@@ -2324,11 +2431,13 @@
     let todosFilter = 'active';
     let notesCourseFilter = null;
     let notesSearch = '';
-    let editingTodoId = null, editingNoteId = null, editingHolidayId = null;
+    let editingTodoId = null, editingNoteId = null, editingHolidayId = null, editingEventId = null;
+    let dashTasksCollapsed = true;
 
     const TABS = [
       { id: 'dashboard', label: 'Desktop', icon: 'desktop' },
       { id: 'timetable', label: 'Calendar', icon: 'calendar' },
+      { id: 'events', label: 'Events', icon: 'bookmark' },
       { id: 'holidays', label: 'Breaks', icon: 'sun' },
       { id: 'todos', label: 'Tasks', icon: 'check' },
       { id: 'notes', label: 'Notes', icon: 'note' },
@@ -2339,6 +2448,7 @@
     onValue(todosRef, snap => {
       todos = snap.val() || {};
       if (activeTab === 'dashboard') renderDashboard();
+      if (activeTab === 'timetable') renderTimetable();
       if (activeTab === 'todos') renderTodos();
       renderStatusbar();
     });
@@ -2372,6 +2482,13 @@
       }
       if (activeTab === 'timetable') renderTimetable();
     });
+    onValue(eventsRef, snap => {
+      events = snap.val() || {};
+      if (activeTab === 'dashboard') renderDashboard();
+      if (activeTab === 'timetable') renderTimetable();
+      if (activeTab === 'events') renderEvents();
+      renderStatusbar();
+    });
 
     /* ═══ NAV ═════════════════════════════════════════════════════════════════ */
     function renderNav() {
@@ -2401,6 +2518,7 @@
     function renderTab(tab) {
       if (tab === 'dashboard') renderDashboard();
       else if (tab === 'timetable') renderTimetable();
+      else if (tab === 'events') renderEvents();
       else if (tab === 'holidays') renderHolidays();
       else if (tab === 'todos') renderTodos();
       else if (tab === 'notes') renderNotes();
@@ -2411,6 +2529,15 @@
     /* ═══ SHARED FRAGMENTS ════════════════════════════════════════════════════ */
     function codePill(code) {
       return `<span class="code-pill" style="background:${courseColor(code)}">${escHtml(code)}</span>`;
+    }
+    function eventChipHtml(e, variant) {
+      const cls = variant === 'w' ? 'wchip' : 'cchip';
+      const timeLabel = e.allDay ? 'All day' : fmtTimeRange(e.startTime, e.endTime);
+      return `<div class="${cls} ${cls}--event">${escHtml(e.title)}<b>${timeLabel}</b></div>`;
+    }
+    function taskChipHtml(t, variant) {
+      const cls = variant === 'w' ? 'wchip' : 'cchip';
+      return `<div class="${cls} ${cls}--task">${escHtml(t.text)}</div>`;
     }
     function sessionCardHtml(s) {
       const c = courseColor(s.code);
@@ -2434,6 +2561,32 @@
       ${s.note ? `<div class="sesh-note">${ic('alert', 11)} ${escHtml(s.note)}</div>` : ''}
     </div>
   </div>`;
+    }
+    function eventCardHtml(e) {
+      const timeLabel = e.allDay ? 'All day' : fmtTimeRange(e.startTime, e.endTime);
+      return `<div class="sesh sesh--event">
+    <span class="sesh-stripe" style="background:var(--event)"></span>
+    <div class="sesh-body">
+      <div class="sesh-top">
+        <div class="sesh-left">
+          <div class="sesh-title">${escHtml(e.title)}</div>
+          <div class="sesh-meta">
+            <span class="sesh-time">${ic('clock', 12)} ${timeLabel}</span>
+            ${e.venue ? `<span class="sesh-loc">${ic('pin', 12)} ${escHtml(e.venue)}</span>` : ''}
+          </div>
+        </div>
+        <div class="sesh-right">
+          ${e.course && COURSE_ORDER.includes(e.course) ? codePill(e.course) : ''}
+          ${e.type ? `<span class="kind kind-event">${escHtml(e.type)}</span>` : ''}
+        </div>
+      </div>
+      ${e.description ? `<div class="tdesc">${linkifyHtml(e.description)}</div>` : ''}
+    </div>
+  </div>`;
+    }
+    function todaysTasksHtml(tasks) {
+      if (!tasks.length) return '';
+      return `${sect('check', 'Due today', `${tasks.length}`)}${tasks.map(t => todoRowHtml(t.id, t, todayISO(), true)).join('')}`;
     }
 
     /* ═══ DASHBOARD ═══════════════════════════════════════════════════════════ */
@@ -2497,6 +2650,9 @@
     }
     function weekDayColHtml(iso, isToday) {
       const sess = sessionsOnDate(iso).filter(s => courseFilter.has(s.code));
+      const evs = eventsOnDate(iso);
+      const tasks = tasksDueOnDate(iso);
+      const hasAny = sess.length || evs.length || tasks.length;
       const d = new Date(iso + 'T00:00:00');
       return `<div class="wday ${isToday ? 'today' : ''}">
     <div class="wday-head">
@@ -2504,23 +2660,39 @@
       <i>${d.getDate()}</i>
     </div>
     <div class="wday-body">
-      ${sess.length ? sess.map(s => `<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTimeRange(s.start, s.end)}</b>` : ''}</div>`).join('') : '<div class="wnone">— free —</div>'}
+      ${sess.map(s => `<div class="wchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTimeRange(s.start, s.end)}</b>` : ''}</div>`).join('')}
+      ${evs.map(e => eventChipHtml(e, 'w')).join('')}
+      ${tasks.map(t => taskChipHtml(t, 'w')).join('')}
+      ${hasAny ? '' : '<div class="wnone">— free —</div>'}
     </div>
   </div>`;
     }
+    const DASH_TASKS_COLLAPSED_COUNT = 2;
+    const DASH_TASKS_MAX = 6;
     function dashboardTodoListHtml() {
       const today = todayISO();
-      const list = Object.entries(todos || {}).filter(([, t]) => !t.done)
-        .sort((a, b) => (a[1].due || '9999').localeCompare(b[1].due || '9999'))
-        .slice(0, 6);
-      if (!list.length) return emptyState('check', 'No open tasks — nice.');
-      return list.map(([id, t]) => todoRowHtml(id, t, today, true)).join('') +
+      const all = Object.entries(todos || {}).filter(([, t]) => !t.done)
+        .sort((a, b) => (a[1].due || '9999').localeCompare(b[1].due || '9999'));
+      if (!all.length) return emptyState('check', 'No open tasks — nice.');
+      const shown = all.slice(0, DASH_TASKS_MAX);
+      const list = dashTasksCollapsed ? shown.slice(0, DASH_TASKS_COLLAPSED_COUNT) : shown;
+      const toggle = shown.length > DASH_TASKS_COLLAPSED_COUNT
+        ? `<button class="btn btn--ghost" style="width:100%; justify-content:center; margin-top:6px" onclick="toggleDashTasks()">${dashTasksCollapsed ? `Show ${shown.length - DASH_TASKS_COLLAPSED_COUNT} more` : 'Show less'} ${ic('arrow', 12)}</button>`
+        : '';
+      return list.map(([id, t]) => todoRowHtml(id, t, today, true)).join('') + toggle +
         `<button class="btn btn--ghost" style="width:100%; justify-content:center; margin-top:6px" onclick="switchTab('todos')">Open task list ${ic('arrow', 12)}</button>`;
     }
+    function toggleDashTasks() { dashTasksCollapsed = !dashTasksCollapsed; renderDashboard(); }
     function renderDashboard() {
       const el = document.getElementById('dashboard-content');
       const today = todayISO();
       const todaysSessions = sessionsOnDate(today).filter(s => courseFilter.has(s.code));
+      const todaysEvents = eventsOnDate(today);
+      const todaysTasks = tasksDueOnDate(today);
+      const todayItemCount = todaysSessions.length + todaysEvents.length + todaysTasks.length;
+      const todayLogBody = todayItemCount === 0
+        ? emptyState('cup', 'No classes today — enjoy it.')
+        : todaysSessions.map(sessionCardHtml).join('') + todaysEvents.map(eventCardHtml).join('') + todaysTasksHtml(todaysTasks);
       const weekDates = weekRange(today);
       const nextWeekStart = fmtISO(new Date(new Date(weekDates[0] + 'T00:00:00').setDate(new Date(weekDates[0] + 'T00:00:00').getDate() + 7)));
       const nextWeekDates = weekRange(nextWeekStart);
@@ -2545,7 +2717,7 @@
     ${statsHtml(today)}
 
     <div class="dash-grid">
-      ${win(`${ic('calendar', 13)} TODAY.LOG`, todaysSessions.length ? todaysSessions.map(sessionCardHtml).join('') : emptyState('cup', 'No classes today — enjoy it.'), { hint: `${todaysSessions.length} ITEM${todaysSessions.length === 1 ? '' : 'S'}` })}
+      ${win(`${ic('calendar', 13)} TODAY.LOG`, todayLogBody, { hint: `${todayItemCount} ITEM${todayItemCount === 1 ? '' : 'S'}` })}
       ${win(`${ic('check', 13)} TASKS.TXT`, `
         <div class="qadd">
           <input type="text" id="qadd-dash" placeholder="Add a quick task…" onkeydown="if(event.key==='Enter') quickAddTodo('qadd-dash')">
@@ -2582,11 +2754,21 @@
     function calDayCellHtml(c, todayIso, selIso) {
       const iso = cellIso(c);
       const sess = sessionsOnDate(iso).filter(s => courseFilter.has(s.code));
-      const shown = sess.slice(0, 3);
-      const extra = sess.length - shown.length;
+      const evs = eventsOnDate(iso);
+      const tasks = tasksDueOnDate(iso);
+      const combined = [
+        ...sess.map(s => ({ kind: 'session', s })),
+        ...evs.map(e => ({ kind: 'event', e })),
+        ...tasks.map(t => ({ kind: 'task', t })),
+      ];
+      const shown = combined.slice(0, 3);
+      const extra = combined.length - shown.length;
+      const chipHtml = item => item.kind === 'session'
+        ? `<div class="cchip" style="background:${courseColor(item.s.code)}">${escHtml(item.s.code)}${item.s.start !== '00:00' ? `<b>${fmtTimeRange(item.s.start, item.s.end)}</b>` : ''}</div>`
+        : item.kind === 'event' ? eventChipHtml(item.e, 'c') : taskChipHtml(item.t, 'c');
       return `<div class="cday ${c.outside ? 'out' : ''} ${iso === todayIso ? 'today' : ''} ${iso === selIso ? 'sel' : ''}" onclick="selectCalendarDay('${iso}')">
     <div class="cday-n">${pad2(c.day)}</div>
-    ${shown.map(s => `<div class="cchip" style="background:${courseColor(s.code)}">${escHtml(s.code)}${s.start !== '00:00' ? `<b>${fmtTimeRange(s.start, s.end)}</b>` : ''}</div>`).join('')}
+    ${shown.map(chipHtml).join('')}
     ${extra > 0 ? `<div class="cmore">+${extra} more</div>` : ''}
   </div>`;
     }
@@ -2694,6 +2876,81 @@
       const p = presets[id];
       if (confirm(`Delete preset "${p ? p.name : ''}"?`)) remove(ref(db, 'presets/' + id));
     }
+
+    /* ═══ EVENTS ══════════════════════════════════════════════════════════════ */
+    function eventRowHtml(id, e) {
+      const range = e.start === e.end ? fmtDateLong(e.start) : `${fmtDateLong(e.start)} – ${fmtDateLong(e.end)}`;
+      const timeLabel = e.allDay ? 'All day' : fmtTimeRange(e.startTime, e.endTime);
+      return `<div class="hrow">
+    <div>
+      <div class="hname">${ic('bookmark', 13)} ${escHtml(e.title)} ${e.course && COURSE_ORDER.includes(e.course) ? codePill(e.course) : ''} ${e.type ? `<span class="kind kind-event">${escHtml(e.type)}</span>` : ''}</div>
+      <div class="hrange">${range} · ${timeLabel}${e.venue ? ` · ${escHtml(e.venue)}` : ''}</div>
+    </div>
+    <div class="tacts">
+      <button class="ibtn" onclick="openEventModal('${id}')">${ic('edit', 11)}</button>
+      <button class="ibtn ibtn--danger" onclick="deleteEvent('${id}')">${ic('trash', 11)}</button>
+    </div>
+  </div>`;
+    }
+    function renderEvents() {
+      const el = document.getElementById('events-content');
+      const today = todayISO();
+      const list = Object.entries(events || {}).sort((a, b) => a[1].start.localeCompare(b[1].start));
+      const upcoming = list.filter(([, e]) => e.end >= today);
+      const past = list.filter(([, e]) => e.end < today);
+      el.innerHTML = `
+    ${viewHead('Calendar module', 'CAMPUS <em>EVENTS</em>',
+        `<button class="btn btn--accent" onclick="openEventModal()">${ic('plus', 12)} Add event</button>`)}
+
+    ${win(`${ic('bookmark', 13)} UPCOMING.DAT`,
+        upcoming.length ? upcoming.map(([id, e]) => eventRowHtml(id, e)).join('') : emptyState('bookmark', 'No upcoming events.'),
+        { tone: 'win--accent', hint: `${upcoming.length} ENTR${upcoming.length === 1 ? 'Y' : 'IES'}` })}
+
+    ${past.length ? sect('bookmark', 'Past events', `${past.length}`) : ''}
+    ${past.length ? win(`${ic('bookmark', 13)} ARCHIVE.DAT`, past.map(([id, e]) => eventRowHtml(id, e)).join('')) : ''}
+  `;
+    }
+    function openEventModal(id) {
+      editingEventId = id || null;
+      const e = id ? events[id] : null;
+      document.getElementById('event-modal-title').textContent = id ? 'EDIT EVENT' : 'ADD EVENT';
+      document.getElementById('event-title').value = e ? e.title : '';
+      document.getElementById('event-description').value = e ? (e.description || '') : '';
+      document.getElementById('event-start').value = e ? e.start : selectedDate;
+      document.getElementById('event-end').value = e ? e.end : selectedDate;
+      document.getElementById('event-allday').checked = e ? !!e.allDay : true;
+      document.getElementById('event-start-time').value = e ? (e.startTime || '') : '';
+      document.getElementById('event-end-time').value = e ? (e.endTime || '') : '';
+      document.getElementById('event-times').style.display = (e && !e.allDay) ? '' : 'none';
+      document.getElementById('event-venue').value = e ? (e.venue || '') : '';
+      document.getElementById('event-course').value = e ? (e.course || '') : '';
+      document.getElementById('event-type').value = e ? (e.type || '') : '';
+      document.getElementById('event-modal').hidden = false;
+    }
+    function saveEvent() {
+      const title = document.getElementById('event-title').value.trim();
+      const start = document.getElementById('event-start').value;
+      const end = document.getElementById('event-end').value || start;
+      if (!title || !start) return;
+      const allDay = document.getElementById('event-allday').checked;
+      const existing = editingEventId ? events[editingEventId] : null;
+      const data = {
+        title,
+        description: document.getElementById('event-description').value.trim() || null,
+        start, end, allDay,
+        startTime: allDay ? null : (document.getElementById('event-start-time').value || null),
+        endTime: allDay ? null : (document.getElementById('event-end-time').value || null),
+        venue: document.getElementById('event-venue').value.trim() || null,
+        course: document.getElementById('event-course').value || null,
+        type: document.getElementById('event-type').value.trim() || null,
+        source: 'manual',
+        createdAt: existing ? (existing.createdAt || Date.now()) : Date.now(),
+      };
+      if (editingEventId) update(ref(db, 'events/' + editingEventId), data);
+      else push(eventsRef, data);
+      closeModal('event-modal');
+    }
+    function deleteEvent(id) { if (confirm('Delete this event?')) remove(ref(db, 'events/' + id)); }
 
     /* ═══ BREAKS ══════════════════════════════════════════════════════════════ */
     function holidayRowHtml(id, h) {
@@ -3020,12 +3277,14 @@
     function renderStatusbar() {
       const open = Object.values(todos || {}).filter(t => !t.done).length;
       const noteCount = Object.keys(notes || {}).length;
+      const eventCount = Object.keys(events || {}).length;
       document.getElementById('statusbar').innerHTML = `
     <span>${ic('folderOpen', 11)} ${(TABS.find(t => t.id === activeTab) || { label: activeTab }).label}</span>
     <span>${COURSE_ORDER.length} courses</span>
     <span>${SESSIONS.length} sessions</span>
     <span>${open} open tasks</span>
     <span>${noteCount} notes</span>
+    <span>${eventCount} events</span>
     <span>DB: firebase · synced</span>
     <span class="status-grip"><i></i><i></i><i></i><i></i><i></i><i></i></span>`;
     }
@@ -3037,7 +3296,7 @@
     /* ═══ BOOTSTRAP ═══════════════════════════════════════════════════════════ */
     function populateCourseSelects() {
       const opts = '<option value="">— None —</option>' + COURSE_ORDER.map(c => `<option value="${c}">${escHtml(c)} — ${escHtml(COURSES[c].title)}</option>`).join('');
-      ['todo-course', 'note-course'].forEach(id => { const elx = document.getElementById(id); if (elx) elx.innerHTML = opts; });
+      ['todo-course', 'note-course', 'event-course'].forEach(id => { const elx = document.getElementById(id); if (elx) elx.innerHTML = opts; });
     }
     document.querySelectorAll('.backdrop').forEach(m => {
       m.addEventListener('click', e => { if (e.target === m) m.hidden = true; });
@@ -3065,9 +3324,11 @@
       openTodoModal, saveTodo, toggleTodoDone, deleteTodo, setTodoFilter,
       openNoteModal, saveNote, deleteNote, handleNotesSearch, setNotesCourseFilter,
       openHolidayModal, saveHoliday, deleteHoliday,
+      openEventModal, saveEvent, deleteEvent,
       toggleCourseFilter, setAllCourseFilters, shiftCalendarMonth, goToTodayMonth, selectCalendarDay,
       savePreset, loadPreset, deletePreset,
       goToCourseTimetable, goToCourseNotes, closeModal,
+      toggleDashTasks,
       toggleTheme, setTheme,
     });
   </script>
