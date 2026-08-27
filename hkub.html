@@ -725,7 +725,7 @@
     .view {
       display: none;
       padding: 28px 30px 40px;
-      max-width: 1300px;
+      max-width: min(calc(100vw - var(--rail-w) - 40px), 1900px);
     }
 
     .view.active {
