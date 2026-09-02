@@ -1537,6 +1537,11 @@
     }
 
     /* ── TREND CHART ────────────────────────────────────────────────────────── */
+    .trend-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .trend {
       display: flex;
       align-items: flex-end;
@@ -1600,6 +1605,78 @@
 
     .trend-col--stack>div {
       width: 100%;
+    }
+
+    /* ── MOBILE REFINEMENTS ─────────────────────────────────────────────────── */
+    @media (max-width:760px) {
+      .taskbar {
+        align-items: flex-end;
+      }
+
+      .taskbar-fab {
+        flex: none;
+        width: 54px;
+        height: 54px;
+        margin: 0 2px;
+        margin-top: -22px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--chip-fg);
+        border: 3px solid var(--ink);
+        box-shadow: 3px 3px 0 var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .taskbar-fab:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 var(--shadow);
+      }
+
+      .qadd {
+        flex-wrap: wrap;
+      }
+
+      .qadd input,
+      .qadd select,
+      .qadd--expense input[type="number"] {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+
+      .qadd button {
+        flex: 1 1 100%;
+        justify-content: center;
+      }
+
+      .catbar-top,
+      .catrow-top,
+      .erow-top {
+        flex-wrap: wrap;
+      }
+
+      .trend {
+        min-width: 480px;
+      }
+
+      .trend-mlabel {
+        width: 58px;
+      }
+
+      .trend-mamt {
+        width: 64px;
+      }
+
+      .stat-v {
+        font-size: 1.7rem;
+      }
+    }
+
+    @media (max-width:420px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -2064,10 +2141,13 @@
     <div class="rail-foot">
       <div>HKD</div><div>MONTHLY</div>
     </div>`;
-      document.getElementById('taskbar').innerHTML = TABS.map(t => `
+      const taskbarItems = TABS.map(t => `
     <div class="rail-item ${t.id === activeTab ? 'active' : ''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">
       ${ic(t.icon, 18)}<span>${t.label}</span>
-    </div>`).join('');
+    </div>`);
+      const mid = Math.ceil(taskbarItems.length / 2);
+      const fab = `<button class="taskbar-fab" onclick="openExpenseModal()" aria-label="Add expense">${ic('plus', 20)}</button>`;
+      document.getElementById('taskbar').innerHTML = taskbarItems.slice(0, mid).join('') + fab + taskbarItems.slice(mid).join('');
     }
     function switchTab(tab) {
       activeTab = tab;
@@ -2460,7 +2540,7 @@
         dayTotals.push(total); dayByCat.push(byCat);
       }
       const max = Math.max(1, ...dayTotals);
-      return `<div class="trend">${dayByCat.map((byCat, i) => {
+      return `<div class="trend-scroll"><div class="trend">${dayByCat.map((byCat, i) => {
         const total = dayTotals[i];
         const heightPct = Math.max(total > 0 ? 4 : 2, Math.round((total / max) * 100));
         const segs = Object.entries(byCat).map(([id, amt]) => {
@@ -2468,7 +2548,7 @@
           return `<div style="height:${segPct}%;background:${categoryColor(id)}"></div>`;
         }).join('');
         return `<div class="trend-col trend-col--stack" style="height:${heightPct}%" title="${pad2(i + 1)}: ${fmtHKD(total)}">${segs}</div>`;
-      }).join('')}</div>`;
+      }).join('')}</div></div>`;
     }
     function dayJournalHtml(y, m) {
       const days = daysInMonth(y, m);
@@ -2577,7 +2657,7 @@
       for (let day = 1; day <= days; day++) totals.push(sumExpenses(categoryId, `${y}-${pad2(m + 1)}-${pad2(day)}`, `${y}-${pad2(m + 1)}-${pad2(day)}`));
       const max = Math.max(1, ...totals);
       const color = categoryId ? categoryColor(categoryId) : 'var(--primary)';
-      return `<div class="trend">${totals.map((t, i) => `<div class="trend-col" style="height:${Math.max(2, Math.round((t / max) * 100))}%;background:${color}" title="${pad2(i + 1)}: ${fmtHKD(t)}"></div>`).join('')}</div>`;
+      return `<div class="trend-scroll"><div class="trend">${totals.map((t, i) => `<div class="trend-col" style="height:${Math.max(2, Math.round((t / max) * 100))}%;background:${color}" title="${pad2(i + 1)}: ${fmtHKD(t)}"></div>`).join('')}</div></div>`;
     }
     function renderReports() {
       const el = document.getElementById('reports-content');
