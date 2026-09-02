@@ -1635,19 +1635,15 @@
       }
 
       .qadd {
-        flex-wrap: wrap;
-      }
-
-      .qadd input,
-      .qadd select,
-      .qadd--expense input[type="number"] {
-        flex: 1 1 100%;
-        width: 100%;
+        flex-direction: column;
       }
 
       .qadd button {
-        flex: 1 1 100%;
         justify-content: center;
+      }
+
+      .qadd--expense input[type="number"] {
+        width: 100%;
       }
 
       .catbar-top,
@@ -1671,12 +1667,36 @@
       .stat-v {
         font-size: 1.7rem;
       }
-    }
 
-    @media (max-width:420px) {
       .stats {
         grid-template-columns: 1fr;
       }
+
+      .taskbar .rail-item span {
+        display: none;
+      }
+
+      .taskbar .rail-item {
+        padding: 10px 2px;
+      }
+
+      .taskbar .rail-item .pix {
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    select.f-input,
+    .qadd select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border-radius: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%231A2F45' d='M3 5h10v2H3zM5 7h6v2H5zM7 9h2v2H7z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 14px;
+      padding-right: 34px;
     }
   </style>
 </head>
