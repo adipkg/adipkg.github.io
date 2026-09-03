@@ -78,27 +78,27 @@
 
     /* ── THEME TOKENS ───────────────────────────────────────────────────────── */
     :root {
-      --bg: #E8DDCB;
-      --panel: #F7F4EE;
-      --panel-2: #E8DDCB;
-      --ink: #1A2F45;
-      --ink-soft: rgba(26, 47, 69, .66);
-      --ink-faint: rgba(26, 47, 69, .38);
-      --line: rgba(26, 47, 69, .26);
-      --primary: #355C7D;
-      --accent: #C15F3C;
-      --event: #2E7D6B;
-      --deep: #1A2F45;
-      --on-deep: #E8DDCB;
-      --chip-fg: #F7F4EE;
-      --title: #355C7D;
-      --shadow: #1A2F45;
+      --bg: #F1E4D0;
+      --panel: #FBF6EC;
+      --panel-2: #F1E4D0;
+      --ink: #33474D;
+      --ink-soft: rgba(51, 71, 77, .66);
+      --ink-faint: rgba(51, 71, 77, .38);
+      --line: rgba(51, 71, 77, .26);
+      --primary: #7FA8AE;
+      --accent: #45A17F;
+      --event: #D9A16B;
+      --deep: #33474D;
+      --on-deep: #F1E4D0;
+      --chip-fg: #FBF6EC;
+      --title: #7FA8AE;
+      --shadow: #33474D;
       --bevel-hi: rgba(255, 255, 255, .85);
-      --bevel-lo: rgba(26, 47, 69, .28);
-      --grid: rgba(26, 47, 69, .035);
-      --glow-1: rgba(53, 92, 125, .10);
-      --glow-2: rgba(193, 95, 60, .09);
-      --busy: rgba(53, 92, 125, .16);
+      --bevel-lo: rgba(51, 71, 77, .28);
+      --grid: rgba(51, 71, 77, .035);
+      --glow-1: rgba(127, 168, 174, .10);
+      --glow-2: rgba(69, 161, 127, .09);
+      --busy: rgba(127, 168, 174, .16);
       --grain-blend: multiply;
       --grain-op: .30;
 
@@ -132,44 +132,44 @@
     /* Dark mode: only swap the page background — windows stay cream.
        Three targeted fixes for elements that sit directly on the dark canvas. */
     html[data-theme="dark"] {
-      --bg: #12202E;
-      --grid: rgba(232, 221, 203, .05);
-      --glow-1: rgba(74, 122, 158, .18);
-      --glow-2: rgba(210, 114, 74, .14);
+      --bg: #131C1E;
+      --grid: rgba(241, 228, 208, .05);
+      --glow-1: rgba(172, 198, 202, .18);
+      --glow-2: rgba(134, 194, 172, .14);
       --grain-blend: screen;
       --grain-op: .10;
     }
 
     /* 1 — Active rail item sits on --bg, so flip it */
     html[data-theme="dark"] .rail-item.active {
-      background: rgba(232, 221, 203, .10);
-      color: #E8DDCB;
+      background: rgba(241, 228, 208, .10);
+      color: #F1E4D0;
     }
     html[data-theme="dark"] .rail-item.active::after {
-      background: rgba(232, 221, 203, .10);
+      background: rgba(241, 228, 208, .10);
     }
 
     /* 2 — View headings + section labels live on the raw dark canvas */
-    html[data-theme="dark"] .view-title { color: #E8DDCB; }
-    html[data-theme="dark"] .view-kicker { color: #C15F3C; }   /* accent stays orange */
-    html[data-theme="dark"] .sect-label { color: #E8DDCB; }
+    html[data-theme="dark"] .view-title { color: #F1E4D0; }
+    html[data-theme="dark"] .view-kicker { color: #45A17F; }   /* accent stays orange */
+    html[data-theme="dark"] .sect-label { color: #F1E4D0; }
     html[data-theme="dark"] .sect-tag {
-      background: #1A2F45;
-      color: #E8DDCB;
-      border-color: rgba(232, 221, 203, .28);
+      background: #33474D;
+      color: #F1E4D0;
+      border-color: rgba(241, 228, 208, .28);
     }
     html[data-theme="dark"] .sect-rule {
-      background: repeating-linear-gradient(90deg, rgba(232,221,203,.35) 0 4px, transparent 4px 8px);
+      background: repeating-linear-gradient(90deg, rgba(241, 228, 208, .35) 0 4px, transparent 4px 8px);
     }
 
     /* 3 — Statusbar lives on --bg */
     html[data-theme="dark"] .statusbar {
-      background: #1A2F45;
-      color: #E8DDCB;
-      border-color: rgba(232, 221, 203, .22);
+      background: #33474D;
+      color: #F1E4D0;
+      border-color: rgba(241, 228, 208, .22);
     }
-    html[data-theme="dark"] .statusbar span { border-color: rgba(232, 221, 203, .18); }
-    html[data-theme="dark"] .status-grip i  { background: rgba(232, 221, 203, .30); }
+    html[data-theme="dark"] .statusbar span { border-color: rgba(241, 228, 208, .18); }
+    html[data-theme="dark"] .status-grip i  { background: rgba(241, 228, 208, .30); }
     /* ── PAPER ──────────────────────────────────────────────────────────────── */
     html {
       scroll-behavior: smooth;
@@ -1877,7 +1877,7 @@
     const DAILY_FOOD_QUOTA = 160;
     const WEEKLY_FOOD_QUOTA = 1250;
     const CURRENCY = 'HKD';
-    const PALETTE = ['#355C7D', '#1A2F45', '#C15F3C', '#5F7A5A', '#6E5578', '#A8823C'];
+    const PALETTE = ['#7FA8AE', '#33474D', '#45A17F', '#CBD0C6', '#C7DDE0', '#D9A16B'];
     const DEFAULT_CATEGORIES = [
       { name: 'Food', monthlyAmount: 5000, isFood: true },
       { name: 'Transport (Octopus)', monthlyAmount: 600 },
