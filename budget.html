@@ -1629,6 +1629,11 @@
         align-items: flex-end;
       }
 
+      .taskbar-fab-spacer {
+        flex: none;
+        width: 60px;
+      }
+
       .taskbar-fab {
         position: absolute;
         left: 50%;
@@ -2189,8 +2194,9 @@
       ${ic(t.icon, 18)}<span>${t.label}</span>
     </div>`);
       const mid = Math.ceil(taskbarItems.length / 2);
+      const spacer = `<div class="taskbar-fab-spacer"></div>`;
       const fab = `<button class="taskbar-fab" onclick="openExpenseModal()" aria-label="Add expense">${ic('plus', 20)}</button>`;
-      document.getElementById('taskbar').innerHTML = taskbarItems.slice(0, mid).join('') + fab + taskbarItems.slice(mid).join('');
+      document.getElementById('taskbar').innerHTML = taskbarItems.slice(0, mid).join('') + spacer + taskbarItems.slice(mid).join('') + fab;
     }
     function switchTab(tab) {
       activeTab = tab;
