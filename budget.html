@@ -1155,6 +1155,16 @@
       background: var(--panel);
     }
 
+    input[type="date"].f-input {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    input[type="date"].f-input::-webkit-date-and-time-value {
+      text-align: left;
+      min-width: 0;
+    }
+
     textarea.f-input {
       resize: vertical;
       min-height: 120px;
@@ -1683,6 +1693,12 @@
       .taskbar .rail-item .pix {
         width: 26px;
         height: 26px;
+      }
+
+      input[type="date"].f-input {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 0.85rem;
       }
     }
 
