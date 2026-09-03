@@ -2236,6 +2236,8 @@
       const foodId = foodCategoryId();
       const foodToday = foodId ? sumExpenses(foodId, today, today) : 0;
       const foodOver = !!foodId && foodToday > DAILY_FOOD_QUOTA;
+      const daysElapsed = d.getDate();
+      const dailyAvg = daysElapsed > 0 ? spentThisMonth / daysElapsed : 0;
 
       return `<div class="stats">
     <div class="stat stat--blue">
@@ -2262,6 +2264,11 @@
       <div class="stat-k">${ic('cup', 12)} Food today</div>
       <div class="stat-v" style="font-size:1.3rem">${foodId ? fmtHKD(foodToday) : '—'}</div>
       <div class="note-scribble" style="margin-top:6px">${foodId ? (foodOver ? 'over ' + fmtHKD(DAILY_FOOD_QUOTA) + ' quota' : 'under ' + fmtHKD(DAILY_FOOD_QUOTA) + ' quota') : 'no food category'}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-k">${ic('chart', 12)} Daily average</div>
+      <div class="stat-v">${fmtHKD(dailyAvg)}</div>
+      <div class="note-scribble" style="margin-top:6px">per day this month</div>
     </div>
   </div>`;
     }
@@ -2406,14 +2413,15 @@
     function foodWeekDayColHtml(iso, isToday, foodId) {
       const spend = foodId ? sumExpenses(foodId, iso, iso) : 0;
       const over = spend > DAILY_FOOD_QUOTA;
+      const diff = Math.abs(spend - DAILY_FOOD_QUOTA);
       const d = new Date(iso + 'T00:00:00');
       const modClass = foodId ? (over ? 'wday--over' : 'wday--under') : '';
       return `<div class="wday ${isToday ? 'today' : ''} ${modClass}">
     <div class="wday-head"><b>${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</b><i>${d.getDate()}</i></div>
     <div class="wday-body" style="align-items:center; justify-content:center; flex:1; text-align:center">
       <div style="font-size:1.1rem">${fmtHKD(spend)}</div>
-      ${over ? `<div class="note-scribble" style="justify-content:center; color:var(--accent)">${ic('alert', 10)} over</div>`
-        : (spend > 0 ? `<div class="note-scribble" style="justify-content:center; color:var(--event)">${ic('check', 10)} saved</div>` : '')}
+      ${over ? `<div class="note-scribble" style="justify-content:center; color:var(--accent)">${ic('alert', 10)} ${fmtHKD(diff)} over</div>`
+        : (spend > 0 ? `<div class="note-scribble" style="justify-content:center; color:var(--event)">${ic('check', 10)} ${fmtHKD(diff)} saved</div>` : '')}
     </div>
   </div>`;
     }
@@ -2454,6 +2462,13 @@
       const cells = buildCalendarCells(y, m);
       const weekdayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       const remaining = remainingForCategory(foodId);
+      const todayD = new Date(today + 'T00:00:00');
+      const daysElapsed = todayD.getDate();
+      const { from: monthFrom } = monthRangeIso(todayD.getFullYear(), todayD.getMonth());
+      const monthSpendSoFar = sumExpenses(foodId, monthFrom, today);
+      const expectedSoFar = round2(DAILY_FOOD_QUOTA * daysElapsed);
+      const paceDiff = round2(expectedSoFar - monthSpendSoFar);
+      const foodDailyAvg = daysElapsed > 0 ? monthSpendSoFar / daysElapsed : 0;
 
       el.innerHTML = `
     ${viewHead('Quota tracker', 'FOOD<em>.QUOTA</em>')}
@@ -2473,6 +2488,30 @@
         <div class="stat-k">${ic('coin', 12)} Food balance</div>
         <div class="stat-v">${fmtHKD(remaining)}</div>
         <div class="note-scribble" style="margin-top:6px">rollover remaining</div>
+      </div>
+    </div>
+
+    ${sect('clock', 'Month to date', `${daysElapsed} DAY${daysElapsed === 1 ? '' : 'S'} IN`)}
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-k">${ic('tag', 12)} Should've spent</div>
+        <div class="stat-v">${fmtHKD(expectedSoFar)}</div>
+        <div class="note-scribble" style="margin-top:6px">${daysElapsed} day${daysElapsed === 1 ? '' : 's'} @ ${fmtHKD(DAILY_FOOD_QUOTA)}/day</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">${ic('cup', 12)} Actually spent</div>
+        <div class="stat-v">${fmtHKD(monthSpendSoFar)}</div>
+        <div class="note-scribble" style="margin-top:6px">so far this month</div>
+      </div>
+      <div class="stat ${paceDiff < 0 ? 'stat--danger' : 'stat--good'}">
+        <div class="stat-k">${ic('coin', 12)} Difference</div>
+        <div class="stat-v">${fmtHKD(paceDiff)}</div>
+        <div class="note-scribble" style="margin-top:6px">${paceDiff < 0 ? 'over pace' : 'under pace'}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">${ic('chart', 12)} Daily average</div>
+        <div class="stat-v">${fmtHKD(foodDailyAvg)}</div>
+        <div class="note-scribble" style="margin-top:6px">per day this month</div>
       </div>
     </div>
 
