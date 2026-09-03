@@ -1630,11 +1630,12 @@
       }
 
       .taskbar-fab {
-        flex: none;
+        position: absolute;
+        left: 50%;
+        bottom: 4px;
+        transform: translateX(-50%);
         width: 54px;
         height: 54px;
-        margin: 0 2px;
-        margin-top: -22px;
         border-radius: 50%;
         background: var(--accent);
         color: var(--chip-fg);
@@ -1646,7 +1647,7 @@
       }
 
       .taskbar-fab:active {
-        transform: translate(2px, 2px);
+        transform: translateX(-50%) translate(2px, 2px);
         box-shadow: 0 0 0 var(--shadow);
       }
 
