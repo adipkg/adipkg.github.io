@@ -2276,7 +2276,7 @@
       ...seshList('BC', 'bootcamp', [['2026-08-26', '09:30', '12:30']], null, null, 'CP4-LT-104'),
 
       // Module 1, Sep 5 – Oct 21, 2026
-      ...seshList('MAIB7001', 'class', ['2026-09-07', '2026-09-10', '2026-09-14', '2026-09-17', '2026-09-21', '2026-09-24', '2026-09-28', '2026-10-05', '2026-10-08', '2026-10-12'], '09:30', '12:30', LOC),
+      ...seshList('MAIB7001', 'class', ['2026-09-07', ['2026-09-10', '18:30', '21:30'], '2026-09-14', '2026-09-17', '2026-09-21', '2026-09-24', '2026-09-28', '2026-10-05', '2026-10-08', '2026-10-12'], '09:30', '12:30', LOC),
       ...seshList('MAIB7001', 'tutorial', [['2026-09-12', '18:30', '19:30'], ['2026-09-19', '18:30', '19:30'], ['2026-09-28', '14:00', '15:00'], ['2026-10-08', '14:00', '15:00']], null, null, LOC),
       ...seshList('MAIB7002', 'class', ['2026-09-08', '2026-09-15', '2026-09-22', '2026-09-29', '2026-10-02', '2026-10-06', '2026-10-09', '2026-10-13', ['2026-10-16', '14:00', '17:00'], ['2026-10-16', '18:30', '21:30']], '18:30', '21:30', LOC),
       ...seshList('MAIB7002', 'final', [['2026-10-17', '18:30', '20:30']], null, null, LOC),
@@ -2330,11 +2330,15 @@
       return out;
     }
     function fmtTime(hhmm) {
+      if (!hhmm) return '';
       const [h, m] = hhmm.split(':').map(Number);
       return new Date(2000, 0, 1, h, m).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     }
     function fmtTimeRange(start, end) {
       if (start === '00:00' && end === '23:59') return 'All day';
+      if (!start && !end) return 'All day';
+      if (!end) return fmtTime(start);
+      if (!start) return fmtTime(end);
       return `${fmtTime(start)} – ${fmtTime(end)}`;
     }
     function fmtDateShort(iso) { return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
