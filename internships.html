@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#12283C" id="theme-color-meta">
+  <script>
+    /* set the theme before first paint so there's no flash */
+    try {
+      var t = localStorage.getItem('internships_theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    } catch (e) { }
+  </script>
+  <title>INTERNSHIPS.EXE — Adip</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%23F6F8F7'/%3E%3Cpath d='M6 2h4v2H6zM1 5h14v9H1zM1 8h14v2H1z' fill='%2312283C'/%3E%3Crect x='2' y='9' width='3' height='3' fill='%23D9A93B'/%3E%3Crect x='7' y='9' width='3' height='3' fill='%233B7EA1'/%3E%3Crect x='12' y='9' width='2' height='3' fill='%238B5FBF'/%3E%3C/svg%3E">
+  <meta name="apple-mobile-web-app-title" content="Internships">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════════════
+   INTERNSHIPS.EXE — "pixel retro tech scrapbook" (Midnight Ticker palette)
+   Typeface: PB Pixel (embedded). 50-unit pixel grid on a 1000upm em, so the
+   font is only crisp at font-sizes that are multiples of 20px.
+   Type scale is therefore strictly 20 / 40 / 60 px. Single weight, no italic.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+    @font-face {
+      font-family: 'PB Pixel';
+      src: url(data:font/ttf;base64,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AAEECQABABAAXAADAAEECQACAA4AbAADAAEECQADADQAegADAAEECQAEACAArgADAAEECQAFABoAzgADAAEECQAGAB4A6AADAAEECQAHAEgBBgADAAEECQAIABABTgADAAEECQAJABABTgADAAEECQAKAOIBXgADAAEECQALACgCQAADAAEECQAMACgCQAADAAEECQANASICaAADAAEECQAOADYDigADAAEECQATAGwDwABDAG8AcAB5AHIAaQBnAGgAdAAgADIAMAAyADYAIABQAGkAeABlAGwAYgBhAGcAIAAoAGgAdAB0AHAAcwA6AC8ALwBwAGkAeABlAGwAYgBhAGcALgBuAGUAdAApAFAAQgAgAFAAaQB4AGUAbABSAGUAZwB1AGwAYQByADEALgAwADAAMQA7AFAAWABCAEcAOwBQAEIAUABpAHgAZQBsAC0AUgBlAGcAdQBsAGEAcgBQAEIAIABQAGkAeABlAGwAIABSAGUAZwB1AGwAYQByAFYAZQByAHMAaQBvAG4AIAAxAC4AMAAwADEAUABCAFAAaQB4AGUAbAAtAFIAZQBnAHUAbABhAHIAUABCACAAUABpAHgAZQBsACAAaQBzACAAYQAgAHQAcgBhAGQAZQBtAGEAcgBrACAAbwBmACAAUABpAHgAZQBsAGIAYQBnAC4AUABpAHgAZQBsAGIAYQBnAFAAQgAgAFAAaQB4AGUAbAAgAGkAcwAgAGEAIAA1ANcANwAgAG8AcABlAG4ALQBzAG8AdQByAGMAZQAgAHAAaQB4AGUAbAAgAGIAaQB0AG0AYQBwACAAdAB5AHAAZQBmAGEAYwBlACAAZABlAHMAaQBnAG4AZQBkACAAZgBvAHIAIABzAGMAcgBlAGUAbgBzACwAIABpAG4AdABlAHIAZgBhAGMAZQBzACwAIABhAG4AZAAgAHIAZQB0AHIAbwAtAGkAbgBzAHAAaQByAGUAZAAgAGwAYQB5AG8AdQB0AHMALgBoAHQAdABwAHMAOgAvAC8AcABpAHgAZQBsAGIAYQBnAC4AbgBlAHQAVABoAGkAcwAgAEYAbwBuAHQAIABTAG8AZgB0AHcAYQByAGUAIABpAHMAIABsAGkAYwBlAG4AcwBlAGQAIAB1AG4AZABlAHIAIAB0AGgAZQAgAFMASQBMACAATwBwAGUAbgAgAEYAbwBuAHQAIABMAGkAYwBlAG4AcwBlACwAIABWAGUAcgBzAGkAbwBuACAAMQAuADEALgAgAFQAaABpAHMAIABsAGkAYwBlAG4AcwBlACAAaQBzACAAYQB2AGEAaQBsAGEAYgBsAGUAIAB3AGkAdABoACAAYQAgAEYAQQBRACAAYQB0ADoAIABoAHQAdABwAHMAOgAvAC8AbwBwAGUAbgBmAG8AbgB0AGwAaQBjAGUAbgBzAGUALgBvAHIAZwBoAHQAdABwAHMAOgAvAC8AbwBwAGUAbgBmAG8AbgB0AGwAaQBjAGUAbgBzAGUALgBvAHIAZwBUAGgAZQAgAHEAdQBpAGMAawAgAGIAcgBvAHcAbgAgAGYAbwB4ACAAagB1AG0AcABzACAAbwB2AGUAcgAgAHQAaABlACAAbABhAHoAeQAgAGQAbwBnACAAMAAxADIAMwA0ADUANgA3ADgAOQAAAAIAAAAAAAD/tQAyAAAAAAAAAAAAAAAAAAAAAAAAAAAAfAAAAAMAJAAlACYAJwAoACkAKgD4ACsALAAtAC4ALwAwADEAMgBnADMANAA1ADYA+wA3ADgAOQA6ADsAPAA9AEQACQBBAGEADQAjAEUAPwBfAF4AYAA+AEAAhwBGAIQAHQAPAIsARwCDALgABwBIABsAqwCzALIAIAECAAQASQAYABcASgD5AEMAIQBLABAATAEDAE0ATgBPAB8AUADvAPAAUQEEABwABgBSAHwAFABTAAsADAAIABEAwwAOAFQAIgAFALQAtQC2ALcACgBVAIoAVgD8AB4AGgAZABIAhQBXABYAjAAVAFgAQgBZAFoAWwBcAJYAXQATBGV1cm8IaWRvdGxlc3MHbmJzcGFjZQ==) format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: block;
+      ascent-override: 46%;
+      descent-override: 16%;
+      line-gap-override: 0%;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    em,
+    i,
+    b,
+    strong {
+      font-style: normal;
+      font-weight: 400;
+    }
+
+    /* ── THEME TOKENS ───────────────────────────────────────────────────────── */
+    :root {
+      --bg: #DCE2E6;
+      --panel: #F6F8F7;
+      --panel-2: #DCE2E6;
+      --ink: #12283C;
+      --ink-soft: rgba(18, 40, 60, .66);
+      --ink-faint: rgba(18, 40, 60, .38);
+      --line: rgba(18, 40, 60, .26);
+      --primary: #3B7EA1;
+      --accent: #D9A93B;
+      --event: #8B5FBF;
+      --deep: #12283C;
+      --on-deep: #DCE2E6;
+      --chip-fg: #F6F8F7;
+      --title: #3B7EA1;
+      --shadow: #12283C;
+      --bevel-hi: rgba(255, 255, 255, .85);
+      --bevel-lo: rgba(18, 40, 60, .28);
+      --grid: rgba(18, 40, 60, .035);
+      --glow-1: rgba(59, 126, 161, .10);
+      --glow-2: rgba(139, 95, 191, .09);
+      --busy: rgba(59, 126, 161, .16);
+      --grain-blend: multiply;
+      --grain-op: .30;
+
+      --sh: 5px 5px 0 var(--shadow);
+      --sh-sm: 3px 3px 0 var(--shadow);
+      --sh-accent: 4px 4px 0 var(--accent);
+      --bevel: inset 2px 2px 0 var(--bevel-hi), inset -2px -2px 0 var(--bevel-lo);
+      --bevel-in: inset -2px -2px 0 var(--bevel-hi), inset 2px 2px 0 var(--bevel-lo);
+
+      --font: 'PB Pixel', 'Courier New', monospace;
+      --bar-h: 42px;
+      --rail-w: 98px;
+      --status-h: 30px;
+      font-size: 20px;
+    }
+
+    @media (min-width:1024px) {
+      :root {
+        font-size: 25px;
+        --rail-w: 112px;
+      }
+    }
+
+    @media (min-width:1440px) {
+      :root {
+        font-size: 29px;
+        --rail-w: 128px;
+      }
+    }
+
+    /* Dark mode: only swap the page background — windows stay cream.
+       Targeted fixes for elements that sit directly on the dark canvas. */
+    html[data-theme="dark"] {
+      --bg: #060B12;
+      --grid: rgba(220, 226, 230, .05);
+      --glow-1: rgba(91, 163, 201, .18);
+      --glow-2: rgba(174, 140, 214, .14);
+      --grain-blend: screen;
+      --grain-op: .10;
+    }
+
+    /* 1 — Active rail item sits on --bg, so flip it */
+    html[data-theme="dark"] .rail-item.active {
+      background: rgba(220, 226, 230, .10);
+      color: #DCE2E6;
+    }
+
+    html[data-theme="dark"] .rail-item.active::after {
+      background: rgba(220, 226, 230, .10);
+    }
+
+    /* 2 — View headings + section labels live on the raw dark canvas */
+    html[data-theme="dark"] .view-title { color: #DCE2E6; }
+    html[data-theme="dark"] .view-kicker { color: #D9A93B; }
+    html[data-theme="dark"] .sect-label { color: #DCE2E6; }
+    html[data-theme="dark"] .sect-tag {
+      background: #12283C;
+      color: #DCE2E6;
+      border-color: rgba(220, 226, 230, .28);
+    }
+    html[data-theme="dark"] .sect-rule {
+      background: repeating-linear-gradient(90deg, rgba(220, 226, 230, .35) 0 4px, transparent 4px 8px);
+    }
+
+    /* 3 — Statusbar lives on --bg */
+    html[data-theme="dark"] .statusbar {
+      background: #12283C;
+      color: #DCE2E6;
+      border-color: rgba(220, 226, 230, .22);
+    }
+    html[data-theme="dark"] .statusbar span { border-color: rgba(220, 226, 230, .18); }
+    html[data-theme="dark"] .status-grip i  { background: rgba(220, 226, 230, .30); }
+
+    /* ── PAPER ──────────────────────────────────────────────────────────────── */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 1rem;
+      line-height: 1.35;
+      color: var(--ink);
+      font-weight: 400;
+      font-synthesis: none;
+      letter-spacing: 0;
+      -webkit-font-smoothing: none;
+      font-smooth: never;
+      text-rendering: geometricPrecision;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image:
+        repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 4px),
+        repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 4px),
+        radial-gradient(circle at 18% 12%, var(--glow-1), transparent 45%),
+        radial-gradient(circle at 88% 78%, var(--glow-2), transparent 42%);
+      transition: background-color .12s steps(2), color .12s steps(2);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: var(--grain-op);
+      mix-blend-mode: var(--grain-blend);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    }
+
+    .pix {
+      display: inline-block;
+      vertical-align: -.18em;
+      shape-rendering: crispEdges;
+      flex: none;
+    }
+
+    @media (min-width:1024px) {
+      body {
+        -webkit-font-smoothing: antialiased;
+        font-smooth: auto;
+        text-rendering: optimizeLegibility;
+      }
+    }
+
+    .pix path,
+    .pix rect,
+    .pix circle {
+      shape-rendering: crispEdges;
+    }
+
+    .up {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .note-scribble {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--ink-soft);
+    }
+
+    /* ── WINDOW CHROME ──────────────────────────────────────────────────────── */
+    .win {
+      background: var(--panel);
+      border: 2px solid var(--ink);
+      box-shadow: var(--sh);
+      margin-bottom: 26px;
+      position: relative;
+    }
+
+    .win-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: var(--chip-fg);
+      border-bottom: 2px solid var(--ink);
+      padding: 6px 6px 6px 10px;
+      min-height: 32px;
+    }
+
+    .win--accent .win-bar {
+      background: var(--accent);
+    }
+
+    .win--deep .win-bar {
+      background: var(--deep);
+      color: var(--on-deep);
+    }
+
+    .win-title {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .win-bar .spacer {
+      flex: 1;
+    }
+
+    .win-hint {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: .72;
+      white-space: nowrap;
+    }
+
+    .win-btns {
+      display: flex;
+      gap: 3px;
+      flex: none;
+    }
+
+    .wbtn {
+      width: 20px;
+      height: 18px;
+      background: var(--panel-2);
+      border: 2px solid var(--ink);
+      box-shadow: var(--bevel);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink);
+      cursor: default;
+      flex: none;
+    }
+
+    .wbtn:active {
+      box-shadow: var(--bevel-in);
+    }
+
+    .win-body {
+      padding: 16px 18px;
+    }
+
+    .win-body--tight {
+      padding: 10px 12px;
+    }
+
+    .win-body--flush {
+      padding: 0;
+    }
+
+    /* ── HEADERS / RULES ────────────────────────────────────────────────────── */
+    .view-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .view-title {
+      font-size: 2rem;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--ink);
+    }
+
+    .view-title em {
+      color: var(--title);
+    }
+
+    .view-kicker {
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sect {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 30px 0 14px;
+    }
+
+    .sect-label {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+    }
+
+    .sect-rule {
+      flex: 1;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--ink) 0 4px, transparent 4px 8px);
+    }
+
+    .sect-tag {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 2px solid var(--ink);
+      padding: 2px 8px;
+      background: var(--panel-2);
+      flex: none;
+    }
+
+    /* ── BUTTONS ────────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: var(--chip-fg);
+      border: 2px solid var(--ink);
+      box-shadow: var(--sh-sm);
+      padding: 7px 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: transform .06s, box-shadow .06s;
+    }
+
+    .btn:hover {
+      background: var(--deep);
+      color: var(--on-deep);
+    }
+
+    .btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0 0 0 var(--shadow);
+    }
+
+    .btn--accent {
+      background: var(--accent);
+    }
+
+    .btn--accent:hover {
+      background: var(--deep);
+    }
+
+    .btn--ghost {
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+
+    .ibtn {
+      width: 30px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--ink);
+      background: var(--panel-2);
+      color: var(--ink);
+      box-shadow: 2px 2px 0 var(--shadow);
+      transition: transform .06s, box-shadow .06s;
+    }
+
+    .ibtn:hover {
+      background: var(--primary);
+      color: var(--chip-fg);
+    }
+
+    .ibtn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 var(--shadow);
+    }
+
+    .ibtn--danger:hover {
+      background: var(--accent);
+      color: var(--chip-fg);
+    }
+
+    /* ── CHIPS ──────────────────────────────────────────────────────────────── */
+    .chips {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 9px;
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      box-shadow: var(--bevel);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .chip:hover {
+      background: var(--panel-2);
+    }
+
+    .chip.on {
+      box-shadow: var(--bevel-in);
+      background: var(--primary);
+      color: var(--chip-fg);
+    }
+
+    /* ── APP FRAME ──────────────────────────────────────────────────────────── */
+    .titlebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--bar-h);
+      z-index: 70;
+      background: var(--deep);
+      border-bottom: 3px solid var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px 0 12px;
+      color: var(--on-deep);
+    }
+
+    .titlebar .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      letter-spacing: 2px;
+    }
+
+    .titlebar .logo b {
+      color: var(--accent);
+    }
+
+    .tb-clock {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--primary);
+      border: 2px solid var(--line);
+      padding: 2px 8px;
+      white-space: nowrap;
+      color: var(--on-deep);
+    }
+
+    .tb-theme {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--panel-2);
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      box-shadow: var(--bevel);
+      padding: 2px 9px;
+      flex: none;
+    }
+
+    .tb-theme:hover {
+      background: var(--accent);
+      color: var(--chip-fg);
+    }
+
+    .tb-theme:active {
+      box-shadow: var(--bevel-in);
+    }
+
+    .rail {
+      position: fixed;
+      top: var(--bar-h);
+      left: 0;
+      bottom: 0;
+      width: var(--rail-w);
+      z-index: 60;
+      background: var(--primary);
+      border-right: 3px solid var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 14px 0 10px;
+      gap: 2px;
+      background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, .07) 0 2px, transparent 2px 6px);
+    }
+
+    .rail-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 4px 9px;
+      color: var(--chip-fg);
+      cursor: pointer;
+      border-left: 5px solid transparent;
+      position: relative;
+    }
+
+    .rail-item span {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .rail-item:hover {
+      background: rgba(220, 226, 230, .14);
+    }
+
+    .rail-item.active {
+      background: var(--bg);
+      color: var(--ink);
+      border-left-color: var(--accent);
+    }
+
+    .rail-item.active::after {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--bg);
+    }
+
+    .rail-foot {
+      margin-top: auto;
+      padding: 10px 6px 0;
+      text-align: center;
+    }
+
+    .rail-foot div {
+      color: var(--chip-fg);
+      opacity: .7;
+      letter-spacing: .5px;
+      font-size: .62rem;
+      white-space: nowrap;
+    }
+
+    .statusbar {
+      position: fixed;
+      left: var(--rail-w);
+      right: 0;
+      bottom: 0;
+      height: var(--status-h);
+      z-index: 65;
+      background: var(--panel-2);
+      border-top: 3px solid var(--ink);
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink);
+      padding-right: 8px;
+      overflow: hidden;
+    }
+
+    .statusbar span {
+      padding: 2px 12px;
+      border-right: 2px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .statusbar span:last-of-type {
+      border-right: none;
+    }
+
+    .status-grip {
+      margin-left: auto;
+      display: flex;
+      gap: 2px;
+    }
+
+    .status-grip i {
+      width: 3px;
+      height: 3px;
+      background: var(--ink-faint);
+      display: block;
+    }
+
+    .main {
+      margin-left: var(--rail-w);
+      padding-top: var(--bar-h);
+      padding-bottom: calc(var(--status-h) + 30px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .view {
+      display: none;
+      padding: 28px 30px 40px;
+      max-width: min(calc(100vw - var(--rail-w) - 40px), 1900px);
+    }
+
+    .view.active {
+      display: block;
+      animation: pop .16s steps(3);
+    }
+
+    @keyframes pop {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* ── HERO ───────────────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      border: 3px solid var(--ink);
+      background: var(--primary);
+      color: var(--chip-fg);
+      box-shadow: 8px 8px 0 var(--shadow);
+      margin-bottom: 34px;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .14) 0 1px, transparent 1px 3px);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      padding: 26px 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 190px;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .hero-eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: .9;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-eyebrow b {
+      background: var(--accent);
+      color: var(--chip-fg);
+      padding: 2px 8px;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      line-height: .95;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 .dim {
+      color: rgba(255, 255, 255, .42);
+      display: block;
+    }
+
+    .hero h1 em {
+      display: block;
+    }
+
+    .hero p {
+      margin-top: 18px;
+      max-width: 52ch;
+      line-height: 1.4;
+      opacity: .88;
+    }
+
+    .hero-crt {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-crt svg {
+      width: 100%;
+      height: auto;
+      max-width: 190px;
+      filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, .45));
+    }
+
+    /* ── STATS ──────────────────────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+      gap: 14px;
+      margin-bottom: 30px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 2px solid var(--ink);
+      box-shadow: var(--sh-sm);
+      padding: 11px 13px 13px;
+    }
+
+    .stat:nth-child(2n) {
+      background: var(--panel-2);
+    }
+
+    .stat-k {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink-soft);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .stat-v {
+      font-size: 2rem;
+      line-height: 1.15;
+      margin-top: 8px;
+    }
+
+    .stat-v small {
+      font-size: 1rem;
+      color: var(--ink-faint);
+    }
+
+    .stat--accent .stat-v {
+      color: var(--accent);
+    }
+
+    .stat--blue .stat-v {
+      color: var(--primary);
+    }
+
+    .stat--danger .stat-v {
+      color: var(--accent);
+    }
+
+    .stat--good .stat-v {
+      color: var(--event);
+    }
+
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    /* ── BREAKS ─────────────────────────────────────────────────────────────── */
+    .hrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 2px dashed var(--line);
+    }
+
+    .hrow:last-child {
+      border-bottom: none;
+    }
+
+    .hname {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hrange {
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    /* ── APPLICATION ROWS ───────────────────────────────────────────────────── */
+    .erow {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      padding: 10px 12px;
+      margin-bottom: 9px;
+      box-shadow: var(--sh-sm);
+    }
+
+    .erow-swatch {
+      width: 14px;
+      height: 14px;
+      margin-top: 4px;
+      border: 2px solid var(--ink);
+      flex: none;
+    }
+
+    .erow-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .erow-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .erow-cat {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .erow-amt {
+      white-space: nowrap;
+    }
+
+    .erow-meta {
+      color: var(--ink-soft);
+      margin-top: 4px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .erow-note {
+      color: var(--ink-soft);
+      line-height: 1.4;
+      word-break: break-word;
+      margin-top: 6px;
+    }
+
+    .erow-note a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    .eacts {
+      display: flex;
+      gap: 5px;
+      flex: none;
+    }
+
+    /* ── DEEP-DIVE TEXT ─────────────────────────────────────────────────────── */
+    .ddtext {
+      color: var(--ink-soft);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .ddtext a {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    /* ── DEADLINE BADGES ────────────────────────────────────────────────────── */
+    .dbadge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--ink);
+      padding: 2px 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+
+    .dbadge--urgent {
+      background: var(--accent);
+      color: var(--chip-fg);
+    }
+
+    .dbadge--soon {
+      background: var(--primary);
+      color: var(--chip-fg);
+    }
+
+    .dbadge--rolling {
+      background: var(--event);
+      color: var(--chip-fg);
+    }
+
+    .dbadge--tbd {
+      border-style: dashed;
+      color: var(--ink-faint);
+      background: transparent;
+    }
+
+    .dbadge--passed {
+      background: var(--ink-faint);
+      color: var(--chip-fg);
+      text-decoration: line-through;
+    }
+
+    .dbadge--upcoming {
+      background: var(--panel-2);
+      color: var(--ink-soft);
+    }
+
+    /* ── KANBAN / PIPELINE ──────────────────────────────────────────────────── */
+    .kanban {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .kcol {
+      flex: 0 0 240px;
+    }
+
+    .kcol .win {
+      margin-bottom: 0;
+    }
+
+    .kcard {
+      border: 2px solid var(--ink);
+      background: var(--panel);
+      box-shadow: var(--sh-sm);
+      padding: 9px 10px;
+      margin-bottom: 9px;
+      cursor: pointer;
+      transition: transform .06s, box-shadow .06s;
+    }
+
+    .kcard:last-child {
+      margin-bottom: 0;
+    }
+
+    .kcard:hover {
+      box-shadow: var(--sh);
+    }
+
+    .kcard-co {
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .kcard-role {
+      color: var(--ink-soft);
+      margin-top: 3px;
+    }
+
+    .kcard-foot {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .kcard-foot select {
+      background: var(--panel-2);
+      border: 2px solid var(--ink);
+      padding: 2px 4px;
+      color: var(--ink);
+      font-size: .7rem;
+    }
+
+    /* ── DIALOGS ────────────────────────────────────────────────────────────── */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(10, 20, 32, .62);
+      background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, .25) 0 2px, transparent 2px 5px);
+    }
+
+    .dialog {
+      width: 100%;
+      max-width: 480px;
+      background: var(--panel);
+      border: 3px solid var(--ink);
+      box-shadow: 9px 9px 0 rgba(0, 0, 0, .5);
+      max-height: 92vh;
+      overflow: auto;
+    }
+
+    .dialog--lg {
+      max-width: 720px;
+    }
+
+    .f-label {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+    }
+
+    .f-input {
+      width: 100%;
+      background: var(--panel-2);
+      border: 2px solid var(--ink);
+      box-shadow: var(--bevel-in);
+      padding: 8px 10px;
+      color: var(--ink);
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .f-input:focus {
+      background: var(--panel);
+    }
+
+    input[type="date"].f-input {
+      min-width: 0;
+      max-width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="date"].f-input::-webkit-date-and-time-value {
+      text-align: left;
+      min-width: 0;
+    }
+
+    textarea.f-input {
+      resize: vertical;
+      min-height: 88px;
+      line-height: 1.5;
+    }
+
+    .f-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .dialog-foot {
+      display: flex;
+      gap: 9px;
+      padding: 0 18px 18px;
+      flex-wrap: wrap;
+    }
+
+    .taskbar {
+      display: none;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
+    @media (max-width:1100px) {
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-crt {
+        justify-content: flex-start;
+      }
+
+      .hero-crt svg {
+        max-width: 150px;
+      }
+    }
+
+    @media (max-width:760px) {
+      :root {
+        --rail-w: 0px;
+      }
+
+      .rail,
+      .statusbar {
+        display: none;
+      }
+
+      .taskbar {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: auto;
+        min-height: 64px;
+        padding-bottom: max(env(safe-area-inset-bottom), 8px);
+        z-index: 70;
+        background: var(--primary);
+        border-top: 3px solid var(--ink);
+      }
+
+      .taskbar .rail-item {
+        flex: 1;
+        border-left: none;
+        border-top: 5px solid transparent;
+        padding: 8px 2px;
+        gap: 4px;
+      }
+
+      .taskbar .rail-item.active {
+        border-left-color: transparent;
+        border-top-color: var(--accent);
+        background: var(--bg);
+      }
+
+      .taskbar .rail-item.active::after {
+        display: none;
+      }
+
+      .taskbar .rail-item span {
+        letter-spacing: 0;
+      }
+
+      .main {
+        margin-left: 0;
+        padding-bottom: calc(72px + max(env(safe-area-inset-bottom), 8px));
+      }
+
+      .view {
+        padding: 20px 14px 30px;
+        max-width: 100%;
+      }
+
+      .view-title,
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero-inner {
+        padding: 20px 18px;
+      }
+
+      .f-row {
+        grid-template-columns: 1fr;
+      }
+
+      .win {
+        margin-bottom: 20px;
+      }
+
+      .titlebar .win-btns {
+        display: none;
+      }
+
+      .tb-clock {
+        max-width: 44vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .erow-top {
+        flex-wrap: wrap;
+      }
+
+      .stat-v {
+        font-size: 1.7rem;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .taskbar .rail-item span {
+        display: none;
+      }
+
+      .taskbar .rail-item {
+        padding: 10px 2px;
+      }
+
+      .taskbar .rail-item .pix {
+        width: 26px;
+        height: 26px;
+      }
+
+      input[type="date"].f-input {
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 0.85rem;
+      }
+
+      .taskbar {
+        align-items: flex-end;
+      }
+
+      .taskbar-fab-spacer {
+        flex: none;
+        width: 60px;
+      }
+
+      .taskbar-fab {
+        position: absolute;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%);
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--chip-fg);
+        border: 3px solid var(--ink);
+        box-shadow: 3px 3px 0 var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .taskbar-fab:active {
+        transform: translateX(-50%) translate(2px, 2px);
+        box-shadow: 0 0 0 var(--shadow);
+      }
+
+      .kcol {
+        flex: 0 0 208px;
+      }
+    }
+
+    select.f-input {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      border-radius: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2312283C' d='M3 5h10v2H3zM5 7h6v2H5zM7 9h2v2H7z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 14px;
+      padding-right: 34px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ TITLE BAR ══════════════════════════════════════════════════════════ -->
+  <div class="titlebar">
+    <span class="logo" id="tb-logo"></span>
+    <span style="flex:1"></span>
+    <button class="tb-theme" id="tb-theme" onclick="toggleTheme()"></button>
+    <span class="tb-clock" id="tb-clock"></span>
+    <span class="win-btns" id="tb-btns"></span>
+  </div>
+
+  <!-- ══ RAIL ═══════════════════════════════════════════════════════════════ -->
+  <nav class="rail" id="rail"></nav>
+  <nav class="taskbar" id="taskbar"></nav>
+
+  <!-- ══ MAIN ═══════════════════════════════════════════════════════════════ -->
+  <main class="main">
+    <section class="view active" id="view-dashboard">
+      <div id="dashboard-content"></div>
+    </section>
+    <section class="view" id="view-pipeline">
+      <div id="pipeline-content"></div>
+    </section>
+    <section class="view" id="view-applications">
+      <div id="applications-content"></div>
+    </section>
+    <section class="view" id="view-settings">
+      <div id="settings-content"></div>
+    </section>
+  </main>
+
+  <!-- ══ STATUS BAR ═════════════════════════════════════════════════════════ -->
+  <div class="statusbar" id="statusbar"></div>
+
+  <!-- ══ DIALOGS ════════════════════════════════════════════════════════════ -->
+  <div id="application-modal" class="backdrop" hidden>
+    <div class="dialog">
+      <div class="win-bar">
+        <span class="win-title" id="application-modal-title">ADD APPLICATION</span>
+        <span class="spacer"></span>
+        <span class="win-btns" data-close="application-modal"></span>
+      </div>
+      <div class="win-body">
+        <label class="f-label">Company</label>
+        <input type="text" id="app-company" class="f-input" placeholder="e.g. Goldman Sachs">
+        <div class="f-row">
+          <div>
+            <label class="f-label">Industry</label>
+            <select id="app-industry" class="f-input"></select>
+          </div>
+          <div>
+            <label class="f-label">Role</label>
+            <input type="text" id="app-role" class="f-input" placeholder="e.g. Investment Banking Summer Analyst">
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Internship Start</label>
+            <input type="date" id="app-start" class="f-input">
+          </div>
+          <div>
+            <label class="f-label">Internship End</label>
+            <input type="date" id="app-end" class="f-input">
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Duration</label>
+            <input type="text" id="app-duration" class="f-input" placeholder="e.g. 10 weeks">
+          </div>
+          <div>
+            <label class="f-label">Pay</label>
+            <input type="text" id="app-pay" class="f-input" placeholder="e.g. HK$45,000/mo or Not disclosed">
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Deadline Type</label>
+            <select id="app-deadline-type" class="f-input" onchange="onDeadlineTypeChange()">
+              <option value="fixed">Fixed date</option>
+              <option value="rolling">Rolling</option>
+              <option value="tbd">TBD / not announced</option>
+            </select>
+          </div>
+          <div id="app-deadline-date-wrap">
+            <label class="f-label">Deadline Date</label>
+            <input type="date" id="app-deadline-date" class="f-input">
+          </div>
+        </div>
+        <div class="f-row">
+          <div>
+            <label class="f-label">Portal URL</label>
+            <input type="url" id="app-portal-url" class="f-input" placeholder="https://...">
+          </div>
+          <div>
+            <label class="f-label">Info Page URL</label>
+            <input type="url" id="app-info-url" class="f-input" placeholder="https://...">
+          </div>
+        </div>
+        <label class="f-label">Status</label>
+        <select id="app-status" class="f-input"></select>
+        <label class="f-label">Notes</label>
+        <textarea id="app-notes" class="f-input" placeholder="Your own notes. Links are shown as clickable."></textarea>
+
+        <div class="sect" style="margin:22px 0 14px">
+          <span class="sect-label">Deep Dive (optional)</span>
+          <span class="sect-rule"></span>
+        </div>
+        <label class="f-label">Overview</label>
+        <textarea id="app-overview" class="f-input" placeholder="What the team/role does"></textarea>
+        <label class="f-label">Responsibilities</label>
+        <textarea id="app-responsibilities" class="f-input"></textarea>
+        <label class="f-label">Eligibility</label>
+        <textarea id="app-eligibility" class="f-input"></textarea>
+        <label class="f-label">Application Process</label>
+        <textarea id="app-application-process" class="f-input"></textarea>
+        <label class="f-label">Compensation Detail</label>
+        <textarea id="app-compensation-detail" class="f-input"></textarea>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn" onclick="saveApplication()">Save</button>
+        <button class="btn btn--ghost" onclick="closeModal('application-modal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="application-detail-modal" class="backdrop" hidden>
+    <div class="dialog dialog--lg">
+      <div class="win-bar">
+        <span class="win-title" id="application-detail-title">DETAIL</span>
+        <span class="spacer"></span>
+        <span class="win-btns" data-close="application-detail-modal"></span>
+      </div>
+      <div class="win-body" id="application-detail-body"></div>
+      <div class="dialog-foot">
+        <button class="btn" id="application-detail-edit-btn">Edit</button>
+        <button class="btn btn--ghost" id="application-detail-delete-btn">Delete</button>
+        <button class="btn btn--ghost" onclick="closeModal('application-detail-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getDatabase, ref, push, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCu3igiyMcHc79z7xr6DSQ29OBPUf3pDJ0",
+      authDomain: "adip-hku.firebaseapp.com",
+      databaseURL: "https://adip-hku-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "adip-hku",
+      storageBucket: "adip-hku.firebasestorage.app",
+      messagingSenderId: "45076390506",
+      appId: "1:45076390506:web:ff0f00a2f04bca0f432013"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getDatabase(fbApp);
+    const applicationsRef = ref(db, 'internships/applications');
+
+    /* ═══ PIXEL ICON SET ═══════════════════════════════════════════════════════
+       16×16 grid, integer coords, crispEdges → chunky retro glyphs.           */
+    const ICONS = {
+      desktop: '<path d="M1 2h14v10H1z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 5h8v4H4z"/><path d="M6 12h4v2H6zM4 14h8v1.5H4z"/>',
+      calendar: '<path fill-rule="evenodd" d="M1 3h14v12H1zm2 5h2v2H3zm3 0h2v2H6zm3 0h2v2H9zm3 0h2v2h-2zM3 11h2v2H3zm3 0h2v2H6zm3 0h2v2H9zm3 0h2v2h-2z"/><path d="M4 1h2v3H4zm6 0h2v3h-2z"/>',
+      sun: '<path d="M7 0h2v3H7zM7 13h2v3H7zM0 7h3v2H0zM13 7h3v2h-3zM2 3h2v2H2zM12 3h2v2h-2zM2 11h2v2H2zM12 11h2v2h-2z"/><path fill-rule="evenodd" d="M5 5h6v6H5zm1.5 1.5v3h3v-3z"/><path d="M6 6h4v4H6z"/>',
+      check: '<path fill-rule="evenodd" d="M1 1h14v14H1zm2 2v10h10V3z"/><path d="M5 8h2v2H5zm2 2h2v2H7zm2-2h2v2H9zm2-2h2v2h-2z"/>',
+      note: '<path d="M2 1h9l3 3v11H2z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 1v4h4"/><path d="M4 7h6v1.5H4zM4 10h6v1.5H4zM4 12.5h4V14H4z"/>',
+      book: '<path d="M1 2h6v12H1z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 2h6v12H9z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 1h2v14H7z"/>',
+      folder: '<path d="M1 2h5l2 2h7v10H1z"/>',
+      folderOpen: '<path d="M1 2h5l2 2h5v2H4L2 13H1z"/><path d="M4 7h11l-2 7H2z"/>',
+      file: '<path d="M3 1h7l3 3v11H3z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 1v4h4"/>',
+      floppy: '<path fill-rule="evenodd" d="M1 1h14v14H1zm4 1v4h6V2zm-1 8v4h8v-4z"/><path d="M9 2h2v3H9z"/>',
+      clock: '<path fill-rule="evenodd" d="M2 2h12v12H2zm2 2v8h8V4z"/><path d="M7 4h2v5H7zM7 8h4v2H7z"/>',
+      pin: '<path fill-rule="evenodd" d="M3 1h10v9H9l-1 5-1-5H3zm2 2v5h6V3z"/><path d="M6 4h4v3H6z"/>',
+      search: '<path fill-rule="evenodd" d="M1 1h10v10H1zm2 2v6h6V3z"/><path d="M10 10h2v2h-2zM12 12h3v3h-3z"/>',
+      plus: '<path d="M7 2h2v12H7z"/><path d="M2 7h12v2H2z"/>',
+      close: '<path d="M3 3h2v2H3zM5 5h2v2H5zM7 7h2v2H7zM9 5h2v2H9zM11 3h2v2h-2zM9 9h2v2H9zM11 11h2v2h-2zM5 9h2v2H5zM3 11h2v2H3z"/>',
+      edit: '<path d="M10 1h3v3h-3z"/><path d="M8 3h3v3H8zM6 5h3v3H6zM4 7h3v3H4zM2 9h3v3H2zM1 12h3v3H1z"/>',
+      trash: '<path d="M5 0h6v2H5zM1 2h14v2H1z"/><path fill-rule="evenodd" d="M3 5h10v11H3zm2 2v7h6V7z"/><path d="M5 7h2v7H5zM9 7h2v7H9z"/>',
+      left: '<path d="M10 2h3v2h-3zM8 4h3v2H8zM6 6h3v4H6zM8 10h3v2H8zM10 12h3v2h-3z"/>',
+      right: '<path d="M3 2h3v2H3zM5 4h3v2H5zM7 6h3v4H7zM5 10h3v2H5zM3 12h3v2H3z"/>',
+      arrow: '<path d="M1 7h11v2H1z"/><path d="M8 4h2v2H8zM10 6h2v4h-2zM8 10h2v2H8z"/>',
+      star: '<path d="M7 1h2v4H7zM4 5h8v2H4zM3 7h10v2H3zM4 9h3v5H4zM9 9h3v5H9z"/>',
+      cup: '<path fill-rule="evenodd" d="M2 4h10v9H2zm2 2v5h6V6z"/><path d="M12 5h3v5h-3v-2h1V7h-1z"/><path d="M2 14h11v2H2zM4 0h1v3H4zM7 0h1v3H7zM10 0h1v3h-1z"/>',
+      alert: '<path d="M7 1h2v2H7zM6 3h4v3H6zM5 6h6v4H5zM4 10h8v3H4zM3 13h10v2H3z" fill="none"/><path fill-rule="evenodd" d="M7 0h2l6 15H1zm1 4L4 13h8z"/><path d="M7 6h2v4H7zM7 11h2v2H7z"/>',
+      bookmark: '<path d="M3 1h10v14l-5-4-5 4z"/>',
+      moon: '<path fill-rule="evenodd" d="M6 1h7v2h-2v2H9v6h2v2h2v2H6v-2H4v-2H2V5h2V3h2z"/><path d="M6 3h3v10H6zM4 5h2v6H4z" fill="none"/>',
+      grid: '<path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/>',
+      monitor: '<path fill-rule="evenodd" d="M0 1h16v11H0zm2 2v7h12V3z"/><path d="M6 12h4v2H6zM3 14h10v2H3z"/>',
+      tag: '<path fill-rule="evenodd" d="M1 1h8l6 6-8 8-6-6zm3 2v2h2V3z"/>',
+      min: '<path d="M3 11h10v2H3z"/>',
+      max: '<path fill-rule="evenodd" d="M2 2h12v12H2zm2 3v7h8V5z"/>',
+      x: '<path d="M3 3h2v2H3zM5 5h2v2H5zM7 7h2v2H7zM9 5h2v2H9zM11 3h2v2h-2zM9 9h2v2H9zM11 11h2v2h-2zM5 9h2v2H5zM3 11h2v2H3z"/>',
+      coin: '<path d="M2 11h12v2H2z"/><path d="M3 8h10v2H3z"/><path d="M4 5h8v2H4z"/><path d="M6 2h4v2H6z"/>',
+      chart: '<path d="M2 10h3v5H2zM7 6h3v9H7zM12 3h2v12h-2z"/>',
+      briefcase: '<path d="M6 2h4v2H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M1 5h14v9H1z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M1 8h14v2H1z"/><path d="M7 8h2v3H7z"/>',
+    };
+    const ICON_SCALE = (function () {
+      const w = window.innerWidth || 1024;
+      if (w >= 1440) return 1.45;
+      if (w >= 1024) return 1.25;
+      return 1;
+    })();
+    function ic(name, size = 16, cls = '') {
+      const s = Math.round(size * ICON_SCALE);
+      return `<svg class="pix ${cls}" width="${s}" height="${s}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+    }
+    const winBtns = `<span class="wbtn" title="decorative">${ic('min', 9)}</span><span class="wbtn" title="decorative">${ic('max', 9)}</span><span class="wbtn" title="decorative">${ic('x', 9)}</span>`;
+
+    /* ═══ CONSTANTS ═══════════════════════════════════════════════════════════ */
+    const STATUS_PIPELINE = [
+      { id: 'watching', label: 'Watching', icon: 'bookmark' },
+      { id: 'applying', label: 'Applying', icon: 'edit' },
+      { id: 'applied', label: 'Applied', icon: 'check' },
+      { id: 'interviewing', label: 'Interviewing', icon: 'clock' },
+      { id: 'offer', label: 'Offer', icon: 'star' },
+      { id: 'rejected', label: 'Rejected', icon: 'x' },
+      { id: 'withdrawn', label: 'Withdrawn', icon: 'trash' },
+    ];
+    const INDUSTRIES = [
+      { id: 'banking', label: 'Banking' },
+      { id: 'consulting', label: 'Consulting' },
+      { id: 'bigtech', label: 'Big Tech' },
+      { id: 'chinatech', label: 'Chinese Tech/AI' },
+      { id: 'hkprogram', label: 'HK Program' },
+    ];
+    const INDUSTRY_COLOR = { banking: '#3B7EA1', consulting: '#D9A93B', bigtech: '#8B5FBF', chinatech: '#4C8C6B', hkprogram: '#B4653F' };
+    const STATUS_COLOR = { watching: 'var(--ink-faint)', applying: 'var(--primary)', applied: 'var(--event)', interviewing: 'var(--accent)', offer: '#4C8C6B', rejected: '#B4653F', withdrawn: 'var(--ink-faint)' };
+
+    const DEFAULT_APPLICATIONS = [
+      { company: 'Goldman Sachs', industry: 'banking', role: 'Investment Banking Summer Analyst (Capital Solutions Group)',
+        duration: '9–10 weeks', deadlineType: 'fixed', deadlineDate: '2026-10-04',
+        portalUrl: 'https://higher.gs.com/roles/170773',
+        infoUrl: 'https://www.goldmansachs.com/careers/students/programs-and-internships/asia-pacific/summer-analyst',
+        notes: 'Candidates may apply to up to 4 business/location combinations at Goldman per recruiting year; extra applications beyond that are auto-withdrawn.',
+        overview: 'Investment Banking at Goldman Sachs delivers strategic advice and financing solutions to corporate and institutional clients, including M&A, capital raising, and risk management transactions. The Capital Solutions Group (CSG) sits within IBD and focuses on structuring financing and capital markets solutions for clients, working alongside coverage bankers on cross-border deals, IPOs, and debt/equity issuance.',
+        responsibilities: 'Summer analysts are fully immersed in day-to-day activities, starting with orientation on firm culture and benefits, then targeted training, before working on real deal responsibilities alongside full-time bankers and fellow interns. The official posting does not break out specific rotation structures or deliverables beyond this general description.',
+        eligibility: 'Open to students currently pursuing a bachelor\'s or graduate degree; other Goldman APAC Summer Analyst postings target penultimate-year students, though this posting does not restate that explicitly. No visa/citizenship or language requirements are stated on the role page itself; some third-party reporting suggests no visa sponsorship for the Hong Kong role, but this is not confirmed on the official posting.',
+        applicationProcess: 'Not fully detailed on the official posting. Third-party interview-prep sources describe Goldman\'s typical pipeline as: online application, an online assessment, a HireVue one-way video interview (5-8 questions, ~30 sec prep / 2 min record), and a final "Superday" of back-to-back interviews (roughly three 30-minute interviews). Not confirmed whether Pymetrics-style games are used for the Hong Kong pipeline specifically.',
+        compensationDetail: 'Not publicly disclosed by Goldman Sachs. Third-party crowdsourced data (Glassdoor) reports a median total pay around HK$624,500/year for Goldman Sachs Summer Analysts in Hong Kong, and general Goldman US reporting mentions a $3,000-$5,000 relocation housing stipend — these are unofficial estimates, not confirmed for this specific role.' },
+      { company: 'Goldman Sachs', industry: 'banking', role: 'FICC & Equities, Sales and Trading Summer Analyst',
+        duration: '9–10 weeks', deadlineType: 'fixed', deadlineDate: '2026-10-04',
+        portalUrl: 'https://higher.gs.com/roles/169893',
+        infoUrl: 'https://www.goldmansachs.com/careers/students/programs-and-internships/asia-pacific/summer-analyst',
+        overview: 'FICC and Equities (Sales and Trading) enables clients to buy and sell financial products, raise funding, and manage risk; the division makes markets and facilitates client transactions across fixed-income, equity, currency, and commodity products globally.',
+        responsibilities: 'Same general program structure as other GS Summer Analyst roles: orientation on firm culture, targeted training, then real responsibilities alongside fellow interns. The posting does not specify desk rotations or exact deliverables (e.g. pitching trade ideas, client materials) — treat any specific desk-level task list as unconfirmed.',
+        eligibility: 'Students pursuing a bachelor\'s or graduate degree; specific year of study, visa/citizenship, and language requirements are not stated in this posting.',
+        applicationProcess: 'Same firm-wide pipeline as other GS Summer Analyst roles — apply to up to 4 business/location combinations, then (per third-party sources, not the posting itself) an online assessment, HireVue video interview, and Superday final round. Not confirmed whether Pymetrics is used in the Hong Kong pipeline.',
+        compensationDetail: 'Not publicly disclosed by Goldman Sachs. Same unofficial Glassdoor Hong Kong Summer Analyst pay estimates apply as the IB role above — not role-specific.' },
+      { company: 'JPMorgan', industry: 'banking', role: 'Commercial & Investment Bank — Markets Summer Analyst Program',
+        duration: '9 weeks, Jun–Aug 2027', deadlineType: 'rolling',
+        portalUrl: 'https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/210747060',
+        infoUrl: 'https://www.jpmorganchase.com/careers/explore-opportunities/programs/markets-summer-analyst',
+        notes: 'Program closes once filled (genuinely rolling per the official posting) — early application encouraged.',
+        overview: 'JPMorgan\'s Commercial & Investment Bank Markets division serves corporations, governments, and institutional clients across 100+ countries. The Markets Summer Analyst Program places interns into one of four tracks: Sales, Trading, Structuring & Origination, or Debt Capital Markets.',
+        responsibilities: 'The 9-week program begins with five days of orientation and classroom training. Analysts support senior colleagues with research and analysis, monitor markets and develop trade ideas, conduct portfolio reviews, and prepare and present market updates and trade recommendations, alongside mentorship, a speaker series, and trading simulations.',
+        eligibility: 'Expected graduation between September 2027 and July 2028 (bachelor\'s or master\'s; a master\'s must be completed within 2 years of the bachelor\'s). Requires strong analytical/quantitative skills and English fluency; Korean, Mandarin, or Japanese fluency is required only for desks covering those specific Asia markets. The posting indicates candidates requiring visa sponsorship may apply for the Hong Kong role.',
+        applicationProcess: 'Rolling admissions, closes once filled. Qualified candidates are invited to a HireVue stage combining a recorded video interview with a math/quantitative assessment, generally to be completed within about 30 days of invitation.',
+        compensationDetail: 'Not publicly disclosed on any JPMorgan posting reviewed.' },
+      { company: 'JPMorgan', industry: 'banking', role: 'Global Private Bank Investment Solutions Program — Summer Internship',
+        duration: '9 weeks, Jun–Aug 2027', deadlineType: 'fixed', deadlineDate: '2026-09-30',
+        portalUrl: 'https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/210745269',
+        infoUrl: 'https://privatebank.jpmorgan.com/apac/en/about-us/careers/early-career-programs',
+        notes: 'Deadline confirmed as Sept 30, 2026, 23:59 HK/Singapore time — not purely rolling as first thought.',
+        overview: 'Sits within JPMorgan\'s Global Private Bank, focused on wealth management for high-net-worth clients. Investment Solutions interns work alongside investment specialists and client advisors, collaborating with teams covering market strategy, equity, and alternative investments.',
+        responsibilities: 'The 9-week program starts with a week of induction/training. Interns analyze client needs and market conditions to help formulate investment approaches, work with advisors on portfolio recommendations, perform analytical research supporting product development, and participate in cross-functional innovation projects, skills workshops, and a senior speaker series.',
+        eligibility: 'Expected graduation between September 2027 and July 2028. Requires strong interpersonal, communication, analytical and problem-solving skills, plus genuine interest in financial markets and macroeconomics. Degree/major, visa/citizenship and language requirements for the Hong Kong role specifically are not stated in the posting.',
+        applicationProcess: 'Deadline Sept 30, 2026, 23:59 HK/Singapore time; reviewed on a rolling basis with early application encouraged. Requires completion of a HireVue video interview. Further stages (e.g. superday) not specified in available sources.',
+        compensationDetail: 'Not publicly disclosed on any posting reviewed.' },
+      { company: 'Morgan Stanley', industry: 'banking', role: 'Technology Summer Analyst Program',
+        duration: '10 weeks, starts June 2027', deadlineType: 'fixed', deadlineDate: '2026-09-27',
+        portalUrl: 'https://www.morganstanley.com/people-opportunities/students-graduates/programs/technology/summer-analyst-asia-pacific',
+        infoUrl: 'https://www.morganstanley.com/people-opportunities/students-graduates/programs/technology/summer-analyst-asia-pacific',
+        notes: 'Posting states two cutoffs, Aug 16 2026 and Sept 27 2026 (23:55 HKT) — not open-ended rolling. Program explicitly values AI/prompt-engineering exposure. Search morganstanley.tal.net closer to application time for the live requisition link.',
+        overview: 'Morgan Stanley\'s Technology division builds and protects the firm\'s platforms across application development, cybersecurity, and enterprise engineering, powering trading, risk, and client-facing systems firm-wide.',
+        responsibilities: 'Analysts work across application development, cybersecurity, and enterprise engineering teams on real business problems — including institutional trading/risk applications, cyber defenses, and next-generation AI-enabled applications. Starts with a one-day orientation, then direct team placement with ongoing mentoring, technical demos, and social/community events.',
+        eligibility: 'Pursuing a bachelor\'s, master\'s, or doctoral degree with expected graduation between October 2027 and July 2028, in Computer Science, Computer Engineering, Data Science, Data Analytics, Electrical Engineering, Financial Engineering, Mathematics, Software Engineering or related fields. Prefers programming proficiency (Python, Java, C++, C#), Linux/Unix and Windows familiarity, and explicitly lists understanding of AI concepts including prompt engineering and applied AI systems. English fluency required; visa/citizenship policy not stated.',
+        applicationProcess: 'Two stated deadlines: Aug 16, 2026 and Sept 27, 2026 (23:55 HKT). Pipeline: CV + online assessment, then an on-demand HireVue-style one-way video interview (~30 sec prep / ~1.5 min per answer), then a Superday of typically 3-5 back-to-back interviews with analysts, associates, VPs and sometimes directors/MDs.',
+        compensationDetail: 'Not publicly disclosed by Morgan Stanley. Third-party crowdsourced data (Glassdoor) cites Summer Analyst pay in Hong Kong around HK$35,000/month — an unofficial estimate, not confirmed as Technology-track-specific.' },
+      { company: 'Citi', industry: 'banking', role: 'Banking — Investment Banking Summer Analyst',
+        duration: '10 weeks (~1.5 wks training + 8.5 wks in a coverage group)', deadlineType: 'fixed', deadlineDate: '2026-10-30',
+        portalUrl: 'https://jobs.citi.com/job/hong-kong/banking-investment-banking-summer-analyst-hong-kong-apac-2027/287/98836110080',
+        infoUrl: 'https://jobs.citi.com',
+        notes: 'Citi caps applicants at 3 Summer Analyst programs across the whole APAC cluster (confirmed current) — plan which Citi roles to prioritize. Deadline confirmed Fri 30 Oct 2026, 23:59 HKT.',
+        overview: 'Sits within Citi\'s institutional Banking division. The Investment Banking group provides sector expertise and strategic advisory — M&A, capital raising, and other strategic financings — to corporate, financial-institution and public-sector clients.',
+        responsibilities: 'Researching companies and organizing financial data for live transactions, building financial models (valuations, DCF, comparative analyses), developing new-business pitch materials, coordinating with internal/external teams, and preparing compliance/control documentation.',
+        eligibility: 'Penultimate year of a Bachelor\'s or Master\'s degree, any discipline, from a top academic institution, graduating December 2027–June 2028. No explicit GPA, visa/citizenship or language requirement stated.',
+        applicationProcess: 'Not fully detailed on the official posting beyond rolling review. Third-party candidate reports (unverified by Citi) describe: online application, a recorded on-demand video interview (candidate-reported HireVue-style, ~3-5 behavioral/situational prompts), a skills-discovery survey (numerical/logical/situational-judgement), then a Superday-style final round (~3-4 back-to-back 30-min interviews).',
+        compensationDetail: 'Not publicly disclosed by Citi. Third-party salary aggregator figures for HK IB summer analysts were inconsistent/unreliable — not used.' },
+      { company: 'Citi', industry: 'banking', role: 'Markets — Sales and Trading Summer Analyst',
+        duration: '10 weeks, 2 rotations', deadlineType: 'fixed', deadlineDate: '2026-10-30',
+        portalUrl: 'https://jobs.citi.com/job/hong-kong/markets-sales-and-trading-summer-analyst-hong-kong-2027/287/97603330976',
+        infoUrl: 'https://jobs.citi.com',
+        notes: 'Deadline confirmed 30 Oct 2026, 23:59 HKT. Same 3-program APAC cap applies.',
+        overview: 'Citi Markets provides products and financing solutions — underwriting, sales and trading, distribution — for corporations, governments, and institutional/retail investors, spanning Equities, Rates, Credit and FX.',
+        responsibilities: '10-week program with two rotations across different trading/sales desks; includes orientation, classroom training, self-learning modules, lectures and networking events, working closely with program/business managers.',
+        eligibility: 'Penultimate-year student, Master\'s or Undergraduate, any discipline, top-tier institution, graduating Dec 2027–June 2028. Sought skills: VBA/Python and Excel proficiency, analytical/quantitative ability, leadership/communication. No GPA, visa or language requirement stated.',
+        applicationProcess: 'Not explicitly detailed on the posting (no confirmed assessment/interview specifics). Rolling recruitment, early application encouraged.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'Citi', industry: 'banking', role: 'Services Summer Analyst',
+        duration: '10 weeks', deadlineType: 'fixed', deadlineDate: '2026-10-30',
+        portalUrl: 'https://jobs.citi.com/job/hong-kong/services-summer-analyst-hong-kong-2027/287/98171092416',
+        infoUrl: 'https://jobs.citi.com',
+        notes: 'Deadline confirmed 30 Oct 2026. Same 3-program APAC cap applies.',
+        overview: 'Citi Services supports institutional clients globally (90+ countries) via cash management, trade finance, custody and fund administration, increasingly leveraging analytics/AI.',
+        responsibilities: 'After an initial training week and an interest/needs-based placement process, analysts are assigned to a team focusing on financial analysis, business development, client engagement and market research; also produce reports/presentations for leadership.',
+        eligibility: '"Junior in college," graduating December 2027–June 2028. Skills sought: Excel (data analysis, lookups, basic modeling), working knowledge of PowerPoint/Outlook, strong interpersonal/communication skills, attention to detail. No GPA, visa, citizenship or language requirement stated.',
+        applicationProcess: 'Not detailed beyond rolling recruitment; early applications encouraged.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'Citi', industry: 'banking', role: 'Commercial Banking Summer Analyst',
+        duration: '10 weeks', deadlineType: 'fixed', deadlineDate: '2026-10-30',
+        portalUrl: 'https://www.iagora.com/work/en/offer/internship-china-finance/6328932',
+        infoUrl: 'https://jobs.citi.com/location/hong-kong-jobs/287',
+        notes: 'Exact jobs.citi.com job-ID could not be independently confirmed (site search is JS-rendered) — content is corroborated across two independent aggregators (iAgora, Workopia) plus the 2026 HK posting pattern. Re-verify the live jobs.citi.com URL directly (likely form: jobs.citi.com/job/hong-kong/banking-commercial-banking-summer-analyst-hong-kong-apac-2027/287/<job-id>) before relying on the portal link above. Deadline 30 Oct 2026 per aggregator, consistent with other Citi HK 2027 postings but unverified against the primary source.',
+        overview: 'Citi Commercial Bank (CCB) is a global business line serving mid-sized, trade-oriented companies (~$10MM-$3B revenue). CCB Asia operates across 12 countries with ~1,200 employees, positioned as a client-centric partner helping clients with international growth via integrated lending, cash management, trade, FX, derivatives and capital-markets solutions.',
+        responsibilities: 'Tailored summer-analyst projects across relationship management, credit/lending management, client segment strategy, business planning and analysis, KYC/Control, and process design.',
+        eligibility: 'Penultimate year, Bachelor\'s or Master\'s, any discipline, top academic institution, graduating Dec 2027–June 2028. No formal work experience required; interest in working with local SMEs and a global outlook expected.',
+        applicationProcess: 'Rolling basis; same Citi-wide 3-program APAC cap applies.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'HSBC', industry: 'banking', role: 'Corporate & Institutional Banking Summer Internship Programme',
+        duration: '10 weeks, from ~14 June 2027', deadlineType: 'fixed', deadlineDate: '2026-10-30',
+        portalUrl: 'https://elevate.iit.edu/jobs/hsbc-bank-2027-hsbc-hong-kong-corporate-and-institutional-banking-summer-internship-programmes/',
+        infoUrl: 'https://www.hsbc.com/careers/students-and-graduates/find-a-programme',
+        notes: 'Portal link is a university job board mirror — the exact apply.careers.hsbc.com job-ID could not be resolved; apply via "Find a Programme" filtered to Hong Kong / Corporate and Institutional Banking. Opened ~6-29 July 2026; Assessment Centres run Sept-Nov. Deadline 30 Oct 2026 (rolling, may close early). Only one HSBC Group application per candidate per year (including Hang Seng) is accepted.',
+        overview: 'Interns work with leading companies, investors and institutions on business-critical activity across Asia. Placement into one of five tracks: Global Investment Research, Global Markets – Sales and Trading, Investment Banking, Investment Banking – Infrastructure Finance, or Relationship Management – Corporate and Institutional Banking.',
+        responsibilities: 'Company/sector analysis, supporting live transactions, helping clients manage risk, financing long-term projects, and strengthening client relationships, collaborating with diverse teams across countries, products and time zones.',
+        eligibility: 'Graduation between November 2027 and July 2028; minimum GPA 4.0/5.0 or 3.2/4.0 (or overseas equivalent) on official transcript; fluent English required; visa sponsorship available for candidates who need it; full-time availability for 10 weeks from June 2027.',
+        applicationProcess: 'General HSBC pipeline per third-party (not HSBC-confirmed) sources: online SHL-style numerical/verbal tests, HireVue video interview, assessment centre (group exercise, case study, competency interview), final interview.',
+        compensationDetail: 'Not publicly disclosed for Hong Kong. A commonly cited "$1,850/week + $3,000 housing stipend" figure appears tied to US/UK HSBC IB programs, not confirmed for HK — not used as an HK figure.' },
+      { company: 'HSBC (Hang Seng Bank HK)', industry: 'banking', role: 'Student Internship Programme 1H2027 — Global Markets',
+        duration: '6 months, Jan–Jun 2027', deadlineType: 'fixed', deadlineDate: '2026-09-10',
+        portalUrl: 'https://apply.careers.hsbc.com/job/Central-Student-Internship-Programme-1H2027-Global-Markets-Hang-Seng-Bank-(HK)-Hong/1369237557/',
+        infoUrl: 'https://www.hsbc.com/careers/students-and-graduates/find-a-programme',
+        notes: 'URGENT: this posting\'s stated deadline (10 Sept 2026) has already passed as of today (14 Sept 2026) — verify immediately whether it is still live or has been pulled/filled. This posting is under the Hang Seng Bank (HK) entity within the HSBC group, not the HSBC brand directly. This is a 6-month internship (Jan-Jun 2027), not a summer-only program — correcting earlier duration gap.',
+        overview: '6-month full-time internship spanning multiple Hang Seng Bank divisions; the Global Markets track sits functionally under the Chief Operating Office area for this program cycle.',
+        responsibilities: 'Framed generically as hands-on experience on the bank\'s day-to-day business, gaining market insight/financial analysis exposure and participating in projects under mentorship — no desk-level deliverables specified.',
+        eligibility: 'Full-time university students, or bachelor\'s degree holders with a deferred master\'s offer, any discipline; fluent English and Chinese (written and verbal); proficient in MS Office and Chinese word processing; must hold Hong Kong permanent residency or a valid student visa covering the full employment period.',
+        applicationProcess: 'Single submission only (duplicates rejected); reviewed on a rolling basis, "processing may take longer due to high volume." No specific assessment/interview stages disclosed.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'HSBC (Hang Seng Bank HK)', industry: 'banking', role: 'Student Internship Programme 1H2027 — Retail Banking and Wealth',
+        duration: '6 months, Jan–Jun 2027', deadlineType: 'fixed', deadlineDate: '2026-09-11',
+        portalUrl: 'https://apply.careers.hsbc.com/job/Central-Student-Internship-Programme-1H2027-Retail-Banking-and-Wealth-Hang-Seng-Bank-(HK)-Hong/1369390457/',
+        infoUrl: 'https://www.hsbc.com/careers/students-and-graduates/find-a-programme',
+        notes: 'URGENT: this posting\'s stated deadline (11 Sept 2026) has already passed as of today (14 Sept 2026) — verify immediately whether it is still live or has been pulled/filled. Under the Hang Seng Bank (HK) entity within the HSBC group, not the HSBC brand directly. 6-month internship (Jan-Jun 2027), not summer-only.',
+        overview: '6-month internship within Hang Seng\'s Retail Banking and Wealth division, covering functions such as risk management, customer propositions, digital banking, lending and private banking.',
+        responsibilities: 'Same generic framing as the Global Markets track — hands-on experience on the bank\'s day-to-day business and innovative projects, mentorship-driven, no granular deliverables specified.',
+        eligibility: 'Same as the Global Markets track — full-time student or bachelor\'s degree holder with deferred master\'s offer, any discipline; English/Chinese proficiency; MS Office + Chinese word processing; HK permanent residency or valid student visa covering full employment period.',
+        applicationProcess: 'Rolling basis, single submission only, "early onboarding available upon request." No specific assessment/interview details disclosed.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'BlackRock', industry: 'banking', role: 'APAC Summer Internship Program — Technology/Analytics Track',
+        duration: '8 weeks, Jun–Aug 2027', deadlineType: 'rolling',
+        portalUrl: 'https://careers.blackrock.com/job/hong-kong-sar/2027-summer-internship-program-apac/45831/90599500992',
+        infoUrl: 'https://careers.blackrock.com/candidate-faqs-apac',
+        notes: 'Program window opened June 2026; Technology function review reportedly runs Sept-Dec 2026, so as of 2026-09-14 it is likely still open/under active review, but no source gave an explicit hard close date — confirm on the live URL before assuming a firm deadline. Candidates can apply to up to 2 functions within the program.',
+        overview: 'BlackRock\'s APAC Summer Internship Program spans Hong Kong, Singapore, Taipei and Tokyo. Technology and Analytics & Modeling functions build tools, models and infrastructure supporting the firm\'s investment and risk platforms (e.g. Aladdin).',
+        responsibilities: 'Interns get real day-to-day work on their team alongside orientation, a speaker series, structured mentoring, and networking events over the 8-week program. The posting does not break out Technology/Analytics-specific deliverables beyond this general description.',
+        eligibility: 'Penultimate year of a bachelor\'s or master\'s degree, graduating between September 2026 and August 2028 (one secondary source phrased this as Sept 2027-Aug 2028 — treat the live job page as authoritative). No GPA, visa or citizenship requirement disclosed.',
+        applicationProcess: 'Online application, then a pre-interview assessment (recorded video answers) due within 5 calendar days of the invite link, required for all APAC locations except Shanghai. Software Engineering and Analytics & Modeling applicants additionally get a ~60-minute coding-test component (series of coding questions plus one video question, single attempt, cannot retake). Must be completed in English. Withdrawing an application blocks reapplying in the same cycle. Number/format of subsequent live interviews not specified.',
+        compensationDetail: 'Not publicly disclosed.' },
+      { company: 'McKinsey & Company', industry: 'consulting', role: 'Business Analyst Summer Internship',
+        deadlineType: 'fixed', deadlineDate: '2026-03-29',
+        infoUrl: 'https://www.mckinsey.com/careers/students/application-deadlines',
+        notes: 'STRONG EVIDENCE THIS HAS ALREADY CLOSED: a third-party source (Villanova career services) reports a general Summer 2027 Business Analyst Intern deadline of March 29, 2026 (used here as the deadlineDate so the tracker flags it as passed); separately, McKinsey Hong Kong/Greater China has historically opened in early summer and closed in early September. Neither is McKinsey\'s own official Hong Kong-specific deadline page (which timed out on fetch) — verify directly at the infoUrl before assuming this cycle is fully closed.',
+        overview: 'The Business Analyst Intern joins a client service team in McKinsey\'s Hong Kong/Greater China office for roughly 8-10 weeks, working on live client engagements across industries.',
+        responsibilities: 'Interns contribute directly to workstreams as part of a case team, helping analyze client problems and develop recommendations — treated the same as a first-year Business Analyst rather than a separate "internship-lite" track.',
+        eligibility: 'Open to undergraduate and master\'s students (not yet graduated); McKinsey generally accepts candidates from any academic major. No specific GPA or visa/citizenship requirement found for the Hong Kong posting.',
+        applicationProcess: 'CV screen, then the McKinsey Solve online assessment (formerly the Problem Solving Game/PSG/Imbellus), typically 2-3 game modules (commonly Redrock, Sea Wolf, Sustainable Futures Lab), 65-85 minutes. Roughly 85% of candidates reportedly do not pass Solve (third-party figure). Those who pass proceed to live case interviews; McKinsey Hong Kong is reported as a 2-round interview format. Response time after Solve is typically 1-2 weeks.',
+        compensationDetail: 'Not publicly disclosed by McKinsey. Third-party (Glassdoor) shows an average intern figure around $96,299 and full-time Business Analyst averages around HK$378,000 — unverified crowd-sourced estimates. A case-prep site describes McKinsey Hong Kong as accepting under 1% of applicants — also unconfirmed by McKinsey.' },
+      { company: 'BCG', industry: 'consulting', role: 'Consulting Internship (Hong Kong / Greater China posting)',
+        duration: '~10 weeks', deadlineType: 'tbd',
+        infoUrl: 'https://careers.bcg.com/global/en/internship-opportunities',
+        notes: 'The specific job/56071 URL previously listed returned HTTP 410 Gone on direct fetch — that requisition has expired/been removed. Fresh 2027-dated postings were found for Singapore under new job IDs (job/58724 Consultant Internship, job/58629 Associate Internship), suggesting BCG has rotated in new postings elsewhere — search careers.bcg.com directly for an equivalent fresh Hong Kong/Greater China 2027 listing rather than relying on the old link. Separately, BCG Greater China full-time deadline is reported as Oct 18, 2026 (a different program), and Summer Associate (MBA) applications open in January.',
+        overview: 'BCG\'s Greater China internship (Shanghai/Beijing/Shenzhen/Hong Kong/Taipei posting) places interns as an intern Associate or Summer Consultant on a live client team for roughly 10 weeks.',
+        responsibilities: 'Interns get real project ownership on a client case team, a dedicated mentor, and the same training/feedback structure as full-time hires.',
+        eligibility: 'Open to undergraduate, advanced-degree and MBA students per BCG\'s general internship materials. Visa sponsorship reported as "available" for the Hong Kong office per a third-party recruiting guide — recommend confirming directly with recruiters. GPA requirement not specified.',
+        applicationProcess: 'Application, then BCG\'s "Casey" chatbot-based online case/assessment (single attempt, structured quantitative reasoning under time pressure), followed by 2 rounds of live case interviews (40-50 min each) in English, candidate-led format.',
+        compensationDetail: 'Not publicly disclosed for Hong Kong/Greater China. General (third-party) BCG guidance says interns are paid a prorated base rate equivalent to full-time hires at their level, plus relocation support — not HK-specific or officially confirmed. A third-party source cites BCG China acceptance around 1%.' },
+      { company: 'Bain & Company', industry: 'consulting', role: 'Associate Consultant Internship',
+        deadlineType: 'tbd',
+        infoUrl: 'https://www.bain.com/careers/work-with-us/internships-programs/associate-consultant-internship/',
+        notes: 'For the Summer 2027 ACI cycle, Bain introduced two general/US-reference deadlines: March 29, 2026 and August 31, 2026 (seats fill progressively after each) — both have already passed as of today, but Bain states international office deadlines differ from US dates and a Hong Kong-specific date could not be confirmed. A specific job-ID link found was already dead ("no longer available") — check Bain\'s Hong Kong office page directly for a current/rolling posting.',
+        overview: 'The Associate Consultant Internship (ACI) is Bain\'s immersive summer program giving students exposure to management consulting by embedding them on a live client case team from roughly week two onward.',
+        responsibilities: 'One week of intensive training in core consulting skills, then staffing on an actual client project where the intern owns a distinct piece of that project — studying client issues and market conditions and presenting findings to the case team/leadership.',
+        eligibility: 'Current bachelor\'s or master\'s students with one full summer remaining before graduation (on track to graduate by June 2028 for this cycle). Bain states all disciplines/degrees are welcome, no prior consulting experience required. GPA and visa/citizenship requirements not specified — office-specific, check the Hong Kong office page.',
+        applicationProcess: 'Resume/CV plus educational background, work experience, and relevant test scores if applicable. General (third-party, not confirmed by Bain\'s own hiring-process page) pipeline: resume screen, online assessment, first round (two ~30-min sessions each combining a brief fit question with a 20-25 min case), then a final round (two to three back-to-back case interviews, sometimes a written case format with 55 min prep + ~40 min presenting). Full process typically 4-6 weeks per third-party guides.',
+        compensationDetail: 'US market: Bain discloses a $9,000/month base salary for the ACI plus fully employer-paid medical/dental/vision — an explicitly US figure, not confirmed for Hong Kong. A third-party source states the internship converts roughly 90% of strong performers to full-time offers (unconfirmed by Bain).' },
+      { company: 'Google', industry: 'bigtech', role: 'Software Engineering / AI-ML Summer Intern',
+        duration: '10–14 weeks', deadlineType: 'rolling',
+        infoUrl: 'https://www.google.com/about/careers/applications/internships',
+        notes: 'CONFIRMED: no Hong Kong-specific SWE/AI-ML intern posting found as of 2026-09-14 — postings checked list only US cities plus Taiwan and Singapore for APAC. Re-check careers.google.com/locations/hong-kong periodically; nearest APAC alternatives are Singapore and Taiwan (Taipei/New Taipei).',
+        overview: 'Google Summer Intern (Software Engineering) places students on product/platform teams (Search, Cloud, Ads, YouTube, Android, or infrastructure teams); the closest internal AI-relevant groups are Google DeepMind, Google Research, or ML infra teams inside Cloud/Search, though exact team is only assigned after matching post-offer.',
+        responsibilities: 'Interns ship a defined project over 10-14 weeks with a named mentor/host, working on real production code — backend engineering, distributed systems, or AI/ML model or infra work depending on team.',
+        eligibility: 'Must be currently enrolled and returning to a Bachelor\'s, Master\'s or PhD program (separate postings per degree level); minimum requirement is coding experience in 2+ general-purpose languages. US postings explicitly require being located in the US for the internship; no Hong Kong eligibility/visa language exists since no HK posting was found.',
+        applicationProcess: 'Resume screen, recruiter phone screen, an online coding assessment (Summer 2027 OA invites reportedly went out from mid-August 2026 covering array/string/hashing problems), then 2 technical interviews (45 min each, shared-doc coding) and a "Googleyness" behavioral round. Round count/format varies by team; not confirmed for any HK team since none exists yet.',
+        compensationDetail: 'Not publicly disclosed for Hong Kong (no HK posting exists). One aggregator cites Summer 2027 US SWE intern pay at $47-$63/hour — a US-market figure only, not applicable to HK.' },
+      { company: 'Meta', industry: 'bigtech', role: 'Summer Internship (all functions)',
+        deadlineType: 'rolling',
+        infoUrl: 'https://www.metacareers.com/careerprograms/students/',
+        notes: 'Confirmed official portal (the Threads link redirects here) — this replaces the earlier social-media source. Applications not confirmed open for the 2027 cycle as of 2026-09-14; historical pattern for some cycles was "open December, close February," which conflicts with the ~Aug-Oct 2026 expectation, so check this page on a rolling basis. Meta has an HK office (metacareers.com/locations/hongkong) but no HK-specific intern requisition was found yet.',
+        overview: 'Meta\'s internship program spans Engineering/Tech & Design, PhD (Research), and Business tracks; AI-relevant internal orgs are GenAI, Meta AI/FAIR (research track, PhD-only), or ML infra/Ads-ranking teams under Software Engineering — assigned after matching, not at application.',
+        responsibilities: 'Interns own a 10-12 week project embedded on a specific team, ship production code with mentor support, and typically present results at an end-of-internship review.',
+        eligibility: 'Full-time, degree-seeking Bachelor\'s or Master\'s student (PhD required for the Research/ML-research track) intending to return to school after the internship, typically penultimate or final year. No HK-specific visa/sponsorship statement found.',
+        applicationProcess: 'Recruiter/resume screen, sometimes an online assessment on CodeSignal (~70 min, 4 escalating-difficulty problems), a 45-minute technical phone screen (2 LeetCode-style problems in CoderPad), then a virtual loop of ~4-5 rounds (2 coding, 1 system design, 1 behavioral; some 2026 cycles added an AI-assisted coding round).',
+        compensationDetail: 'Not publicly disclosed for Hong Kong. US-market figures found: ~$8,000-$9,000/month base for SWE interns (~$51/hour), plus ~$2,600/month housing stipend and relocation support — not applicable to HK.' },
+      { company: 'Amazon', industry: 'bigtech', role: 'Software Development Engineer (SDE) Summer Intern',
+        duration: '3 or 6 months', deadlineType: 'rolling',
+        portalUrl: 'https://www.amazon.jobs/en/jobs/10418355/2027-software-dev-engineer-intern',
+        infoUrl: 'https://www.amazon.jobs/en/locations/hong-kong',
+        notes: 'CONFIRMED: no Hong Kong SDE intern posting exists. The only genuine HK internship on amazon.jobs is a "Technical Business Developer Intern, 2026, Hong Kong" (Job ID 10394507) — an AWS business/customer-facing role, not engineering. Nearest confirmed APAC SDE intern activity: India (Bengaluru, Chennai, Hyderabad, Delhi, Mumbai, Pune) and Japan.',
+        overview: 'Amazon\'s SDE internship (University Talent Acquisition track) places interns on a team within AWS, Retail/International Stores, or similar; AI-relevant orgs would be AWS AI/ML services (Bedrock, SageMaker) or internal ML platforms, inferred since no HK posting exists to confirm team assignment.',
+        responsibilities: 'Typical SDE intern postings (India 6-month, Japan 8-12 week summer) describe designing, coding and testing production features on an owning team with a mentor, working toward a capstone project presented near the end.',
+        eligibility: 'Currently enrolled in a Bachelor\'s or Master\'s in CS/CE or related field, graduating ~2027-2029 depending on track. India track requires in-person 6-month commitment (Jan-Jun 2027); Japan track requires on-site Summer 2027 (Jun-Sep), graduation year 2028/2029, with a stated OA/application deadline of Sept 27, 2026. No HK eligibility/visa info exists since no HK posting was found.',
+        applicationProcess: 'Online application, then typically a HackerRank test (2 DSA questions, easy-medium, ~5-day window) plus a work-style/leadership-principles assessment, sometimes a second Mettl assessment (~41 questions, 9 sections), then ~1 technical interview round about a week later. Exact round count for HK is not specified since no HK SDE posting exists.',
+        compensationDetail: 'Not publicly disclosed for Hong Kong or any APAC SDE track found in this research.' },
+      { company: 'Microsoft', industry: 'bigtech', role: 'University Internship Program (Hong Kong)',
+        duration: 'varies, some 6-month Jan–Jun 2027', deadlineType: 'rolling',
+        infoUrl: 'https://careers.microsoft.com/v2/global/en/universityinternship',
+        notes: 'CONFIRMED: no HK-specific internship posting found — the HK jobs page currently lists only 3 full-time roles, including a Senior/Principal Researcher role on multimodal foundation models/agentic AI (Job ID 1970393556983842), which signals an AI research presence in HK but not confirmed as an internship pipeline. US Summer 2027 university postings reportedly appear only briefly (as short as 9 days) before being pulled — check careers.microsoft.com/v2/global/en/locations/hong-kong.html frequently.',
+        overview: 'Microsoft\'s University Internship Program spans Software Engineering, Product Management, Data & Applied Science, and Microsoft Research globally; the one clearly AI-relevant Hong Kong opening currently listed is full-time (not intern), not a confirmed internship pathway.',
+        responsibilities: 'Not specified for an HK-specific internship since none is posted; generic Microsoft SWE intern postings describe feature design/build/test work on a product team with an assigned manager and mentor over a 12-week ("Explore," 1st/2nd-year students) or full internship track (upperclassmen).',
+        eligibility: 'Generic pages state open to current Bachelor\'s, Master\'s, MBA and PhD students, with an "Explore" track for first/second-year students who completed only introductory CS coursework. No explicit HK visa/sponsorship statement found.',
+        applicationProcess: 'Recruiter call (background/role-fit), then an online assessment via Codility or HackerRank (60-90 min, typically 2 LeetCode medium-to-hard problems), 2 technical interview rounds (45-60 min each), and a behavioral round — some summaries describe 5 total stages. No confirmed HK-specific timeline exists yet.',
+        compensationDetail: 'No official Microsoft HK internship pay figure found. Third-party aggregator (Glassdoor) cites ~HK$11,000/month for general HK internships (unverified, not confirmed as this specific program). US reference: Explore SWE intern pay ~$34/hour plus a $7,000-$10,000 summer housing stipend — not applicable to HK.' },
+      { company: 'ByteDance (Seed team)', industry: 'chinatech', role: 'Foundation Model / AI Research & Engineering Intern',
+        deadlineType: 'rolling',
+        portalUrl: 'https://seed.bytedance.com/en/career',
+        infoUrl: 'https://seed.bytedance.com/en/blog/bytedance-seed-2027-foundation-model-campus-recruitment-is-now-open-internships-included',
+        notes: 'IMPORTANT: the official 2027 recruitment blog post lists exactly 7 base locations — Beijing, Shanghai, Shenzhen, Hangzhou, Singapore, San Jose, and Seattle. Hong Kong is NOT among them for this Seed/foundation-model track (ByteDance does have a general HK office for other, non-AI-research roles like commercial/partnership internships, but not this one). If you need to stay in Hong Kong, this specific track likely does not qualify without relocating. Top performers are eligible for an extra incentive program aimed at AI talent.',
+        overview: 'ByteDance Seed is ByteDance\'s frontier AI research org (est. 2023), working on foundation models across LLM, multimodal, AI-for-Science, and robotics toward AGI. Roles span Research Scientist/Engineer positions in LLM, vision/multimodal, training/inference infrastructure, speech, AI-for-Science, robotics, and Responsible AI.',
+        responsibilities: 'Not detailed on public pages beyond track names; individual joinbytedance.com job descriptions would carry day-to-day specifics per track.',
+        eligibility: 'New-graduate track: graduating Sept 2026-Aug 2027. Intern track specifically: graduating Sept 2027 or later. No citizenship/residency requirement stated; application is split into separate Mainland China vs non-Mainland China portals.',
+        applicationProcess: 'Apply via seed.bytedance.com/en/career or joinbytedance.com, routed to Mainland vs non-Mainland portals. No explicit deadline stated; contact seedcampus@bytedance.com. No specifics on interview rounds/assessments found.',
+        compensationDetail: 'Not publicly disclosed beyond "highly competitive compensation packages"; top performers get an unspecified extra AI-talent incentive.' },
+      { company: 'Tencent', industry: 'chinatech', role: 'AI-Native Track Internship (Agent Development / AI Full-Stack / AI Algorithm Engineer)',
+        deadlineType: 'rolling',
+        portalUrl: 'https://careers.tencent.com/en-us/campusrecruit.html',
+        infoUrl: 'https://join.qq.com/post.html',
+        notes: 'HK CONFIRMED as a valid location: an independent Chinese-press source (Shanghai Observer/jfdaily.com) corroborates the original futunn.com report, stating recruitment spans Shenzhen, Beijing, Shanghai, Chengdu, Guangzhou, Hangzhou, plus Hong Kong and 20+ countries for international-track roles — grouped as "international" rather than a core mainland hub. Official portal is join.qq.com (select 2027 Campus Recruitment / 应届生-2027校园招聘); careers.tencent.com is the parallel English/global site. Tencent explicitly warns against paid external referrals as a scam-prevention notice.',
+        overview: 'Tencent launched its largest-ever 2027 campus recruitment (~Aug 11, 2026), adding AI-native positions across technical, product and design categories in response to the AGI shift. Track includes AI Full-Stack Engineer, Agent Development Engineer, AI Application Engineer, AI Algorithm Engineer, AI Product Manager, and AIGC art-creation roles.',
+        responsibilities: 'Stated hiring bar: candidates who can proactively identify/define problems, critically assess and validate AI-generated outputs, and translate AI capability into tangible product outcomes — suggesting hands-on building blended with AI-tool evaluation. No granular day-to-day task list found.',
+        eligibility: 'Targets students graduating January 2026 through December 2027 (undergrad/graduate, domestic and international — framed as open to overseas students too). No explicit HK/Macau/mainland citizenship requirement found; Mandarin proficiency is a reasonable practical expectation for mainland-facing teams but not confirmed as a hard requirement.',
+        applicationProcess: 'Apply via join.qq.com (2027 Campus Recruitment) or careers.tencent.com. No specific number of interview/assessment rounds disclosed; no firm deadline found.',
+        compensationDetail: 'Not publicly disclosed — sources mention only "highly competitive compensation" and concentrated mentor investment for the AI Product Manager Trainee sub-program specifically.' },
+      { company: 'Alibaba (incl. DAMO Academy / Alibaba Cloud HK)', industry: 'chinatech', role: 'Class of 2027 AI-Track Internship',
+        deadlineType: 'rolling',
+        portalUrl: 'https://campus-talent.alibaba.com/campus/en/index',
+        infoUrl: 'https://careers.alibabacloud.com/en/campus/home?lang=en',
+        notes: 'HK CONFIRMED: Alibaba\'s HK office (Times Square) houses Alibaba Cloud Intelligence Group, Alibaba International Digital Commerce Group and Cainiao Group. Alibaba Cloud separately runs a recurring, dedicated "Alibaba Cloud Hong Kong Summer Internship Program" (confirmed via Alibaba Cloud\'s own Facebook/LinkedIn posts) with past cohorts in digital marketing, big data, AI solutions architecture, and cybersecurity — this dedicated HK track is likely the best fit, worth searching for directly rather than the generic Class of 2027 portal. DAMO Academy\'s core labs are mainland-based; a dedicated DAMO Hong Kong lab was not confirmed. Over 80% of Alibaba Cloud\'s Class of 2027 roles are AI-related.',
+        overview: 'Alibaba\'s Class of 2027 Internship Program (graduates Nov 2026-Oct 2027) is explicitly AI-focused, building an "AI Dream Team" across 20+ cities globally, including a confirmed Hong Kong office presence for Alibaba Cloud.',
+        responsibilities: 'Not itemized beyond track titles seen as live listings (e.g. Algorithm Engineer - Expert AI Model, AI Agent Optimization Engineer - training/data/evaluation focus). The HK summer program\'s day-to-day is described only generically as forums, workshops, industry-expert sessions and project work.',
+        eligibility: 'Graduates from November 2026 to October 2027 generally. No explicit HK/Macau/mainland citizenship requirement found for the HK-based summer program; described as globally open. Language requirements not specified.',
+        applicationProcess: 'Apply via campus-talent.alibaba.com (find the Alibaba Cloud or DAMO section) or careers.alibabacloud.com/en/campus/home. No specific interview/assessment round count or deadline disclosed.',
+        compensationDetail: 'Not publicly disclosed in any source found — no stipend/salary figures.' },
+      { company: 'HKSTP / Cyberport', industry: 'hkprogram', role: 'HYAB Youth Start-up Internship Programme',
+        duration: '3–6 months', deadlineType: 'tbd',
+        infoUrl: 'https://www.hkstp.org/en/talent/early-career-and-internship/hyab-youth-start-up-internship-programme',
+        notes: 'Genuinely Hong Kong-based by design (not mainland/multinational). 2027 cycle not yet announced as of 2026-09-14. Most recent cycle (2026) was announced 2026-01-15, following an annual January-announcement pattern — a 2027 announcement would realistically be expected around January 2027, i.e. after today\'s date. IMPORTANT ELIGIBILITY FLAG: requires Hong Kong permanent ID card or (for local students) HK ID card — i.e. Hong Kong residency/ID is required, not open to non-HK-resident applicants; confirm this fits before waiting on the 2027 cycle. ~200 combined placements across Cyberport + HKSTP in the 2026 cycle. 2026 cycle timeline (likely template for 2027): applications/interviews Jan-Feb, internship runs March-August.',
+        overview: 'A Hong Kong government (Home and Youth Affairs Bureau) funded scheme, co-run by Cyberport and HKSTP, placing students at Hong Kong startups for 3-6 months across fields including data analysis, fintech, biotech, AI applications, business development, marketing, design, customer service, R&D and software engineering.',
+        responsibilities: 'Varies entirely by host startup and field; no universal day-to-day task list exists since placements are startup-specific.',
+        eligibility: 'Age 18-30; must be a full-time post-secondary student (sub-degree, undergrad or postgrad) holding Hong Kong ID/permanent residency. Must be legally permitted to work in HK, not already employed by or holding shares in the host startup, and not simultaneously on another publicly-funded internship scheme.',
+        applicationProcess: '2026 cycle template: applications/interviews Jan-Feb, internship commences March, runs through August with professional development sessions, concludes late August. Applications go through Cyberport\'s and HKSTP\'s dedicated program webpages.',
+        compensationDetail: 'Salary subsidy up to HK$11,490/month, funded by HYAB (confirmed figure, consistent across multiple government and Cyberport sources for the 2026 cycle). Not yet confirmed whether this figure carries into a 2027 cycle since none is announced.' },
+      { company: 'SenseTime', industry: 'hkprogram', role: 'R&D Lab Internship / Scholarship',
+        deadlineType: 'tbd',
+        infoUrl: 'https://www.sensetime.com/en/join-index',
+        notes: 'HK CONFIRMED: SenseTime is headquartered at Hong Kong Science Park (genuine base, not just a nominal HQ address), with additional offices in Beijing, Shenzhen, Shanghai, Chengdu, Hangzhou, Kyoto, Tokyo, and Singapore. The SenseTime Scholarship (est. 2017, 10th cohort as of a 2026 announcement) is the clearest documented pathway, giving recipients priority access to R&D lab internships/summer research and 1:1 mentorship. Scholarship application form: sensetime.com/cn/scholarship-application; general internship inquiries: hr@sensetime.com.',
+        overview: 'HK-headquartered leading computer-vision/deep-learning AI company. The SenseTime Scholarship awards undergrads scholarships plus priority access to SenseTime R&D lab internships, summer research, and joint-lab research.',
+        responsibilities: 'Not itemized in public sources for the general internship; scholarship recipients get access to R&D labs, summer research programs, and joint-lab research.',
+        eligibility: 'Scholarship: full-time undergraduates in years 1-3, majoring in computer science, electronics, automation, software engineering, integrated circuits, mathematics or physics, particularly those researching computer vision, deep learning, NLP, embodied intelligence, high-performance computing, systems or chips. Explicitly targets students from Hong Kong, Macau and Mainland China. Mandarin proficiency plausible but not explicitly confirmed for the HK/English track.',
+        applicationProcess: 'Scholarship application via sensetime.com/cn/scholarship-application, requiring personal info, school/major/year, GPA/class ranking, future plans, plus documents (ID photo, CV, transcript, research materials, recommendation letter to ur@sensetime.com). General careers inquiries to hr@sensetime.com. No interview-round count or deadline disclosed.',
+        compensationDetail: 'Scholarship amount: RMB 20,000 per recipient, up to ~30 awarded per cohort (per the 10th Scholarship Initiative announcement) — this is a scholarship stipend, not confirmed internship pay. Actual internship salary/stipend not publicly disclosed.' },
+    ].map((a, i) => ({
+      status: 'watching', internshipStart: null, internshipEnd: null, duration: null,
+      deadlineDate: null, pay: null, portalUrl: null, infoUrl: null, notes: null,
+      overview: null, responsibilities: null, eligibility: null, applicationProcess: null, compensationDetail: null,
+      order: i, ...a,
+    }));
+
+    /* ═══ UTILITIES ═══════════════════════════════════════════════════════════ */
+    function pad2(n) { return String(n).padStart(2, '0'); }
+    function fmtISO(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+    function todayISO() { return fmtISO(new Date()); }
+    function escHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function linkifyHtml(s) {
+      const str = String(s ?? '');
+      const urlRe = /https?:\/\/[^\s<>"']+/g;
+      let out = '', last = 0, m;
+      while ((m = urlRe.exec(str))) {
+        out += escHtml(str.slice(last, m.index));
+        const url = m[0].replace(/[.,;:!?)]+$/, '');
+        const trail = m[0].slice(url.length);
+        out += `<a href="${escHtml(url)}" target="_blank" rel="noopener">${escHtml(url)}</a>${escHtml(trail)}`;
+        last = m.index + m[0].length;
+      }
+      out += escHtml(str.slice(last));
+      return out;
+    }
+    function fmtDateShort(iso) { return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+    function fmtDateLong(iso) { return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }); }
+    function daysBetween(aIso, bIso) { return Math.round((new Date(bIso + 'T00:00:00') - new Date(aIso + 'T00:00:00')) / 86400000); }
+    function emptyState(icon, text) {
+      return `<div class="empty">${ic(icon, 22)}<div>${escHtml(text)}</div></div>`;
+    }
+    /* window shell helper */
+    function win(title, body, opt = {}) {
+      const { tone = '', hint = '', bodyClass = 'win-body' } = opt;
+      return `<div class="win ${tone}">
+    <div class="win-bar">
+      <span class="win-title">${title}</span>
+      <span class="spacer"></span>
+      ${hint ? `<span class="win-hint">${hint}</span>` : ''}
+      <span class="win-btns">${winBtns}</span>
+    </div>
+    <div class="${bodyClass}">${body}</div>
+  </div>`;
+    }
+    function viewHead(kicker, title, right = '') {
+      return `<div class="view-head">
+    <div>
+      <div class="view-kicker">${ic('arrow', 12)} ${escHtml(kicker)}</div>
+      <h1 class="view-title">${title}</h1>
+    </div>
+    <div>${right}</div>
+  </div>`;
+    }
+    function sect(icon, label, tag = '') {
+      return `<div class="sect">
+    <span class="sect-label">${ic(icon, 14)} ${escHtml(label)}</span>
+    <span class="sect-rule"></span>
+    ${tag ? `<span class="sect-tag">${escHtml(tag)}</span>` : ''}
+  </div>`;
+    }
+    function briefcaseSvg() {
+      return `<svg viewBox="0 0 100 96" fill="none" shape-rendering="crispEdges">
+    <rect x="10" y="30" width="80" height="50" fill="#F6F8F7" stroke="#12283C" stroke-width="4"/>
+    <rect x="10" y="30" width="80" height="14" fill="#3B7EA1"/>
+    <rect x="38" y="14" width="24" height="20" fill="none" stroke="#12283C" stroke-width="4"/>
+    <rect x="44" y="40" width="12" height="8" fill="#D9A93B" stroke="#12283C" stroke-width="3"/>
+    <rect x="16" y="52" width="30" height="4" fill="#12283C" opacity=".5"/>
+    <rect x="16" y="60" width="22" height="4" fill="#12283C" opacity=".35"/>
+    <rect x="16" y="68" width="26" height="4" fill="#12283C" opacity=".2"/>
+    <rect x="66" y="6" width="10" height="10" fill="#8B5FBF" stroke="#12283C" stroke-width="3"/>
+    <rect x="80" y="16" width="10" height="10" fill="#D9A93B" stroke="#12283C" stroke-width="3"/>
+    <rect x="8" y="10" width="10" height="10" fill="#3B7EA1" stroke="#12283C" stroke-width="3"/>
+  </svg>`;
+    }
+
+    /* ═══ DOMAIN HELPERS ══════════════════════════════════════════════════════ */
+    function isDark() { return document.documentElement.dataset.theme === 'dark'; }
+    function deadlineUrgency(app) {
+      if (app.deadlineType === 'rolling') return 'rolling';
+      if (app.deadlineType === 'tbd' || !app.deadlineDate) return 'tbd';
+      const days = daysBetween(todayISO(), app.deadlineDate);
+      if (days < 0) return 'passed';
+      if (days <= 14) return 'urgent';
+      if (days <= 45) return 'soon';
+      return 'upcoming';
+    }
+    function deadlineLabel(urgency) {
+      return { urgent: 'Urgent', soon: 'Soon', rolling: 'Rolling', tbd: 'TBD', passed: 'Passed?', upcoming: 'Open' }[urgency] || '';
+    }
+    function fmtDeadline(app) {
+      if (app.deadlineType === 'rolling') return 'Rolling';
+      if (app.deadlineType === 'tbd' || !app.deadlineDate) return 'TBD';
+      return fmtDateShort(app.deadlineDate);
+    }
+    function hasDeepDive(app) {
+      return !!(app.overview && app.responsibilities && app.eligibility && app.applicationProcess);
+    }
+    function industryLabel(id) { return (INDUSTRIES.find(i => i.id === id) || {}).label || id || '—'; }
+    function statusLabel(id) { return (STATUS_PIPELINE.find(s => s.id === id) || {}).label || id || '—'; }
+
+    /* ═══ STATE ═══════════════════════════════════════════════════════════════ */
+    let applications = {};
+    let applicationsSeeded = false;
+    let activeTab = 'dashboard';
+    let editingApplicationId = null;
+    let industryFilter = null;
+
+    const TABS = [
+      { id: 'dashboard', label: 'Dashboard', icon: 'desktop' },
+      { id: 'pipeline', label: 'Pipeline', icon: 'grid' },
+      { id: 'applications', label: 'Applications', icon: 'folder' },
+      { id: 'settings', label: 'Settings', icon: 'monitor' },
+    ];
+
+    /* ═══ FIREBASE LISTENER + SEEDING ═════════════════════════════════════════ */
+    onValue(applicationsRef, snap => {
+      applications = snap.val() || {};
+      if (!applicationsSeeded) {
+        applicationsSeeded = true;
+        const hasData = Object.keys(applications).length > 0;
+        if (!hasData && !localStorage.getItem('internships_seeded_v1')) {
+          DEFAULT_APPLICATIONS.forEach(a => push(applicationsRef, { ...a, createdAt: Date.now(), updatedAt: Date.now() }));
+        }
+        localStorage.setItem('internships_seeded_v1', '1');
+      }
+      renderNav();
+      renderTab(activeTab);
+      renderStatusbar();
+    });
+
+    /* ═══ NAV ═════════════════════════════════════════════════════════════════ */
+    function renderNav() {
+      const items = TABS.map(t => `
+    <div class="rail-item ${t.id === activeTab ? 'active' : ''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">
+      ${ic(t.id === activeTab ? 'folderOpen' : 'folder', 24)}
+      <span>${t.label}</span>
+    </div>`).join('');
+      document.getElementById('rail').innerHTML = items + `
+    <div class="rail-foot">
+      <div>HK</div><div>2027</div>
+    </div>`;
+      const taskbarItems = TABS.map(t => `
+    <div class="rail-item ${t.id === activeTab ? 'active' : ''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">
+      ${ic(t.icon, 18)}<span>${t.label}</span>
+    </div>`);
+      const mid = Math.ceil(taskbarItems.length / 2);
+      const spacer = `<div class="taskbar-fab-spacer"></div>`;
+      const fab = `<button class="taskbar-fab" onclick="openApplicationModal()" aria-label="Add application">${ic('plus', 20)}</button>`;
+      document.getElementById('taskbar').innerHTML = taskbarItems.slice(0, mid).join('') + spacer + taskbarItems.slice(mid).join('') + fab;
+    }
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + tab).classList.add('active');
+      renderNav();
+      renderTab(tab);
+      renderStatusbar();
+      window.scrollTo(0, 0);
+    }
+    function renderTab(tab) {
+      if (tab === 'dashboard') renderDashboard();
+      else if (tab === 'pipeline') renderPipeline();
+      else if (tab === 'applications') renderApplications();
+      else if (tab === 'settings') renderSettings();
+    }
+    function closeModal(id) { document.getElementById(id).hidden = true; }
+
+    /* ═══ DASHBOARD ═══════════════════════════════════════════════════════════ */
+    function dashStatsHtml() {
+      const list = Object.values(applications || {});
+      const total = list.length;
+      const inProgress = list.filter(a => ['applying', 'applied', 'interviewing'].includes(a.status)).length;
+      const offers = list.filter(a => a.status === 'offer').length;
+      const urgent = list.filter(a => deadlineUrgency(a) === 'urgent').length;
+      return `<div class="stats">
+    <div class="stat stat--blue">
+      <div class="stat-k">${ic('folder', 12)} Tracked</div>
+      <div class="stat-v">${total}</div>
+      <div class="note-scribble" style="margin-top:6px">applications</div>
+    </div>
+    <div class="stat">
+      <div class="stat-k">${ic('edit', 12)} In progress</div>
+      <div class="stat-v">${inProgress}</div>
+      <div class="note-scribble" style="margin-top:6px">applying / applied / interviewing</div>
+    </div>
+    <div class="stat stat--good">
+      <div class="stat-k">${ic('star', 12)} Offers</div>
+      <div class="stat-v">${offers}</div>
+      <div class="note-scribble" style="margin-top:6px">${offers ? 'congrats!' : 'none yet'}</div>
+    </div>
+    <div class="stat ${urgent ? 'stat--danger' : ''}">
+      <div class="stat-k">${ic('alert', 12)} Urgent</div>
+      <div class="stat-v">${urgent}</div>
+      <div class="note-scribble" style="margin-top:6px">deadline ≤ 14 days</div>
+    </div>
+  </div>`;
+    }
+    function upcomingDeadlinesHtml() {
+      const list = Object.entries(applications || {});
+      if (!list.length) return emptyState('folder', 'No applications yet — click + to add one.');
+      const rank = a => a.deadlineType === 'fixed' ? 0 : (a.deadlineType === 'rolling' ? 1 : 2);
+      const sorted = list.slice().sort((a, b) => {
+        const ra = rank(a[1]), rb = rank(b[1]);
+        if (ra !== rb) return ra - rb;
+        if (ra === 0) return (a[1].deadlineDate || '').localeCompare(b[1].deadlineDate || '');
+        return (a[1].order ?? 0) - (b[1].order ?? 0);
+      }).slice(0, 8);
+      return sorted.map(([id, a]) => `
+    <div class="hrow" style="cursor:pointer" onclick="openApplicationDetailModal('${id}')">
+      <div><div class="hname">${ic('briefcase', 12)} ${escHtml(a.company)}</div><div class="hrange">${escHtml(a.role)}</div></div>
+      <span class="dbadge dbadge--${deadlineUrgency(a)}">${ic('calendar', 10)} ${fmtDeadline(a)}</span>
+    </div>`).join('');
+    }
+    function industryChipsHtml() {
+      const list = Object.values(applications || {});
+      return INDUSTRIES.map(ind => {
+        const count = list.filter(a => a.industry === ind.id).length;
+        return `<span class="chip" onclick="goToApplicationsFiltered('${ind.id}')"><span class="pix" style="width:10px;height:10px;background:${INDUSTRY_COLOR[ind.id]};display:inline-block;border:2px solid var(--ink)"></span> ${escHtml(ind.label)} (${count})</span>`;
+      }).join('');
+    }
+    function goToApplicationsFiltered(industryId) { industryFilter = industryId; switchTab('applications'); }
+    function renderDashboard() {
+      const el = document.getElementById('dashboard-content');
+      const today = todayISO();
+      const d = new Date(today + 'T00:00:00');
+      const weekday = d.toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
+      const dateLabel = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      el.innerHTML = `
+    <div class="hero">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-eyebrow">${ic('briefcase', 12)} INTERNSHIPS / DESKTOP <b>${escHtml(weekday)}</b> ${escHtml(dateLabel)}</div>
+          <h1><span class="dim">TRACK EVERY</span><em>APPLICATION.</em></h1>
+          <p>Every role, every deadline, every deep dive — one place to see where you stand across banking, consulting and tech.</p>
+        </div>
+        <div class="hero-crt">${briefcaseSvg()}</div>
+      </div>
+    </div>
+
+    ${dashStatsHtml()}
+
+    <div class="dash-grid">
+      ${win(`${ic('calendar', 13)} DEADLINES.LOG`, upcomingDeadlinesHtml(), { hint: 'NEXT 8' })}
+      ${win(`${ic('tag', 13)} INDUSTRY.CFG`, `<div class="chips" style="margin-bottom:0">${industryChipsHtml()}</div>`, { tone: 'win--accent' })}
+    </div>
+  `;
+    }
+
+    /* ═══ PIPELINE ════════════════════════════════════════════════════════════ */
+    function kanbanCardHtml(id, a) {
+      return `<div class="kcard" onclick="openApplicationDetailModal('${id}')">
+    <div class="kcard-co">${escHtml(a.company)}</div>
+    <div class="kcard-role">${escHtml(a.role)}</div>
+    <div class="kcard-foot">
+      <span class="dbadge dbadge--${deadlineUrgency(a)}" style="font-size:.7rem">${fmtDeadline(a)}</span>
+      <select onclick="event.stopPropagation()" onchange="setApplicationStatus('${id}',this.value)">
+        ${STATUS_PIPELINE.map(s => `<option value="${s.id}" ${s.id === a.status ? 'selected' : ''}>${s.label}</option>`).join('')}
+      </select>
+    </div>
+  </div>`;
+    }
+    function renderPipeline() {
+      const el = document.getElementById('pipeline-content');
+      const list = Object.entries(applications || {});
+      el.innerHTML = `
+    ${viewHead('Tracking', 'PIPELINE')}
+    <div class="kanban">
+      ${STATUS_PIPELINE.map(st => {
+        const items = list.filter(([, a]) => a.status === st.id).sort((a, b) => (a[1].order ?? 0) - (b[1].order ?? 0));
+        return `<div class="kcol">
+      ${win(`${ic(st.icon, 12)} ${st.label.toUpperCase()}`, items.length ? items.map(([id, a]) => kanbanCardHtml(id, a)).join('') : emptyState(st.icon, 'Empty'), { hint: `${items.length}` })}
+    </div>`;
+      }).join('')}
+    </div>
+  `;
+    }
+
+    /* ═══ APPLICATIONS ════════════════════════════════════════════════════════ */
+    function applicationRowHtml(id, a) {
+      return `<div class="erow">
+    <span class="erow-swatch" style="background:${INDUSTRY_COLOR[a.industry] || '#999'}"></span>
+    <div class="erow-body" style="cursor:pointer" onclick="openApplicationDetailModal('${id}')">
+      <div class="erow-top">
+        <span class="erow-cat">${escHtml(a.company)} — ${escHtml(a.role)}</span>
+        <span class="erow-amt">${a.pay ? escHtml(a.pay) : '—'}</span>
+      </div>
+      <div class="erow-meta">
+        <span>${ic('tag', 10)} ${escHtml(industryLabel(a.industry))}</span>
+        <span>${ic('bookmark', 10)} ${escHtml(statusLabel(a.status))}</span>
+        <span class="dbadge dbadge--${deadlineUrgency(a)}">${ic('calendar', 9)} ${fmtDeadline(a)}</span>
+      </div>
+    </div>
+    <div class="eacts">
+      <button class="ibtn" onclick="event.stopPropagation();openApplicationModal('${id}')">${ic('edit', 11)}</button>
+      <button class="ibtn ibtn--danger" onclick="event.stopPropagation();deleteApplication('${id}')">${ic('trash', 11)}</button>
+    </div>
+  </div>`;
+    }
+    function setIndustryFilter(id) { industryFilter = id; renderApplications(); }
+    function renderApplications() {
+      const el = document.getElementById('applications-content');
+      let list = Object.entries(applications || {});
+      if (industryFilter) list = list.filter(([, a]) => a.industry === industryFilter);
+      list.sort((a, b) => a[1].company.localeCompare(b[1].company) || (a[1].order ?? 0) - (b[1].order ?? 0));
+      el.innerHTML = `
+    ${viewHead('All entries', 'APPLICATIONS', `<button class="btn" onclick="openApplicationModal()">${ic('plus', 12)} Add application</button>`)}
+    <div class="chips">
+      <span class="chip ${!industryFilter ? 'on' : ''}" onclick="setIndustryFilter(null)">${ic('grid', 11)} All industries</span>
+      ${INDUSTRIES.map(ind => `<span class="chip ${industryFilter === ind.id ? 'on' : ''}" onclick="setIndustryFilter('${ind.id}')">${escHtml(ind.label)}</span>`).join('')}
+    </div>
+    ${win(`${ic('folder', 13)} ENTRIES.LOG`, list.length ? list.map(([id, a]) => applicationRowHtml(id, a)).join('') : emptyState('folder', 'Nothing matches this filter.'), { hint: `${list.length} ROW${list.length === 1 ? '' : 'S'}` })}
+  `;
+    }
+
+    /* ═══ ADD / EDIT MODAL ════════════════════════════════════════════════════ */
+    function populateIndustrySelect() {
+      document.getElementById('app-industry').innerHTML = INDUSTRIES.map(i => `<option value="${i.id}">${escHtml(i.label)}</option>`).join('');
+    }
+    function populateStatusSelect() {
+      document.getElementById('app-status').innerHTML = STATUS_PIPELINE.map(s => `<option value="${s.id}">${escHtml(s.label)}</option>`).join('');
+    }
+    function onDeadlineTypeChange() {
+      const t = document.getElementById('app-deadline-type').value;
+      document.getElementById('app-deadline-date-wrap').style.display = t === 'fixed' ? '' : 'none';
+    }
+    function openApplicationModal(id) {
+      editingApplicationId = id || null;
+      const a = id ? applications[id] : null;
+      document.getElementById('application-modal-title').textContent = id ? 'EDIT APPLICATION' : 'ADD APPLICATION';
+      document.getElementById('app-company').value = a ? a.company : '';
+      populateIndustrySelect();
+      document.getElementById('app-industry').value = a ? a.industry : INDUSTRIES[0].id;
+      document.getElementById('app-role').value = a ? a.role : '';
+      document.getElementById('app-start').value = a && a.internshipStart ? a.internshipStart : '';
+      document.getElementById('app-end').value = a && a.internshipEnd ? a.internshipEnd : '';
+      document.getElementById('app-duration').value = a && a.duration ? a.duration : '';
+      document.getElementById('app-pay').value = a && a.pay ? a.pay : '';
+      document.getElementById('app-deadline-type').value = a ? a.deadlineType : 'tbd';
+      document.getElementById('app-deadline-date').value = a && a.deadlineDate ? a.deadlineDate : '';
+      onDeadlineTypeChange();
+      document.getElementById('app-portal-url').value = a && a.portalUrl ? a.portalUrl : '';
+      document.getElementById('app-info-url').value = a && a.infoUrl ? a.infoUrl : '';
+      populateStatusSelect();
+      document.getElementById('app-status').value = a ? a.status : STATUS_PIPELINE[0].id;
+      document.getElementById('app-notes').value = a && a.notes ? a.notes : '';
+      document.getElementById('app-overview').value = a && a.overview ? a.overview : '';
+      document.getElementById('app-responsibilities').value = a && a.responsibilities ? a.responsibilities : '';
+      document.getElementById('app-eligibility').value = a && a.eligibility ? a.eligibility : '';
+      document.getElementById('app-application-process').value = a && a.applicationProcess ? a.applicationProcess : '';
+      document.getElementById('app-compensation-detail').value = a && a.compensationDetail ? a.compensationDetail : '';
+      document.getElementById('application-modal').hidden = false;
+    }
+    function saveApplication() {
+      const company = document.getElementById('app-company').value.trim();
+      const role = document.getElementById('app-role').value.trim();
+      if (!company || !role) return;
+      const industry = document.getElementById('app-industry').value;
+      const internshipStart = document.getElementById('app-start').value || null;
+      const internshipEnd = document.getElementById('app-end').value || null;
+      const duration = document.getElementById('app-duration').value.trim() || null;
+      const pay = document.getElementById('app-pay').value.trim() || null;
+      const deadlineType = document.getElementById('app-deadline-type').value;
+      const deadlineDate = deadlineType === 'fixed' ? (document.getElementById('app-deadline-date').value || null) : null;
+      const portalUrl = document.getElementById('app-portal-url').value.trim() || null;
+      const infoUrl = document.getElementById('app-info-url').value.trim() || null;
+      const status = document.getElementById('app-status').value;
+      const notes = document.getElementById('app-notes').value.trim() || null;
+      const overview = document.getElementById('app-overview').value.trim() || null;
+      const responsibilities = document.getElementById('app-responsibilities').value.trim() || null;
+      const eligibility = document.getElementById('app-eligibility').value.trim() || null;
+      const applicationProcess = document.getElementById('app-application-process').value.trim() || null;
+      const compensationDetail = document.getElementById('app-compensation-detail').value.trim() || null;
+      const existing = editingApplicationId ? applications[editingApplicationId] : null;
+      const data = {
+        company, industry, role, internshipStart, internshipEnd, duration,
+        deadlineType, deadlineDate, pay, portalUrl, infoUrl, status, notes,
+        overview, responsibilities, eligibility, applicationProcess, compensationDetail,
+        order: existing ? (existing.order ?? Object.keys(applications).length) : Object.keys(applications).length,
+        createdAt: existing ? (existing.createdAt || Date.now()) : Date.now(),
+        updatedAt: Date.now(),
+      };
+      if (editingApplicationId) update(ref(db, 'internships/applications/' + editingApplicationId), data);
+      else push(applicationsRef, data);
+      closeModal('application-modal');
+    }
+    function deleteApplication(id) { if (confirm('Delete this application?')) remove(ref(db, 'internships/applications/' + id)); }
+    function setApplicationStatus(id, status) { update(ref(db, 'internships/applications/' + id), { status, updatedAt: Date.now() }); }
+
+    /* ═══ DETAIL MODAL ════════════════════════════════════════════════════════ */
+    function applicationDetailBodyHtml(a) {
+      return `
+    <div class="chips" style="margin-bottom:14px">
+      <span class="chip" style="background:${INDUSTRY_COLOR[a.industry] || 'var(--panel-2)'};color:var(--chip-fg);cursor:default">${ic('tag', 11)} ${escHtml(industryLabel(a.industry))}</span>
+      <span class="chip on" style="background:${STATUS_COLOR[a.status] || 'var(--primary)'};cursor:default">${ic('bookmark', 11)} ${escHtml(statusLabel(a.status))}</span>
+      <span class="dbadge dbadge--${deadlineUrgency(a)}">${ic('calendar', 11)} ${fmtDeadline(a)}</span>
+    </div>
+    <div class="hrow"><div><div class="hname">${ic('clock', 12)} Internship dates</div></div><div class="hrange">${a.internshipStart ? fmtDateShort(a.internshipStart) : '—'}${a.internshipEnd ? ' – ' + fmtDateShort(a.internshipEnd) : ''}</div></div>
+    <div class="hrow"><div><div class="hname">${ic('grid', 12)} Duration</div></div><div class="hrange">${a.duration ? escHtml(a.duration) : '—'}</div></div>
+    <div class="hrow" style="border-bottom:none"><div><div class="hname">${ic('coin', 12)} Pay</div></div><div class="hrange">${a.pay ? escHtml(a.pay) : 'Not disclosed'}</div></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0">
+      ${a.portalUrl ? `<a class="btn" href="${escHtml(a.portalUrl)}" target="_blank" rel="noopener">${ic('arrow', 11)} Open Portal</a>` : `<span class="chip" style="opacity:.5;cursor:default">Portal not found yet</span>`}
+      ${a.infoUrl ? `<a class="btn btn--ghost" href="${escHtml(a.infoUrl)}" target="_blank" rel="noopener">${ic('search', 11)} Info Page</a>` : ''}
+    </div>
+
+    ${sect('bookmark', 'Status')}
+    <select onchange="setApplicationStatus('${a.__id}',this.value)" class="f-input" style="margin-bottom:0">
+      ${STATUS_PIPELINE.map(s => `<option value="${s.id}" ${s.id === a.status ? 'selected' : ''}>${s.label}</option>`).join('')}
+    </select>
+
+    ${sect('note', 'Notes')}
+    ${a.notes ? `<div class="erow-note">${linkifyHtml(a.notes)}</div>` : emptyState('note', 'No notes yet.')}
+
+    ${hasDeepDive(a) ? '' : sect('search', 'Deep Dive') + emptyState('search', 'Deep dive research pending.')}
+    ${a.overview ? sect('search', 'Overview') + `<div class="ddtext">${linkifyHtml(a.overview)}</div>` : ''}
+    ${a.responsibilities ? sect('file', 'Responsibilities') + `<div class="ddtext">${linkifyHtml(a.responsibilities)}</div>` : ''}
+    ${a.eligibility ? sect('check', 'Eligibility') + `<div class="ddtext">${linkifyHtml(a.eligibility)}</div>` : ''}
+    ${a.applicationProcess ? sect('clock', 'Application Process') + `<div class="ddtext">${linkifyHtml(a.applicationProcess)}</div>` : ''}
+    ${a.compensationDetail ? sect('coin', 'Compensation Detail') + `<div class="ddtext">${linkifyHtml(a.compensationDetail)}</div>` : ''}
+  `;
+    }
+    function openApplicationDetailModal(id) {
+      const a = applications[id];
+      if (!a) return;
+      document.getElementById('application-detail-title').textContent = `${a.company} — ${a.role}`.toUpperCase();
+      document.getElementById('application-detail-body').innerHTML = applicationDetailBodyHtml({ ...a, __id: id });
+      document.getElementById('application-detail-edit-btn').onclick = () => { closeModal('application-detail-modal'); openApplicationModal(id); };
+      document.getElementById('application-detail-delete-btn').onclick = () => { closeModal('application-detail-modal'); deleteApplication(id); };
+      document.getElementById('application-detail-modal').hidden = false;
+    }
+
+    /* ═══ SETTINGS ════════════════════════════════════════════════════════════ */
+    function exportData() {
+      const payload = { applications, exportedAt: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `internships-export-${todayISO()}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    function reseedDefaults() {
+      if (!confirm('This will re-add the default company list without removing existing entries. Continue?')) return;
+      DEFAULT_APPLICATIONS.forEach(a => push(applicationsRef, { ...a, createdAt: Date.now(), updatedAt: Date.now() }));
+    }
+    function renderSettings() {
+      const el = document.getElementById('settings-content');
+      const total = Object.keys(applications || {}).length;
+      el.innerHTML = `
+    ${viewHead('System', 'SETTINGS')}
+    ${win(`${ic('monitor', 13)} DISPLAY.CFG`, `
+      <div class="hrow">
+        <div><div class="hname">${ic(isDark() ? 'moon' : 'sun', 12)} Theme</div><div class="hrange">${isDark() ? 'Dark' : 'Light'} mode</div></div>
+        <button class="btn btn--ghost" onclick="toggleTheme()">Toggle</button>
+      </div>`)}
+    ${win(`${ic('file', 13)} DATA.CFG`, `
+      <div class="hrow">
+        <div><div class="hname">${ic('floppy', 12)} Export data</div><div class="hrange">Download all applications as JSON</div></div>
+        <button class="btn btn--ghost" onclick="exportData()">Export</button>
+      </div>
+      <div class="hrow" style="border-bottom:none">
+        <div><div class="hname">${ic('grid', 12)} Re-seed defaults</div><div class="hrange">Re-add the default company list (does not remove existing entries)</div></div>
+        <button class="btn btn--ghost" onclick="reseedDefaults()">Re-seed</button>
+      </div>`)}
+    ${sect('folder', 'Records', `${total} TOTAL`)}
+  `;
+    }
+
+    /* ═══ CHROME RENDERERS ════════════════════════════════════════════════════ */
+    function renderTitlebar() {
+      document.getElementById('tb-logo').innerHTML = `${ic('briefcase', 16)} INTERNSHIPS<b>.EXE</b>`;
+      document.getElementById('tb-btns').innerHTML = winBtns;
+      const tt = document.getElementById('tb-theme');
+      if (tt) tt.innerHTML = isDark() ? `${ic('sun', 12)} Light` : `${ic('moon', 12)} Dark`;
+    }
+    function setTheme(t) {
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem('internships_theme', t); } catch (e) { }
+      const meta = document.getElementById('theme-color-meta');
+      if (meta) meta.content = t === 'dark' ? '#060B12' : '#12283C';
+      renderTitlebar(); renderNav(); renderStatusbar(); renderTab(activeTab);
+    }
+    function toggleTheme() { setTheme(isDark() ? 'light' : 'dark'); }
+    function renderStatusbar() {
+      const list = Object.values(applications || {});
+      const urgent = list.filter(a => deadlineUrgency(a) === 'urgent').length;
+      document.getElementById('statusbar').innerHTML = `
+    <span>${ic('folderOpen', 11)} ${(TABS.find(t => t.id === activeTab) || { label: activeTab }).label}</span>
+    <span>${list.length} applications</span>
+    <span>${urgent} urgent deadline${urgent === 1 ? '' : 's'}</span>
+    <span>DB: firebase · synced</span>
+    <span class="status-grip"><i></i><i></i><i></i><i></i><i></i><i></i></span>`;
+    }
+    function updateClock() {
+      const elx = document.getElementById('tb-clock');
+      if (elx) elx.textContent = new Date().toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    /* ═══ BOOTSTRAP ═══════════════════════════════════════════════════════════ */
+    document.querySelectorAll('.backdrop').forEach(mdl => {
+      mdl.addEventListener('click', e => { if (e.target === mdl) mdl.hidden = true; });
+    });
+    document.querySelectorAll('[data-close]').forEach(elx => {
+      elx.innerHTML = winBtns;
+      const btns = elx.querySelectorAll('.wbtn');
+      const last = btns[btns.length - 1];
+      if (last) { last.style.cursor = 'pointer'; last.title = 'Close'; last.addEventListener('click', () => closeModal(elx.dataset.close)); }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.querySelectorAll('.backdrop').forEach(mdl => mdl.hidden = true);
+    });
+
+    renderTitlebar();
+    updateClock();
+    setInterval(updateClock, 30000);
+    renderNav();
+    renderStatusbar();
+    switchTab('dashboard');
+
+    Object.assign(window, {
+      switchTab,
+      openApplicationModal, saveApplication, deleteApplication, setApplicationStatus,
+      openApplicationDetailModal,
+      setIndustryFilter, goToApplicationsFiltered,
+      onDeadlineTypeChange,
+      exportData, reseedDefaults,
+      closeModal,
+      toggleTheme, setTheme,
+    });
+  </script>
+</body>
+
+</html>
