@@ -1781,7 +1781,10 @@
         <label class="f-label">Amount (HKD)</label>
         <input type="number" id="expense-amount" class="f-input" min="0" step="0.01" placeholder="0.00">
         <label class="f-label">Category</label>
-        <select id="expense-category" class="f-input"></select>
+        <select id="expense-category" class="f-input" onchange="toggleExpenseCoffeeVisibility()"></select>
+        <label class="f-label" id="expense-coffee-row" style="display:none; align-items:center; gap:8px">
+          <input type="checkbox" id="expense-coffee"> Coffee
+        </label>
         <label class="f-label">Date</label>
         <input type="date" id="expense-date" class="f-input">
         <label class="f-label">Note (optional)</label>
@@ -2032,12 +2035,13 @@
       const found = Object.entries(categories || {}).find(([, c]) => c.isFood && !c.archived);
       return found ? found[0] : null;
     }
-    function sumExpenses(categoryId, fromIso, toIso) {
+    function sumExpenses(categoryId, fromIso, toIso, tag) {
       let total = 0;
       for (const e of Object.values(expenses || {})) {
         if (categoryId && e.categoryId !== categoryId) continue;
         if (fromIso && e.date < fromIso) continue;
         if (toIso && e.date > toIso) continue;
+        if (tag && e.tag !== tag) continue;
         total += Number(e.amount) || 0;
       }
       return round2(total);
@@ -2102,7 +2106,7 @@
     <span class="erow-swatch" style="background:${color}"></span>
     <div class="erow-body">
       <div class="erow-top">
-        <span class="erow-cat">${escHtml(name)}</span>
+        <span class="erow-cat">${escHtml(name)}${e.tag === 'coffee' ? ` ${ic('cup', 10)}` : ''}</span>
         <span class="erow-amt">${fmtHKD(e.amount)}</span>
       </div>
       <div class="erow-meta"><span>${ic('calendar', 10)} ${escHtml(fmtDateShort(e.date))}</span></div>
@@ -2253,7 +2257,7 @@
     </div>
     <div class="stat ${totalRemaining < 0 ? 'stat--danger' : 'stat--good'}">
       <div class="stat-k">${ic('coin', 12)} Remaining</div>
-      <div class="stat-v">${fmtHKD(totalRemaining)}</div>
+      <div class="stat-v">${fmtHKD(Math.round(totalRemaining))}</div>
       <div class="note-scribble" style="margin-top:6px">across all categories</div>
     </div>
     <div class="stat">
@@ -2390,6 +2394,12 @@
       push(expensesRef, { categoryId, amount, date: todayISO(), note: null, createdAt: Date.now() });
       amtEl.value = '';
     }
+    function toggleExpenseCoffeeVisibility() {
+      const row = document.getElementById('expense-coffee-row');
+      const isFoodCat = document.getElementById('expense-category').value === foodCategoryId();
+      row.style.display = isFoodCat ? 'flex' : 'none';
+      if (!isFoodCat) document.getElementById('expense-coffee').checked = false;
+    }
     function openExpenseModal(id) {
       editingExpenseId = id || null;
       const e = id ? expenses[id] : null;
@@ -2399,6 +2409,8 @@
       document.getElementById('expense-category').value = e ? e.categoryId : (categoryOrderIds[0] || '');
       document.getElementById('expense-date').value = e ? e.date : todayISO();
       document.getElementById('expense-note').value = e ? (e.note || '') : '';
+      toggleExpenseCoffeeVisibility();
+      document.getElementById('expense-coffee').checked = e ? e.tag === 'coffee' : false;
       document.getElementById('expense-modal').hidden = false;
     }
     function saveExpense() {
@@ -2406,9 +2418,10 @@
       const categoryId = document.getElementById('expense-category').value;
       const date = document.getElementById('expense-date').value || todayISO();
       const note = document.getElementById('expense-note').value.trim() || null;
+      const tag = (categoryId === foodCategoryId() && document.getElementById('expense-coffee').checked) ? 'coffee' : null;
       if (!amount || amount <= 0 || !categoryId) return;
       const existing = editingExpenseId ? expenses[editingExpenseId] : null;
-      const data = { categoryId, amount, date, note, createdAt: existing ? (existing.createdAt || Date.now()) : Date.now() };
+      const data = { categoryId, amount, date, note, tag, createdAt: existing ? (existing.createdAt || Date.now()) : Date.now() };
       if (editingExpenseId) update(ref(db, 'budget/expenses/' + editingExpenseId), data);
       else push(expensesRef, data);
       closeModal('expense-modal');
@@ -2475,6 +2488,7 @@
       const expectedSoFar = round2(DAILY_FOOD_QUOTA * daysElapsed);
       const paceDiff = round2(expectedSoFar - monthSpendSoFar);
       const foodDailyAvg = daysElapsed > 0 ? monthSpendSoFar / daysElapsed : 0;
+      const coffeeSpendSoFar = sumExpenses(foodId, monthFrom, today, 'coffee');
 
       el.innerHTML = `
     ${viewHead('Quota tracker', 'FOOD<em>.QUOTA</em>')}
@@ -2513,6 +2527,11 @@
         <div class="stat-k">${ic('coin', 12)} Difference</div>
         <div class="stat-v">${fmtHKD(paceDiff)}</div>
         <div class="note-scribble" style="margin-top:6px">${paceDiff < 0 ? 'over pace' : 'under pace'}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-k">${ic('cup', 12)} Coffee</div>
+        <div class="stat-v">${fmtHKD(coffeeSpendSoFar)}</div>
+        <div class="note-scribble" style="margin-top:6px">so far this month</div>
       </div>
       <div class="stat">
         <div class="stat-k">${ic('chart', 12)} Daily average</div>
@@ -2929,7 +2948,7 @@
     Object.assign(window, {
       switchTab,
       quickAddExpense,
-      openExpenseModal, saveExpense, deleteExpense,
+      openExpenseModal, saveExpense, deleteExpense, toggleExpenseCoffeeVisibility,
       setExpensesCategoryFilter, setExpensesDateFilter,
       openCategoryModal, saveCategory, archiveCategory,
       shiftFoodCalendarMonth, shiftReportsMonth, shiftLogMonth,
