@@ -2050,8 +2050,14 @@
     }
     function remainingForCategory(id) {
       const bal = categoryBalances[id];
-      const allocated = bal ? bal.totalAllocated : (categories[id] ? categories[id].monthlyAmount : 0);
-      return round2(allocated - sumExpenses(id));
+      const cat = categories[id];
+      const allocated = bal ? bal.totalAllocated : (cat ? cat.monthlyAmount : 0);
+      // Allocation only ever accrues from the month a category started being tracked
+      // (see runAllocationSweep). Expenses backdated before that month (e.g. entries
+      // logged retroactively before the tracker existed) must not be drawn against it.
+      const trackFromMonth = cat && cat.createdAt ? new Date(cat.createdAt) : null;
+      const trackFrom = trackFromMonth ? `${trackFromMonth.getFullYear()}-${pad2(trackFromMonth.getMonth() + 1)}-01` : null;
+      return round2(allocated - sumExpenses(id, trackFrom));
     }
     function categoryOptionsHtml() {
       return categoryOrderIds.map(id => `<option value="${id}">${escHtml(categories[id].name)}</option>`).join('');
