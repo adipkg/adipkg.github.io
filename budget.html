@@ -2085,6 +2085,20 @@
       });
       return round2(inflow - sumExpenses(fundId, null, prevIso));
     }
+    // Budget available to a rollover category (e.g. Savings) during month (y, m):
+    // every month's allocation up to and including it, less spending before it.
+    function rolloverAvailableForMonth(id, y, m) {
+      const cat = categories[id];
+      const now = new Date();
+      if (!cat.createdAt || y * 12 + m > now.getFullYear() * 12 + now.getMonth()) return cat.monthlyAmount;
+      const c = new Date(cat.createdAt);
+      const months = (y * 12 + m) - (c.getFullYear() * 12 + c.getMonth()) + 1;
+      if (months <= 0) return cat.monthlyAmount;
+      const prev = new Date(y, m, 0);
+      const prevIso = `${prev.getFullYear()}-${pad2(prev.getMonth() + 1)}-${pad2(prev.getDate())}`;
+      const trackFrom = `${c.getFullYear()}-${pad2(c.getMonth() + 1)}-01`;
+      return round2(months * cat.monthlyAmount - sumExpenses(id, trackFrom, prevIso));
+    }
     function categoryOptionsHtml() {
       return categoryOrderIds.map(id => `<option value="${id}">${escHtml(categories[id].name)}</option>`).join('');
     }
@@ -2105,6 +2119,8 @@
       // The fund has no monthly budget; its "budget" is whatever balance is available.
       const allocated = cat.isFund
         ? (opts.fundMonth ? fundAvailableForMonth(id, opts.fundMonth.y, opts.fundMonth.m) : round2(remainingForCategory(id) + spent))
+        : cat.keepsRollover && opts.fundMonth
+        ? rolloverAvailableForMonth(id, opts.fundMonth.y, opts.fundMonth.m)
         : opts.useMonthly
         ? cat.monthlyAmount
         : (categoryBalances[id] ? categoryBalances[id].totalAllocated : cat.monthlyAmount);
@@ -2373,7 +2389,7 @@
     </div>
 
     ${sect('chart', 'Category breakdown', 'THIS MONTH')}
-    ${win(`${ic('tag', 13)} SHARE.CFG`, categoryOrderIds.length ? categoryOrderIds.map(id => catBarHtml(id, { fromIso: monthFrom, toIso: monthTo, useMonthly: true })).join('') : emptyState('tag', 'No categories yet.'))}
+    ${win(`${ic('tag', 13)} SHARE.CFG`, categoryOrderIds.length ? categoryOrderIds.map(id => catBarHtml(id, { fromIso: monthFrom, toIso: monthTo, useMonthly: true, fundMonth: { y: d.getFullYear(), m: d.getMonth() } })).join('') : emptyState('tag', 'No categories yet.'))}
 
     ${sect('file', 'Recent expenses', `${Object.keys(expenses || {}).length} TOTAL`)}
     ${win(`${ic('file', 13)} RECENT.LOG`, dashboardExpenseListHtml())}
