@@ -2063,6 +2063,28 @@
       const trackFrom = trackFromMonth ? `${trackFromMonth.getFullYear()}-${pad2(trackFromMonth.getMonth() + 1)}-01` : null;
       return round2(allocated - sumExpenses(id, trackFrom));
     }
+    // Balance available in the fund during month (y, m): everything swept in at the
+    // start of that month (leftovers of all earlier months), less what the fund itself
+    // already spent. Future months show 0 until they begin.
+    function fundAvailableForMonth(fundId, y, m) {
+      const mIdx = y * 12 + m;
+      const now = new Date();
+      if (mIdx > now.getFullYear() * 12 + now.getMonth()) return 0; // not swept in yet
+      const prev = new Date(y, m, 0); // last day of previous month
+      const prevIso = `${prev.getFullYear()}-${pad2(prev.getMonth() + 1)}-${pad2(prev.getDate())}`;
+      let inflow = 0;
+      categoryOrderIds.forEach(id => {
+        const cat = categories[id];
+        if (id === fundId || cat.keepsRollover || !cat.createdAt) return;
+        const c = new Date(cat.createdAt);
+        const startIdx = c.getFullYear() * 12 + c.getMonth();
+        const months = (mIdx - 1) - startIdx + 1;
+        if (months <= 0) return;
+        const trackFrom = `${c.getFullYear()}-${pad2(c.getMonth() + 1)}-01`;
+        inflow += months * (cat.monthlyAmount || 0) - sumExpenses(id, trackFrom, prevIso);
+      });
+      return round2(inflow - sumExpenses(fundId, null, prevIso));
+    }
     function categoryOptionsHtml() {
       return categoryOrderIds.map(id => `<option value="${id}">${escHtml(categories[id].name)}</option>`).join('');
     }
@@ -2082,7 +2104,7 @@
       const spent = sumExpenses(id, opts.fromIso, opts.toIso);
       // The fund has no monthly budget; its "budget" is whatever balance is available.
       const allocated = cat.isFund
-        ? round2(remainingForCategory(id) + spent)
+        ? (opts.fundMonth ? fundAvailableForMonth(id, opts.fundMonth.y, opts.fundMonth.m) : round2(remainingForCategory(id) + spent))
         : opts.useMonthly
         ? cat.monthlyAmount
         : (categoryBalances[id] ? categoryBalances[id].totalAllocated : cat.monthlyAmount);
@@ -2851,7 +2873,7 @@
 
     ${!filterId ? `
     ${sect('chart', 'Category breakdown', escHtml(monthLabel))}
-    ${win(`${ic('tag', 13)} SHARE.CFG`, categoryOrderIds.length ? categoryOrderIds.map(id => catBarHtml(id, { fromIso: from, toIso: to, useMonthly: true })).join('') : emptyState('tag', 'No categories yet.'))}` : ''}
+    ${win(`${ic('tag', 13)} SHARE.CFG`, categoryOrderIds.length ? categoryOrderIds.map(id => catBarHtml(id, { fromIso: from, toIso: to, useMonthly: true, fundMonth: { y, m } })).join('') : emptyState('tag', 'No categories yet.'))}` : ''}
 
     ${sect('chart', 'Daily spend', escHtml(monthLabel))}
     ${win(`${ic('chart', 13)} TREND.LOG`, dayTrendHtml(y, m, filterId))}
