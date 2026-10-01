@@ -2080,7 +2080,10 @@
       const cat = categories[id];
       if (!cat) return '';
       const spent = sumExpenses(id, opts.fromIso, opts.toIso);
-      const allocated = opts.useMonthly
+      // The fund has no monthly budget; its "budget" is whatever balance is available.
+      const allocated = cat.isFund
+        ? round2(remainingForCategory(id) + spent)
+        : opts.useMonthly
         ? cat.monthlyAmount
         : (categoryBalances[id] ? categoryBalances[id].totalAllocated : cat.monthlyAmount);
       const pct = allocated > 0 ? Math.min(100, Math.round((spent / allocated) * 100)) : (spent > 0 ? 100 : 0);
