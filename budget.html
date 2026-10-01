@@ -2136,6 +2136,11 @@
     /* ═══ FIREBASE LISTENERS + SEEDING + ROLLOVER SWEEP ══════════════════════════ */
     function runAllocationSweep() {
       const nowMonth = currentMonthStr();
+      // Leftovers from every category except the fund itself and those flagged
+      // keepsRollover (Savings) are swept into the fund category at month rollover.
+      const fundEntry = Object.entries(categories || {}).find(([, c]) => c.isFund && !c.archived);
+      const fundId = fundEntry ? fundEntry[0] : null;
+      let swept = 0;
       Object.entries(categories || {}).forEach(([id, cat]) => {
         if (cat.archived) return;
         const bal = categoryBalances[id];
@@ -2145,11 +2150,20 @@
         }
         if (bal.lastAllocatedMonth >= nowMonth) return;
         const months = monthDiff(bal.lastAllocatedMonth, nowMonth);
+        let carry = 0;
+        if (fundId && id !== fundId && !cat.keepsRollover) {
+          carry = remainingForCategory(id);
+          swept += carry;
+        }
         update(ref(db, 'budget/categoryBalances/' + id), {
-          totalAllocated: round2((bal.totalAllocated || 0) + months * cat.monthlyAmount),
+          totalAllocated: round2((bal.totalAllocated || 0) - carry + months * cat.monthlyAmount),
           lastAllocatedMonth: nowMonth,
         });
       });
+      if (fundId && swept !== 0) {
+        const fb = categoryBalances[fundId];
+        update(ref(db, 'budget/categoryBalances/' + fundId), { totalAllocated: round2((fb ? fb.totalAllocated || 0 : 0) + swept) });
+      }
     }
     function maybeRunSweep() { if (categoriesLoaded && categoryBalancesLoaded) runAllocationSweep(); }
 
