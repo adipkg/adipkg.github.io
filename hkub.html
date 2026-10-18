@@ -2501,6 +2501,10 @@
           push(presetsRef, { name: 'My Registered Courses', courses: ['Pyth', 'AAI', 'GAI', 'BC', 'MAIB7001', 'MAIB7002', 'MAIB7003', 'MAIB7005', 'MAIB7008', 'MAIB7010', 'MAIB7011', 'MAIB7013', 'MAIB7014', 'MAIB7901', 'LLAW6334'] });
         }
         localStorage.setItem('hkub_preset_seeded_v3', '1');
+        if (!localStorage.getItem('hkub_preset_2yr_v1') && !Object.values(presets).some(p => p.name === '2 Year Plan')) {
+          push(presetsRef, { name: '2 Year Plan', courses: ['Pyth', 'AAI', 'GAI', 'BC', 'MAIB7001', 'MAIB7002', 'MAIB7003', 'MAIB7005', 'MAIB7008', 'MAIB7010', 'MAIB7013', 'LLAW6334'] });
+        }
+        localStorage.setItem('hkub_preset_2yr_v1', '1');
       }
       if (activeTab === 'timetable') renderTimetable();
     });
