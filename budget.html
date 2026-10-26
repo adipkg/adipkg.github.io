@@ -767,6 +767,194 @@
       filter: drop-shadow(5px 5px 0 rgba(0, 0, 0, .45));
     }
 
+
+    /* ── PLACES ─────────────────────────────────────────────────────────────── */
+    .pl-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .pl-card {
+      font: inherit;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      background: var(--panel);
+      border: 2px solid var(--ink);
+      border-left: 8px solid var(--vc);
+      box-shadow: var(--sh-sm);
+      padding: 9px 11px 11px;
+      transition: transform .08s, box-shadow .08s, opacity .12s, filter .12s;
+    }
+
+    .pl-card:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--shadow); }
+    .pl-card:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--shadow); }
+    .pl-card--on { background: var(--panel-2); box-shadow: 4px 4px 0 var(--vc), 4px 4px 0 2px var(--ink); }
+    .pl-card--dim { opacity: .45; filter: grayscale(1); border-left-color: var(--ink-faint); }
+
+    .pl-card-name {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pl-sw { width: 10px; height: 10px; flex: none; background: var(--vc); border: 2px solid var(--ink); }
+
+    .pl-card-total {
+      font-size: 1.45rem;
+      line-height: 1.2;
+      margin: 4px 0 2px;
+      white-space: nowrap;
+    }
+
+    .pl-card-meta {
+      font-size: .66rem;
+      line-height: 1.35;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pl-share {
+      display: block;
+      height: 6px;
+      margin-top: 7px;
+      background: var(--busy);
+      border: 1px solid var(--line);
+    }
+
+    .pl-share i { display: block; height: 100%; background: var(--vc); }
+
+    .pl-chart {
+      --pl-h: 250px;
+      display: flex;
+      gap: 8px;
+      padding: 26px 6px 4px 0;
+      overflow-x: auto;
+    }
+
+    .pl-y {
+      position: relative;
+      flex: none;
+      width: 38px;
+      height: var(--pl-h);
+      font-size: .62rem;
+      color: var(--ink-soft);
+    }
+
+    .pl-y span { position: absolute; right: 2px; transform: translateY(50%); line-height: 1; }
+
+    .pl-plot {
+      position: relative;
+      flex: 1;
+      min-width: min-content;
+      height: calc(var(--pl-h) + 30px);
+    }
+
+    .pl-grid {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 2px dotted var(--line);
+      pointer-events: none;
+    }
+
+    .pl-grid:first-child { border-top: 2px solid var(--ink); }
+
+    .pl-cols {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: var(--pl-h);
+      display: flex;
+      align-items: stretch;
+      gap: 5px;
+      padding: 0 6px;
+    }
+
+    .pl-col { flex: 1; min-width: 22px; max-width: 60px; margin: 0 auto; position: relative; }
+    .pl-col--today .pl-mon { color: var(--accent); }
+    .pl-track { height: 100%; display: flex; align-items: flex-end; }
+
+    .pl-bar {
+      position: relative;
+      width: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column-reverse;
+      border: 2px solid var(--ink);
+      border-bottom: 0;
+      background: var(--panel);
+      box-shadow: var(--sh-sm);
+    }
+
+    .pl-seg {
+      display: block;
+      width: 100%;
+      min-height: 3px;
+      cursor: pointer;
+      border-top: 2px solid var(--ink);
+      transition: filter .1s;
+    }
+
+    .pl-seg:first-child { border-top: 0; }
+    .pl-seg:hover { filter: brightness(1.12); }
+    .pl-seg--off { background: var(--ink-faint); opacity: .55; }
+
+    .pl-lbl {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 6px;
+      font-size: .58rem;
+      white-space: nowrap;
+      color: var(--ink);
+    }
+
+    .pl-mon {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: .6rem;
+      color: var(--ink-soft);
+    }
+    .pl-quota {
+      position: absolute;
+      left: 0;
+      right: 0;
+      border-top: 2px dashed var(--ink);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .pl-quota span {
+      position: absolute;
+      right: 0;
+      bottom: 2px;
+      padding: 0 4px;
+      font-size: .58rem;
+      background: var(--panel);
+      border: 1px solid var(--ink);
+    }
+
+    .pl-tip { margin-top: 12px; font-size: .7rem; opacity: .8; }
+
     /* ── STATS ──────────────────────────────────────────────────────────────── */
     .stats {
       display: grid;
@@ -1990,7 +2178,7 @@
     /* ═══ STATE ═══════════════════════════════════════════════════════════════ */
     let categories = {}, categoryBalances = {}, expenses = {}, vendors = {};
     let vendorOrderIds = [];
-    let placesVendorFilter = null;
+    const placesSelected = new Set();
     let categoryOrderIds = [];
     let activeTab = 'dashboard';
     let categoriesSeeded = false;
@@ -2005,6 +2193,8 @@
     let reportsCategoryFilter = null;
     let reportsSelectedDate = null;
     let logMonth = { y: _todayD.getFullYear(), m: _todayD.getMonth() };
+    let placesMonth = { y: _todayD.getFullYear(), m: _todayD.getMonth() };
+    let foodChartCoffeeOnly = false;
 
     const TABS = [
       { id: 'dashboard', label: 'Dashboard', icon: 'desktop' },
@@ -2503,45 +2693,130 @@
     function deleteExpense(id) { if (confirm('Delete this expense?')) remove(ref(db, 'budget/expenses/' + id)); }
 
     /* ═══ PLACES ══════════════════════════════════════════════════════════════ */
+    const VENDOR_FALLBACK_COLORS = ['#E0A33C', '#7FA8AE', '#C8604F', '#8C79B8', '#45A17F', '#4C6A9A', '#B58863', '#D77FA1'];
+    function vendorColor(id) {
+      const v = vendors[id];
+      if (v && v.color) return v.color;
+      const i = vendorOrderIds.indexOf(id);
+      return VENDOR_FALLBACK_COLORS[(i >= 0 ? i : 0) % VENDOR_FALLBACK_COLORS.length];
+    }
+    function fmtHKDWhole(n) { return 'HK$' + Math.round(n).toLocaleString('en-US'); }
     function vendorStats(id) {
       const list = Object.entries(expenses || {})
         .filter(([, e]) => e.vendorId === id)
-        .map(([eid, e]) => ({ id: eid, ...e }))
-        .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+        .map(([eid, e]) => ({ id: eid, ...e }));
       const total = round2(list.reduce((s, e) => s + (Number(e.amount) || 0), 0));
-      return { list, total, count: list.length, avg: list.length ? total / list.length : 0, last: list.length ? list[0].date : null };
+      const last = list.reduce((m, e) => (e.date > m ? e.date : m), '');
+      return { list, total, count: list.length, avg: list.length ? total / list.length : 0, last: last || null };
     }
-    function setPlacesVendor(id) { placesVendorFilter = placesVendorFilter === id ? null : id; renderPlaces(); }
+    function togglePlacesVendor(id) {
+      if (placesSelected.has(id)) placesSelected.delete(id); else placesSelected.add(id);
+      renderPlaces();
+    }
+    function clearPlacesVendors() { placesSelected.clear(); renderPlaces(); }
+    function shiftPlacesMonth(delta) {
+      let { y, m } = placesMonth;
+      m += delta; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
+      placesMonth = { y, m };
+      renderPlaces();
+    }
+    function placesNiceMax(v) {
+      const steps = [40, 80, 120, 200, 320, 400, 600, 800, 1000, 1200, 1600, 2000, 2400, 3000, 4000, 5000, 6000, 8000, 10000];
+      return steps.find(x => x >= v) || Math.ceil(v / 1000) * 1000;
+    }
+    // vendor visits grouped by day for the selected month: { 'YYYY-MM-DD': { vendorId: { total, count } } }
+    function placesMonthData(y, m) {
+      const from = `${y}-${pad2(m + 1)}-01`, to = `${y}-${pad2(m + 1)}-${pad2(daysInMonth(y, m))}`;
+      const days = {};
+      Object.values(expenses || {}).forEach(e => {
+        if (!e.vendorId || !vendors[e.vendorId] || e.date < from || e.date > to) return;
+        const d = days[e.date] || (days[e.date] = {});
+        const c = d[e.vendorId] || (d[e.vendorId] = { total: 0, count: 0 });
+        c.total += Number(e.amount) || 0; c.count++;
+      });
+      return days;
+    }
+    function placesChartHtml(days, y, m) {
+      const n = daysInMonth(y, m);
+      const filtering = placesSelected.size > 0;
+      const sel = vendorOrderIds.filter(id => placesSelected.has(id));
+      const rest = vendorOrderIds.filter(id => !placesSelected.has(id));
+      const iso = d => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+      const totalOf = d => Object.values(days[iso(d)] || {}).reduce((s, c) => s + c.total, 0);
+      const selTotalOf = d => sel.reduce((s, id) => s + ((days[iso(d)] && days[iso(d)][id]) ? days[iso(d)][id].total : 0), 0);
+      const all = Array.from({ length: n }, (_, i) => i + 1);
+      if (!all.some(d => totalOf(d) > 0)) return emptyState('chart', 'No tagged visits this month.');
+      const max = placesNiceMax(Math.max(...all.map(totalOf), 1));
+      const ticks = [0, 1, 2, 3, 4].map(i => (max / 4) * i);
+      const today = todayISO();
+      const monShort = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+      const cols = all.map(d => {
+        const tot = totalOf(d);
+        const segs = tot <= 0 ? '' : (filtering ? sel.concat(rest) : vendorOrderIds).map(id => {
+          const c = days[iso(d)] && days[iso(d)][id];
+          if (!c || c.total <= 0) return '';
+          const on = !filtering || placesSelected.has(id);
+          return `<i class="pl-seg ${on ? '' : 'pl-seg--off'}" style="height:${(c.total / tot) * 100}%;${on ? `background:${vendorColor(id)}` : ''}" title="${escHtml(vendors[id].name)} · ${monShort} ${d} · ${fmtHKDWhole(c.total)} · ${c.count} visit${c.count === 1 ? '' : 's'}" onclick="togglePlacesVendor('${id}')"></i>`;
+        }).join('');
+        const shown = filtering ? selTotalOf(d) : tot;
+        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''}">
+      <div class="pl-track">
+        <div class="pl-bar" style="height:${(tot / max) * 100}%">
+          ${shown > 0 ? `<span class="pl-lbl">${Math.round(shown)}</span>` : ''}
+          ${segs}
+        </div>
+      </div>
+      <div class="pl-mon">${d}</div>
+    </div>`;
+      }).join('');
+      return `<div class="pl-chart">
+    <div class="pl-y">${ticks.map((t, i) => `<span style="bottom:${i * 25}%">${Math.round(t)}</span>`).join('')}</div>
+    <div class="pl-plot">
+      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:${i * 25}%"></div>`).join('')}
+      <div class="pl-cols">${cols}</div>
+    </div>
+  </div>`;
+    }
     function renderPlaces() {
       const el = document.getElementById('places-content');
+      const { y, m } = placesMonth;
+      const days = placesMonthData(y, m);
+      const monthLabel = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+      placesSelected.forEach(id => { if (!vendors[id]) placesSelected.delete(id); });
+      const filtering = placesSelected.size > 0;
       const stats = {};
-      vendorOrderIds.forEach(id => { stats[id] = vendorStats(id); });
-      const shown = placesVendorFilter && stats[placesVendorFilter] ? [placesVendorFilter] : vendorOrderIds;
-      const rows = shown.flatMap(id => stats[id].list).sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
-      const total = round2(rows.reduce((s, e) => s + (Number(e.amount) || 0), 0));
-      const byMonth = {};
-      rows.forEach(e => { const k = e.date.slice(0, 7); byMonth[k] = round2((byMonth[k] || 0) + (Number(e.amount) || 0)); });
-      const monthsHtml = Object.keys(byMonth).sort().reverse().map(k => {
-        const [y, m] = k.split('-').map(Number);
-        const label = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        return `<div class="erow"><div class="erow-body"><div class="erow-top"><span class="erow-cat">${escHtml(label)}</span><span class="erow-amt">${fmtHKD(byMonth[k])}</span></div></div></div>`;
+      vendorOrderIds.forEach(id => {
+        let total = 0, count = 0, last = null;
+        Object.entries(days).forEach(([d, byV]) => { if (byV[id]) { total += byV[id].total; count += byV[id].count; if (!last || d > last) last = d; } });
+        stats[id] = { total: round2(total), count, avg: count ? total / count : 0, last, all: vendorStats(id).total };
+      });
+      const grand = vendorOrderIds.reduce((s, id) => s + stats[id].total, 0) || 1;
+      const shownIds = filtering ? vendorOrderIds.filter(id => placesSelected.has(id)) : vendorOrderIds;
+      const shownTotal = shownIds.reduce((s, id) => s + stats[id].total, 0);
+      const shownVisits = shownIds.reduce((s, id) => s + stats[id].count, 0);
+      const cards = vendorOrderIds.map(id => {
+        const st = stats[id];
+        const on = placesSelected.has(id);
+        const dim = filtering && !on;
+        return `<button type="button" class="pl-card ${on ? 'pl-card--on' : ''} ${dim ? 'pl-card--dim' : ''}" style="--vc:${vendorColor(id)}" onclick="togglePlacesVendor('${id}')">
+      <span class="pl-card-name"><i class="pl-sw"></i>${escHtml(vendors[id].name)}</span>
+      <span class="pl-card-total">${fmtHKDWhole(st.total)}</span>
+      <span class="pl-card-meta">${st.count} visit${st.count === 1 ? '' : 's'}${st.count ? ` · avg ${fmtHKDWhole(st.avg)}` : ''}</span>
+      <span class="pl-card-meta">${st.last ? 'last ' + escHtml(fmtDateShort(st.last)) : 'none this month'} · all ${fmtHKDWhole(st.all)}</span>
+      <span class="pl-share"><i style="width:${st.total > 0 ? Math.max(2, (st.total / grand) * 100) : 0}%"></i></span>
+    </button>`;
       }).join('');
       el.innerHTML = `
-    ${viewHead('Frequent spots', 'PLACES')}
+    ${viewHead('Frequent spots', 'PLACES', `
+      <div class="cal-nav">
+        <button class="ibtn" onclick="shiftPlacesMonth(-1)">${ic('left', 11)}</button>
+        <span class="cal-month">${monthLabel}</span>
+        <button class="ibtn" onclick="shiftPlacesMonth(1)">${ic('right', 11)}</button>
+      </div>${filtering ? ` <button class="btn btn--ghost" onclick="clearPlacesVendors()">Clear filter</button>` : ''}`)}
     ${vendorOrderIds.length ? `
-    <div class="stats">
-      ${vendorOrderIds.map(id => {
-        const st = stats[id];
-        const on = placesVendorFilter === id;
-        return `<div class="stat ${on ? 'stat--accent' : ''}" style="cursor:pointer" onclick="setPlacesVendor('${id}')">
-      <div class="stat-k">${ic('tag', 12)} ${escHtml(vendors[id].name)}</div>
-      <div class="stat-v">${fmtHKD(st.total)}</div>
-      <div class="note-scribble" style="margin-top:6px">${st.count} visit${st.count === 1 ? '' : 's'}${st.count ? ` · avg ${fmtHKD(st.avg)} · last ${escHtml(fmtDateShort(st.last))}` : ''}</div>
-    </div>`;
-      }).join('')}
-    </div>
-    ${win(`${ic('calendar', 13)} BY.MONTH`, monthsHtml || emptyState('calendar', 'No visits tagged yet.'), { hint: placesVendorFilter && vendors[placesVendorFilter] ? escHtml(vendors[placesVendorFilter].name).toUpperCase() : 'ALL PLACES' })}
-    ${win(`${ic('file', 13)} VISITS.LOG`, rows.length ? rows.map(e => expenseRowHtml(e.id, e)).join('') : emptyState('file', 'No visits tagged yet.'), { hint: `${rows.length} VISIT${rows.length === 1 ? '' : 'S'} · ${fmtHKD(total)}` })}
+    <div class="pl-cards">${cards}</div>
+    ${win(`${ic('chart', 13)} SPEND.BY.DAY`, placesChartHtml(days, y, m), { hint: `${filtering ? shownIds.map(id => escHtml(vendors[id].name)).join(' + ').toUpperCase() : 'ALL PLACES'} · ${fmtHKDWhole(shownTotal)} · ${shownVisits} VISIT${shownVisits === 1 ? '' : 'S'}` })}
+    <div class="note-scribble pl-tip">Tap a place to highlight it in the chart. Tap more to compare.</div>
     ` : emptyState('tag', 'No places set up.')}
   `;
     }
@@ -2578,6 +2853,49 @@
       m += delta; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; }
       foodCalendarMonth = { y, m };
       renderFood();
+    }
+    function setFoodChartCoffeeOnly(on) { foodChartCoffeeOnly = !!on; renderFood(); }
+    // Daily food spend for the browsed month. Bars are coloured by whether the whole
+    // day's food spend was over the daily quota; "coffee only" changes the heights only.
+    function foodDayChartHtml(y, m, foodId) {
+      const n = daysInMonth(y, m);
+      const iso = d => `${y}-${pad2(m + 1)}-${pad2(d)}`;
+      const days = Array.from({ length: n }, (_, i) => {
+        const d = i + 1;
+        const total = sumExpenses(foodId, iso(d), iso(d));
+        const shown = foodChartCoffeeOnly ? sumExpenses(foodId, iso(d), iso(d), 'coffee') : total;
+        return { d, total, shown };
+      });
+      const maxShown = Math.max(...days.map(x => x.shown), 0);
+      const max = placesNiceMax(foodChartCoffeeOnly ? Math.max(maxShown, 1) : Math.max(maxShown, DAILY_FOOD_QUOTA));
+      const ticks = [0, 1, 2, 3, 4].map(i => (max / 4) * i);
+      const today = todayISO();
+      const monShort = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+      const cols = days.map(({ d, total, shown }) => {
+        const over = total > DAILY_FOOD_QUOTA;
+        const seg = shown > 0
+          ? `<i class="pl-seg" style="height:100%;background:var(${over ? '--accent' : '--event'})" title="${monShort} ${d} · ${fmtHKDWhole(shown)}${foodChartCoffeeOnly ? ' coffee' : ''} · day total ${fmtHKDWhole(total)}"></i>` : '';
+        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''}">
+      <div class="pl-track">
+        <div class="pl-bar" style="height:${(shown / max) * 100}%">
+          ${shown > 0 ? `<span class="pl-lbl">${Math.round(shown)}</span>` : ''}
+          ${seg}
+        </div>
+      </div>
+      <div class="pl-mon">${d}</div>
+    </div>`;
+      }).join('');
+      const monthTotal = round2(days.reduce((s, x) => s + x.shown, 0));
+      const quotaLine = DAILY_FOOD_QUOTA <= max
+        ? `<div class="pl-quota" style="bottom:${(DAILY_FOOD_QUOTA / max) * 100}%"><span>${DAILY_FOOD_QUOTA}</span></div>` : '';
+      return { monthTotal, html: `<div class="pl-chart">
+    <div class="pl-y">${ticks.map((t, i) => `<span style="bottom:${i * 25}%">${Math.round(t)}</span>`).join('')}</div>
+    <div class="pl-plot">
+      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:${i * 25}%"></div>`).join('')}
+      <div class="pl-cols">${cols}</div>
+      ${quotaLine}
+    </div>
+  </div>` };
     }
     function renderFood() {
       const el = document.getElementById('food-content');
@@ -2675,6 +2993,16 @@
       <span><i style="background:var(--event)"></i> Under quota</span>
       <span><i style="background:var(--accent)"></i> Over quota</span>
     </div>
+
+    ${(() => {
+      const chart = foodDayChartHtml(y, m, foodId);
+      const chips = `<div class="chips" style="margin:0 0 6px">
+        <span class="chip ${!foodChartCoffeeOnly ? 'on' : ''}" onclick="setFoodChartCoffeeOnly(false)">${ic('cup', 11)} All food</span>
+        <span class="chip ${foodChartCoffeeOnly ? 'on' : ''}" onclick="setFoodChartCoffeeOnly(true)">${ic('cup', 11)} Coffee only</span>
+      </div>`;
+      return win(`${ic('chart', 13)} SPEND.BY.DAY`, chips + chart.html + (foodChartCoffeeOnly ? `<div class="note-scribble pl-tip">Bar height is coffee only. Colour still shows whether the whole day's food spend was over ${fmtHKD(DAILY_FOOD_QUOTA)}.</div>` : ''),
+        { hint: `${foodChartCoffeeOnly ? 'COFFEE' : 'ALL FOOD'} · ${fmtHKDWhole(chart.monthTotal)}` });
+    })()}
 
     ${win(`${ic('calendar', 13)} ${escHtml(monthLabel.toUpperCase())}`, `
       <div class="cal-scroll">
@@ -3070,6 +3398,7 @@
       setExpensesCategoryFilter, setExpensesDateFilter,
       openCategoryModal, saveCategory, archiveCategory,
       shiftFoodCalendarMonth, shiftReportsMonth, shiftLogMonth,
+      togglePlacesVendor, clearPlacesVendors, shiftPlacesMonth, setFoodChartCoffeeOnly,
       setReportsCategoryFilter, selectReportsDay,
       toggleDashExpenses,
       exportData,
