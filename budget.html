@@ -544,6 +544,10 @@
       box-shadow: var(--bevel-in);
     }
 
+    /* Settings lives in the rail on desktop; on mobile it moves here so the taskbar splits evenly around the + button */
+    .tb-settings { display: none; padding: 2px 7px; }
+    .tb-settings.active { background: var(--accent); color: var(--chip-fg); }
+
     .rail {
       position: fixed;
       top: var(--bar-h);
@@ -928,9 +932,9 @@
     .pl-mon {
       position: absolute;
       top: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      text-align: center;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
       font-size: .6rem;
       color: var(--ink-soft);
     }
@@ -954,6 +958,24 @@
     }
 
     .pl-tip { margin-top: 12px; font-size: .7rem; opacity: .8; }
+
+    /* On phones all 31 day columns must fit the plot width: drop the column min-width,
+       thin the borders, turn value labels vertical and only label every 5th day. */
+    @media (max-width:760px) {
+      .pl-chart { --pl-h: 200px; gap: 4px; padding-top: 34px; overflow-x: visible; }
+      .pl-y { width: 26px; }
+      .pl-cols { gap: 2px; padding: 0 2px; }
+      .pl-col { min-width: 0; }
+      .pl-bar { border-width: 1px; box-shadow: none; }
+      .pl-seg { min-height: 2px; border-top-width: 1px; }
+      .pl-lbl {
+        writing-mode: vertical-rl;
+        transform: translateX(-50%) rotate(180deg);
+        margin-bottom: 3px;
+        font-size: .5rem;
+      }
+      .pl-col--minor .pl-mon { visibility: hidden; }
+    }
 
     /* ── STATS ──────────────────────────────────────────────────────────────── */
     .stats {
@@ -1817,6 +1839,10 @@
         align-items: flex-end;
       }
 
+      .tb-settings {
+        display: inline-flex;
+      }
+
       .taskbar-fab-spacer {
         flex: none;
         width: 60px;
@@ -1924,6 +1950,7 @@
     <span class="logo" id="tb-logo"></span>
     <span style="flex:1"></span>
     <button class="tb-theme" id="tb-theme" onclick="toggleTheme()"></button>
+    <button class="tb-theme tb-settings" id="tb-settings" onclick="switchTab('settings')" aria-label="Settings"></button>
     <span class="tb-clock" id="tb-clock"></span>
     <span class="win-btns" id="tb-btns"></span>
   </div>
@@ -2469,7 +2496,7 @@
     <div class="rail-foot">
       <div>HKD</div><div>MONTHLY</div>
     </div>`;
-      const taskbarItems = TABS.map(t => `
+      const taskbarItems = TABS.filter(t => t.id !== 'settings').map(t => `
     <div class="rail-item ${t.id === activeTab ? 'active' : ''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">
       ${ic(t.icon, 18)}<span>${t.label}</span>
     </div>`);
@@ -2477,6 +2504,9 @@
       const spacer = `<div class="taskbar-fab-spacer"></div>`;
       const fab = `<button class="taskbar-fab" onclick="openExpenseModal()" aria-label="Add expense">${ic('plus', 20)}</button>`;
       document.getElementById('taskbar').innerHTML = taskbarItems.slice(0, mid).join('') + spacer + taskbarItems.slice(mid).join('') + fab;
+      const tbSettings = document.getElementById('tb-settings');
+      tbSettings.innerHTML = ic('monitor', 14);
+      tbSettings.classList.toggle('active', activeTab === 'settings');
     }
     function switchTab(tab) {
       activeTab = tab;
@@ -2770,7 +2800,7 @@
           return `<i class="pl-seg ${on ? '' : 'pl-seg--off'}" style="height:${(c.total / tot) * 100}%;${on ? `background:${vendorColor(id)}` : ''}" title="${escHtml(vendors[id].name)} · ${monShort} ${d} · ${fmtHKDWhole(c.total)} · ${c.count} visit${c.count === 1 ? '' : 's'}" onclick="togglePlacesVendor('${id}')"></i>`;
         }).join('');
         const shown = filtering ? selTotalOf(d) : tot;
-        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''}">
+        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''} ${d !== 1 && d % 5 ? 'pl-col--minor' : ''}">
       <div class="pl-track">
         <div class="pl-bar" style="height:${(tot / max) * 100}%">
           ${shown > 0 ? `<span class="pl-lbl">${Math.round(shown)}</span>` : ''}
@@ -2783,7 +2813,7 @@
       return `<div class="pl-chart">
     <div class="pl-y">${ticks.map((t, i) => `<span style="bottom:${i * 25}%">${Math.round(t)}</span>`).join('')}</div>
     <div class="pl-plot">
-      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:${i * 25}%"></div>`).join('')}
+      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:calc(30px + var(--pl-h) * ${i / 4})"></div>`).join('')}
       <div class="pl-cols">${cols}</div>
     </div>
   </div>`;
@@ -2887,7 +2917,7 @@
         const over = foodChartCoffeeOnly ? shown > COFFEE_DAILY_LIMIT : total > DAILY_FOOD_QUOTA;
         const seg = shown > 0
           ? `<i class="pl-seg" style="height:100%;background:var(${over ? '--accent' : '--event'})" title="${monShort} ${d} · ${fmtHKDWhole(shown)}${foodChartCoffeeOnly ? ' coffee' : ''} · day total ${fmtHKDWhole(total)}"></i>` : '';
-        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''}">
+        return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''} ${d !== 1 && d % 5 ? 'pl-col--minor' : ''}">
       <div class="pl-track">
         <div class="pl-bar" style="height:${(shown / max) * 100}%">
           ${shown > 0 ? `<span class="pl-lbl">${Math.round(shown)}</span>` : ''}
@@ -2899,11 +2929,11 @@
       }).join('');
       const monthTotal = round2(days.reduce((s, x) => s + x.shown, 0));
       const quotaLine = DAILY_FOOD_QUOTA <= max
-        ? `<div class="pl-quota" style="bottom:${(DAILY_FOOD_QUOTA / max) * 100}%"><span>${DAILY_FOOD_QUOTA}</span></div>` : '';
+        ? `<div class="pl-quota" style="bottom:calc(30px + var(--pl-h) * ${DAILY_FOOD_QUOTA / max})"><span>${DAILY_FOOD_QUOTA}</span></div>` : '';
       return { monthTotal, html: `<div class="pl-chart">
     <div class="pl-y">${ticks.map((t, i) => `<span style="bottom:${i * 25}%">${Math.round(t)}</span>`).join('')}</div>
     <div class="pl-plot">
-      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:${i * 25}%"></div>`).join('')}
+      ${ticks.map((t, i) => `<div class="pl-grid" style="bottom:calc(30px + var(--pl-h) * ${i / 4})"></div>`).join('')}
       <div class="pl-cols">${cols}</div>
       ${quotaLine}
     </div>
