@@ -1755,6 +1755,9 @@
     <section class="view" id="view-food">
       <div id="food-content"></div>
     </section>
+    <section class="view" id="view-places">
+      <div id="places-content"></div>
+    </section>
     <section class="view" id="view-log">
       <div id="log-content"></div>
     </section>
@@ -1785,6 +1788,8 @@
         <label class="f-label" id="expense-coffee-row" style="display:none; align-items:center; gap:8px">
           <input type="checkbox" id="expense-coffee"> Coffee
         </label>
+        <label class="f-label">Vendor (optional)</label>
+        <select id="expense-vendor" class="f-input"></select>
         <label class="f-label">Date</label>
         <input type="date" id="expense-date" class="f-input">
         <label class="f-label">Note (optional)</label>
@@ -1839,6 +1844,7 @@
     const categoriesRef = ref(db, 'budget/categories');
     const categoryBalancesRef = ref(db, 'budget/categoryBalances');
     const expensesRef = ref(db, 'budget/expenses');
+    const vendorsRef = ref(db, 'budget/vendors');
 
     /* ═══ PIXEL ICON SET ═══════════════════════════════════════════════════════
        16×16 grid, integer coords, crispEdges → chunky retro glyphs.           */
@@ -1982,7 +1988,9 @@
     }
 
     /* ═══ STATE ═══════════════════════════════════════════════════════════════ */
-    let categories = {}, categoryBalances = {}, expenses = {};
+    let categories = {}, categoryBalances = {}, expenses = {}, vendors = {};
+    let vendorOrderIds = [];
+    let placesVendorFilter = null;
     let categoryOrderIds = [];
     let activeTab = 'dashboard';
     let categoriesSeeded = false;
@@ -2002,6 +2010,7 @@
       { id: 'dashboard', label: 'Dashboard', icon: 'desktop' },
       { id: 'expenses', label: 'Expenses', icon: 'file' },
       { id: 'food', label: 'Food', icon: 'cup' },
+      { id: 'places', label: 'Places', icon: 'grid' },
       { id: 'log', label: 'Daily Log', icon: 'floppy' },
       { id: 'reports', label: 'Reports', icon: 'chart' },
       { id: 'settings', label: 'Settings', icon: 'monitor' },
@@ -2150,7 +2159,7 @@
         <span class="erow-cat">${escHtml(name)}${e.tag === 'coffee' ? ` ${ic('cup', 10)}` : ''}</span>
         <span class="erow-amt">${fmtHKD(e.amount)}</span>
       </div>
-      <div class="erow-meta"><span>${ic('calendar', 10)} ${escHtml(fmtDateShort(e.date))}</span></div>
+      <div class="erow-meta"><span>${ic('calendar', 10)} ${escHtml(fmtDateShort(e.date))}</span>${e.vendorId && vendors[e.vendorId] ? `<span>${ic('tag', 10)} ${escHtml(vendors[e.vendorId].name)}</span>` : ''}</div>
       ${e.note ? `<div class="erow-note">${linkifyHtml(e.note)}</div>` : ''}
     </div>
     ${opts.compact ? '' : `<div class="eacts">
@@ -2237,6 +2246,11 @@
       maybeRunSweep();
       renderTab(activeTab);
     });
+    onValue(vendorsRef, snap => {
+      vendors = snap.val() || {};
+      vendorOrderIds = Object.keys(vendors).sort((a, b) => (vendors[a].order || 0) - (vendors[b].order || 0));
+      renderTab(activeTab);
+    });
     onValue(expensesRef, snap => {
       expenses = snap.val() || {};
       renderTab(activeTab);
@@ -2276,6 +2290,7 @@
       if (tab === 'dashboard') renderDashboard();
       else if (tab === 'expenses') renderExpenses();
       else if (tab === 'food') renderFood();
+      else if (tab === 'places') renderPlaces();
       else if (tab === 'log') renderLog();
       else if (tab === 'reports') renderReports();
       else if (tab === 'settings') renderSettings();
@@ -2462,6 +2477,9 @@
       document.getElementById('expense-amount').value = e ? e.amount : '';
       populateCategorySelects();
       document.getElementById('expense-category').value = e ? e.categoryId : (categoryOrderIds[0] || '');
+      document.getElementById('expense-vendor').innerHTML = '<option value="">None</option>' +
+        vendorOrderIds.map(vid => `<option value="${vid}">${escHtml(vendors[vid].name)}</option>`).join('');
+      document.getElementById('expense-vendor').value = e && e.vendorId && vendors[e.vendorId] ? e.vendorId : '';
       document.getElementById('expense-date').value = e ? e.date : todayISO();
       document.getElementById('expense-note').value = e ? (e.note || '') : '';
       toggleExpenseCoffeeVisibility();
@@ -2474,14 +2492,59 @@
       const date = document.getElementById('expense-date').value || todayISO();
       const note = document.getElementById('expense-note').value.trim() || null;
       const tag = (categoryId === foodCategoryId() && document.getElementById('expense-coffee').checked) ? 'coffee' : null;
+      const vendorId = document.getElementById('expense-vendor').value || null;
       if (!amount || amount <= 0 || !categoryId) return;
       const existing = editingExpenseId ? expenses[editingExpenseId] : null;
-      const data = { categoryId, amount, date, note, tag, createdAt: existing ? (existing.createdAt || Date.now()) : Date.now() };
+      const data = { categoryId, amount, date, note, tag, vendorId, createdAt: existing ? (existing.createdAt || Date.now()) : Date.now() };
       if (editingExpenseId) update(ref(db, 'budget/expenses/' + editingExpenseId), data);
       else push(expensesRef, data);
       closeModal('expense-modal');
     }
     function deleteExpense(id) { if (confirm('Delete this expense?')) remove(ref(db, 'budget/expenses/' + id)); }
+
+    /* ═══ PLACES ══════════════════════════════════════════════════════════════ */
+    function vendorStats(id) {
+      const list = Object.entries(expenses || {})
+        .filter(([, e]) => e.vendorId === id)
+        .map(([eid, e]) => ({ id: eid, ...e }))
+        .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+      const total = round2(list.reduce((s, e) => s + (Number(e.amount) || 0), 0));
+      return { list, total, count: list.length, avg: list.length ? total / list.length : 0, last: list.length ? list[0].date : null };
+    }
+    function setPlacesVendor(id) { placesVendorFilter = placesVendorFilter === id ? null : id; renderPlaces(); }
+    function renderPlaces() {
+      const el = document.getElementById('places-content');
+      const stats = {};
+      vendorOrderIds.forEach(id => { stats[id] = vendorStats(id); });
+      const shown = placesVendorFilter && stats[placesVendorFilter] ? [placesVendorFilter] : vendorOrderIds;
+      const rows = shown.flatMap(id => stats[id].list).sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+      const total = round2(rows.reduce((s, e) => s + (Number(e.amount) || 0), 0));
+      const byMonth = {};
+      rows.forEach(e => { const k = e.date.slice(0, 7); byMonth[k] = round2((byMonth[k] || 0) + (Number(e.amount) || 0)); });
+      const monthsHtml = Object.keys(byMonth).sort().reverse().map(k => {
+        const [y, m] = k.split('-').map(Number);
+        const label = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        return `<div class="erow"><div class="erow-body"><div class="erow-top"><span class="erow-cat">${escHtml(label)}</span><span class="erow-amt">${fmtHKD(byMonth[k])}</span></div></div></div>`;
+      }).join('');
+      el.innerHTML = `
+    ${viewHead('Frequent spots', 'PLACES')}
+    ${vendorOrderIds.length ? `
+    <div class="stats">
+      ${vendorOrderIds.map(id => {
+        const st = stats[id];
+        const on = placesVendorFilter === id;
+        return `<div class="stat ${on ? 'stat--accent' : ''}" style="cursor:pointer" onclick="setPlacesVendor('${id}')">
+      <div class="stat-k">${ic('tag', 12)} ${escHtml(vendors[id].name)}</div>
+      <div class="stat-v">${fmtHKD(st.total)}</div>
+      <div class="note-scribble" style="margin-top:6px">${st.count} visit${st.count === 1 ? '' : 's'}${st.count ? ` · avg ${fmtHKD(st.avg)} · last ${escHtml(fmtDateShort(st.last))}` : ''}</div>
+    </div>`;
+      }).join('')}
+    </div>
+    ${win(`${ic('calendar', 13)} BY.MONTH`, monthsHtml || emptyState('calendar', 'No visits tagged yet.'), { hint: placesVendorFilter && vendors[placesVendorFilter] ? escHtml(vendors[placesVendorFilter].name).toUpperCase() : 'ALL PLACES' })}
+    ${win(`${ic('file', 13)} VISITS.LOG`, rows.length ? rows.map(e => expenseRowHtml(e.id, e)).join('') : emptyState('file', 'No visits tagged yet.'), { hint: `${rows.length} VISIT${rows.length === 1 ? '' : 'S'} · ${fmtHKD(total)}` })}
+    ` : emptyState('tag', 'No places set up.')}
+  `;
+    }
 
     /* ═══ FOOD ════════════════════════════════════════════════════════════════ */
     function foodWeekDayColHtml(iso, isToday, foodId) {
