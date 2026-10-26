@@ -2262,6 +2262,17 @@
       const trackFrom = trackFromMonth ? `${trackFromMonth.getFullYear()}-${pad2(trackFromMonth.getMonth() + 1)}-01` : null;
       return round2(allocated - sumExpenses(id, trackFrom, todayISO())); // future-dated (prepaid) entries only count once their date arrives
     }
+    // Total "Remaining" shown on the dashboard and reports: leaves out the Overflow fund
+    // and HKD 1,000 of the Savings balance.
+    const SAVINGS_RESERVE = 1000;
+    function totalRemainingAdjusted() {
+      return categoryOrderIds.reduce((s, id) => {
+        const cat = categories[id];
+        if (cat.isFund) return s;
+        const r = remainingForCategory(id);
+        return s + (cat.keepsRollover ? r - Math.min(SAVINGS_RESERVE, Math.max(r, 0)) : r);
+      }, 0);
+    }
     // Balance available in the fund during month (y, m): everything swept in at the
     // start of that month (leftovers of all earlier months), less what the fund itself
     // already spent. Future months show 0 until they begin.
@@ -2496,7 +2507,7 @@
       const { from: monthFrom, to: monthTo } = monthRangeIso(y, m);
       const totalMonthly = categoryOrderIds.reduce((s, id) => s + (categories[id].monthlyAmount || 0), 0);
       const spentThisMonth = sumExpenses(null, monthFrom, monthTo);
-      const totalRemaining = categoryOrderIds.reduce((s, id) => s + remainingForCategory(id), 0);
+      const totalRemaining = totalRemainingAdjusted();
       const daysLeft = daysInMonth(y, m) - d.getDate() + 1;
       let topCat = null, topSpent = 0;
       categoryOrderIds.forEach(id => {
@@ -2518,7 +2529,6 @@
     <div class="stat ${totalRemaining < 0 ? 'stat--danger' : 'stat--good'}">
       <div class="stat-k">${ic('coin', 12)} Remaining</div>
       <div class="stat-v">${fmtHKD(Math.round(totalRemaining))}</div>
-      <div class="note-scribble" style="margin-top:6px">across all categories</div>
     </div>
     <div class="stat">
       <div class="stat-k">${ic('clock', 12)} Days left</div>
@@ -3232,7 +3242,7 @@
       const thisWeekTotal = sumExpenses(filterId, thisWeek[0], thisWeek[6]);
       const lastWeekTotal = sumExpenses(filterId, lastWeek[0], lastWeek[6]);
       const delta = lastWeekTotal > 0 ? Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100) : (thisWeekTotal > 0 ? 100 : 0);
-      const balanceRemaining = filterId ? remainingForCategory(filterId) : categoryOrderIds.reduce((s, id) => s + remainingForCategory(id), 0);
+      const balanceRemaining = filterId ? remainingForCategory(filterId) : totalRemainingAdjusted();
       const spentThisMonth = sumExpenses(filterId, from, to);
       const cells = buildCalendarCells(y, m);
       const weekdayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
