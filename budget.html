@@ -2061,7 +2061,7 @@
       // logged retroactively before the tracker existed) must not be drawn against it.
       const trackFromMonth = cat && cat.createdAt ? new Date(cat.createdAt) : null;
       const trackFrom = trackFromMonth ? `${trackFromMonth.getFullYear()}-${pad2(trackFromMonth.getMonth() + 1)}-01` : null;
-      return round2(allocated - sumExpenses(id, trackFrom));
+      return round2(allocated - sumExpenses(id, trackFrom, todayISO())); // future-dated (prepaid) entries only count once their date arrives
     }
     // Balance available in the fund during month (y, m): everything swept in at the
     // start of that month (leftovers of all earlier months), less what the fund itself
