@@ -2854,9 +2854,10 @@
       foodCalendarMonth = { y, m };
       renderFood();
     }
+    const COFFEE_DAILY_LIMIT = 45;
     function setFoodChartCoffeeOnly(on) { foodChartCoffeeOnly = !!on; renderFood(); }
-    // Daily food spend for the browsed month. Bars are coloured by whether the whole
-    // day's food spend was over the daily quota; "coffee only" changes the heights only.
+    // Daily food spend for the browsed month. Bars are coloured by whether the day's food
+    // spend is over the daily quota; in coffee-only mode by whether coffee is over COFFEE_DAILY_LIMIT.
     function foodDayChartHtml(y, m, foodId) {
       const n = daysInMonth(y, m);
       const iso = d => `${y}-${pad2(m + 1)}-${pad2(d)}`;
@@ -2872,7 +2873,7 @@
       const today = todayISO();
       const monShort = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
       const cols = days.map(({ d, total, shown }) => {
-        const over = total > DAILY_FOOD_QUOTA;
+        const over = foodChartCoffeeOnly ? shown > COFFEE_DAILY_LIMIT : total > DAILY_FOOD_QUOTA;
         const seg = shown > 0
           ? `<i class="pl-seg" style="height:100%;background:var(${over ? '--accent' : '--event'})" title="${monShort} ${d} · ${fmtHKDWhole(shown)}${foodChartCoffeeOnly ? ' coffee' : ''} · day total ${fmtHKDWhole(total)}"></i>` : '';
         return `<div class="pl-col ${iso(d) === today ? 'pl-col--today' : ''}">
@@ -3000,7 +3001,7 @@
         <span class="chip ${!foodChartCoffeeOnly ? 'on' : ''}" onclick="setFoodChartCoffeeOnly(false)">${ic('cup', 11)} All food</span>
         <span class="chip ${foodChartCoffeeOnly ? 'on' : ''}" onclick="setFoodChartCoffeeOnly(true)">${ic('cup', 11)} Coffee only</span>
       </div>`;
-      return win(`${ic('chart', 13)} SPEND.BY.DAY`, chips + chart.html + (foodChartCoffeeOnly ? `<div class="note-scribble pl-tip">Bar height is coffee only. Colour still shows whether the whole day's food spend was over ${fmtHKD(DAILY_FOOD_QUOTA)}.</div>` : ''),
+      return win(`${ic('chart', 13)} SPEND.BY.DAY`, chips + chart.html + (foodChartCoffeeOnly ? `<div class="note-scribble pl-tip">Coffee only: yellow is ${fmtHKD(COFFEE_DAILY_LIMIT)} or under, green is over.</div>` : ''),
         { hint: `${foodChartCoffeeOnly ? 'COFFEE' : 'ALL FOOD'} · ${fmtHKDWhole(chart.monthTotal)}` });
     })()}
 
