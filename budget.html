@@ -1398,6 +1398,37 @@
       padding: 0 18px 18px;
     }
 
+    /* ── REVIEW (bank alerts waiting to become expenses) ────────────────────── */
+    .tb-review { background: var(--event); color: var(--chip-fg); }
+    .tb-review[hidden] { display: none; }
+    .dialog--wide { max-width: 560px; }
+    .rv-card {
+      border: 2px solid var(--ink);
+      background: var(--panel-2);
+      box-shadow: var(--sh-sm);
+      padding: 14px 14px 4px;
+      margin-bottom: 16px;
+    }
+    .rv-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+    .rv-payee { text-transform: uppercase; letter-spacing: 1px; overflow-wrap: anywhere; }
+    .rv-inr { flex: none; color: var(--ink-soft); }
+    .rv-meta { color: var(--ink-soft); margin-bottom: 10px; }
+    .rv-match { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; color: var(--accent); }
+    .rv-match--new { color: var(--ink-soft); }
+    .rv-amt { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+    .rv-amt .f-input { margin-bottom: 0; text-align: center; max-width: 120px; }
+    .rv-amt .ibtn { width: 38px; height: 38px; font-size: 1.2rem; flex: none; }
+    .rv-amt small { color: var(--ink-soft); }
+    .rv-card textarea.f-input { min-height: 54px; }
+    .rv-check { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .rv-alert { color: var(--ink-soft); margin-bottom: 12px; }
+    .rv-alert summary { cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+    .rv-alert p { margin-top: 6px; overflow-wrap: anywhere; }
+    .rv-actions { display: flex; gap: 9px; margin-bottom: 10px; }
+    .rv-rate { width: 90px; margin-bottom: 0; flex: none; }
+    .rv-actions .btn:disabled { opacity: .45; cursor: not-allowed; }
+    @media (max-width:760px) { .tb-review-label { display: none; } }
+
     .taskbar {
       display: none;
     }
@@ -1949,6 +1980,7 @@
   <div class="titlebar">
     <span class="logo" id="tb-logo"></span>
     <span style="flex:1"></span>
+    <button class="tb-theme tb-review" id="tb-review" onclick="openReview()" hidden></button>
     <button class="tb-theme" id="tb-theme" onclick="toggleTheme()"></button>
     <button class="tb-theme tb-settings" id="tb-settings" onclick="switchTab('settings')" aria-label="Settings"></button>
     <span class="tb-clock" id="tb-clock"></span>
@@ -2040,6 +2072,21 @@
     </div>
   </div>
 
+  <div id="review-modal" class="backdrop" hidden>
+    <div class="dialog dialog--wide">
+      <div class="win-bar" style="background:var(--event)">
+        <span class="win-title" id="review-modal-title">REVIEW PAYMENTS</span>
+        <span class="spacer"></span>
+        <span class="win-btns" data-close="review-modal"></span>
+      </div>
+      <div class="win-body" id="review-list"></div>
+      <div class="dialog-foot">
+        <button class="btn btn--accent" id="review-add-all" onclick="addAllReviews()">Add all ready</button>
+        <button class="btn btn--ghost" onclick="closeModal('review-modal')">Later</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getDatabase, ref, push, update, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
@@ -2060,6 +2107,9 @@
     const categoryBalancesRef = ref(db, 'budget/categoryBalances');
     const expensesRef = ref(db, 'budget/expenses');
     const vendorsRef = ref(db, 'budget/vendors');
+    const pendingRef = ref(db, 'budget/pending');          // payments read from Axis alerts, waiting for review
+    const settingsRef = ref(db, 'budget/settings');
+    const axisSyncRef = ref(db, 'budget/meta/axisSync');
 
     /* ═══ PIXEL ICON SET ═══════════════════════════════════════════════════════
        16×16 grid, integer coords, crispEdges → chunky retro glyphs.           */
@@ -2113,6 +2163,7 @@
     const DAILY_FOOD_QUOTA = 160;
     const WEEKLY_FOOD_QUOTA = 1250;
     const CURRENCY = 'HKD';
+    const DEFAULT_INR_PER_HKD = 12.5;   // used until a rate is saved in Settings
     const PALETTE = ['#7FA8AE', '#33474D', '#45A17F', '#CBD0C6', '#C7DDE0', '#D9A16B'];
     const DEFAULT_CATEGORIES = [
       { name: 'Food', monthlyAmount: 5000, isFood: true },
@@ -2204,6 +2255,8 @@
 
     /* ═══ STATE ═══════════════════════════════════════════════════════════════ */
     let categories = {}, categoryBalances = {}, expenses = {}, vendors = {};
+    let pending = {}, settings = {}, axisSync = null;
+    let vendorsLoaded = false, expensesLoaded = false, pendingLoaded = false;
     let vendorOrderIds = [];
     const placesSelected = new Set();
     let categoryOrderIds = [];
@@ -2467,6 +2520,7 @@
       renderNav();
       renderTab(activeTab);
       renderStatusbar();
+      refreshReview();
     });
     onValue(categoryBalancesRef, snap => {
       categoryBalances = snap.val() || {};
@@ -2477,12 +2531,31 @@
     onValue(vendorsRef, snap => {
       vendors = snap.val() || {};
       vendorOrderIds = Object.keys(vendors).sort((a, b) => (vendors[a].order || 0) - (vendors[b].order || 0));
+      vendorsLoaded = true;
       renderTab(activeTab);
+      refreshReview();
     });
     onValue(expensesRef, snap => {
       expenses = snap.val() || {};
+      expensesLoaded = true;
       renderTab(activeTab);
       renderStatusbar();
+      refreshReview();
+    });
+    onValue(pendingRef, snap => {
+      pending = snap.val() || {};
+      pendingLoaded = true;
+      refreshReview();
+      if (activeTab === 'settings') renderSettings();
+    });
+    onValue(settingsRef, snap => {
+      settings = snap.val() || {};
+      refreshReview(true);
+      if (activeTab === 'settings') renderSettings();
+    });
+    onValue(axisSyncRef, snap => {
+      axisSync = snap.val();
+      if (activeTab === 'settings') renderSettings();
     });
 
     /* ═══ NAV ═════════════════════════════════════════════════════════════════ */
@@ -2732,6 +2805,193 @@
       closeModal('expense-modal');
     }
     function deleteExpense(id) { if (confirm('Delete this expense?')) remove(ref(db, 'budget/expenses/' + id)); }
+
+    /* ═══ REVIEW: payments read from Axis Bank alerts ═══════════════════════════ */
+    // budget-scripts/axis-alerts.gs adds each new alert to budget/pending as
+    // { inr, payee, channel, date, time, excerpt, unsure, status: 'new', createdAt }.
+    // Nothing counts until it's added here. Added and deleted ones keep their status,
+    // so the script never queues them again.
+    const reviewDrafts = {};        // id -> your edits to that payment, kept while the pop-up re-renders
+    const reviewSeen = new Set();   // ids already shown, so the pop-up opens by itself only for new ones
+    let reviewShownIds = '';
+    function inrPerHkd() { const r = Number(settings.inrPerHkd); return r > 0 ? r : DEFAULT_INR_PER_HKD; }
+    function fmtINR(n) { return '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
+    function pendingIds() {
+      return Object.keys(pending).filter(id => pending[id].status === 'new')
+        .sort((a, b) => (pending[a].createdAt || 0) - (pending[b].createdAt || 0));
+    }
+    function payeeKey(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+    // the place whose name, or a payee name remembered for it, appears in the alert's payee; the longest match wins
+    function matchVendor(payee) {
+      const key = payeeKey(payee);
+      if (!key) return null;
+      let best = null, bestLen = 0;
+      vendorOrderIds.forEach(id => {
+        [vendors[id].name, ...Object.keys(vendors[id].aliases || {})].map(payeeKey).forEach(k => {
+          const hit = key.includes(k) || (key.length >= 5 && k.includes(key));   // bank alerts often cut names short
+          if (k.length >= 3 && k.length > bestLen && hit) { best = id; bestLen = k.length; }
+        });
+      });
+      return best;
+    }
+    // what you usually log at a place: its most used category, and coffee if most Food visits there were
+    function vendorHabits(vendorId) {
+      const counts = {}, foodId = foodCategoryId();
+      let visits = 0, food = 0, coffee = 0;
+      Object.values(expenses).forEach(e => {
+        if (e.vendorId !== vendorId) return;
+        visits++;
+        counts[e.categoryId] = (counts[e.categoryId] || 0) + 1;
+        if (e.categoryId === foodId) { food++; if (e.tag === 'coffee') coffee++; }
+      });
+      const categoryId = Object.keys(counts).filter(id => categories[id] && !categories[id].archived)
+        .sort((a, b) => counts[b] - counts[a])[0] || '';
+      return { visits, categoryId, coffee: !!foodId && categoryId === foodId && coffee * 2 > food };
+    }
+    function reviewDraft(id) {
+      if (reviewDrafts[id]) return reviewDrafts[id];
+      const matched = matchVendor(pending[id].payee);
+      const habits = matched ? vendorHabits(matched) : { visits: 0, categoryId: '', coffee: false };
+      return reviewDrafts[id] = {
+        amount: null,   // null: converted from rupees at the current rate
+        categoryId: habits.categoryId, vendorId: matched || '', note: '', coffee: habits.coffee, remember: true,
+        matched, visits: habits.visits, usualCategoryId: habits.categoryId,
+      };
+    }
+    function reviewAmount(id) {
+      const d = reviewDraft(id);
+      return d.amount != null ? d.amount : Math.round((Number(pending[id].inr) || 0) / inrPerHkd());
+    }
+    function reviewCardHtml(id) {
+      const p = pending[id], d = reviewDraft(id);
+      const foodId = foodCategoryId();
+      const usual = d.usualCategoryId && categories[d.usualCategoryId] ? ` · usually ${escHtml(categories[d.usualCategoryId].name)}` : '';
+      const match = d.matched && vendors[d.matched]
+        ? `<div class="rv-match">${ic('check', 11)} Matched to ${escHtml(vendors[d.matched].name)} · ${d.visits} visit${d.visits === 1 ? '' : 's'}${usual}</div>`
+        : `<div class="rv-match rv-match--new">${ic('pin', 11)} New place</div>`;
+      const remember = p.payee && d.vendorId && d.vendorId !== d.matched && vendors[d.vendorId]
+        ? `<label class="rv-check"><input type="checkbox" ${d.remember ? 'checked' : ''} onchange="editReview('${id}', 'remember', this.checked)"> Match “${escHtml(p.payee)}” to ${escHtml(vendors[d.vendorId].name)} next time</label>` : '';
+      return `<div class="rv-card" data-id="${id}">
+      <div class="rv-head"><span class="rv-payee">${escHtml(p.payee || 'Unknown payee')}</span><span class="rv-inr">${fmtINR(p.inr)}</span></div>
+      <div class="rv-meta">${escHtml(fmtDateLong(p.date))}${p.time ? ' · ' + escHtml(p.time) : ''}${p.channel ? ' · ' + escHtml(p.channel) : ''}${p.unsure ? ' · check this was a payment' : ''}</div>
+      ${match}
+      <label class="f-label">Amount (HKD)</label>
+      <div class="rv-amt">
+        <button class="ibtn" type="button" onclick="nudgeReview('${id}', -0.5)" aria-label="0.5 HKD less">−</button>
+        <input type="number" class="f-input" id="rv-amt-${id}" min="0" step="0.5" inputmode="decimal" value="${reviewAmount(id)}" oninput="editReview('${id}', 'amount', this.value)" aria-label="Amount in HKD">
+        <button class="ibtn" type="button" onclick="nudgeReview('${id}', 0.5)" aria-label="0.5 HKD more">+</button>
+        <small>${fmtINR(p.inr)} ÷ ${inrPerHkd()}</small>
+      </div>
+      <label class="f-label">Category</label>
+      <select class="f-input" onchange="editReview('${id}', 'categoryId', this.value)">
+        <option value="">Pick a category</option>
+        ${categoryOrderIds.map(cid => `<option value="${cid}" ${cid === d.categoryId ? 'selected' : ''}>${escHtml(categories[cid].name)}</option>`).join('')}
+      </select>
+      ${foodId && d.categoryId === foodId ? `<label class="rv-check"><input type="checkbox" ${d.coffee ? 'checked' : ''} onchange="editReview('${id}', 'coffee', this.checked)"> Coffee</label>` : ''}
+      <label class="f-label">Place (optional)</label>
+      <select class="f-input" onchange="editReview('${id}', 'vendorId', this.value)">
+        <option value="">None</option>
+        ${vendorOrderIds.map(vid => `<option value="${vid}" ${vid === d.vendorId ? 'selected' : ''}>${escHtml(vendors[vid].name)}</option>`).join('')}
+      </select>
+      ${remember}
+      <label class="f-label">Note (optional)</label>
+      <textarea class="f-input" placeholder="What was it for?" oninput="editReview('${id}', 'note', this.value)">${escHtml(d.note)}</textarea>
+      ${p.excerpt ? `<details class="rv-alert"><summary>Bank alert</summary><p>${escHtml(p.excerpt)}</p></details>` : ''}
+      <div class="rv-actions">
+        <button class="btn btn--accent" onclick="addReview('${id}')" ${d.categoryId ? '' : 'disabled title="Pick a category first"'}>${ic('check', 12)} Add</button>
+        <button class="btn btn--ghost" onclick="dismissReview('${id}')">${ic('trash', 12)} Delete</button>
+      </div>
+    </div>`;
+    }
+    function renderReviewList() {
+      const ids = pendingIds();
+      reviewShownIds = ids.join();
+      ids.forEach(id => reviewSeen.add(id));
+      document.getElementById('review-modal-title').textContent = `REVIEW PAYMENTS · ${ids.length}`;
+      document.getElementById('review-list').innerHTML = ids.map(reviewCardHtml).join('');
+      document.getElementById('review-add-all').hidden = ids.length < 2;
+    }
+    function rerenderReviewCard(id) {
+      const card = document.querySelector(`.rv-card[data-id="${id}"]`);
+      if (card) card.outerHTML = reviewCardHtml(id);
+    }
+    function renderReviewBadge() {
+      const n = pendingIds().length;
+      const btn = document.getElementById('tb-review');
+      btn.hidden = n === 0;
+      btn.innerHTML = `${ic('alert', 12)} ${n}<span class="tb-review-label"> to review</span>`;
+      btn.setAttribute('aria-label', `${n} payment${n === 1 ? '' : 's'} to review`);
+    }
+    // keeps the badge and an open pop-up current, and opens the pop-up when a new payment arrives
+    function refreshReview(force) {
+      if (!pendingLoaded) return;
+      renderReviewBadge();
+      const ready = categoriesLoaded && vendorsLoaded && expensesLoaded;
+      const ids = pendingIds();
+      const modal = document.getElementById('review-modal');
+      if (!modal.hidden) {
+        if (!ids.length) { closeModal('review-modal'); return; }
+        if (force || ids.join() !== reviewShownIds) renderReviewList();
+        return;
+      }
+      const busy = [...document.querySelectorAll('.backdrop')].some(m => !m.hidden);
+      if (ready && !busy && ids.some(id => !reviewSeen.has(id))) openReview();
+    }
+    function openReview() {
+      if (!pendingIds().length) return;
+      renderReviewList();
+      document.getElementById('review-modal').hidden = false;
+    }
+    function editReview(id, field, value) {
+      const d = reviewDraft(id);
+      if (field === 'amount') { d.amount = value === '' ? null : Math.max(0, round2(parseFloat(value) || 0)); return; }
+      d[field] = value;
+      if (field === 'vendorId' && value && !d.categoryId) {
+        // picked a place by hand: fill in what you usually log there
+        const habits = vendorHabits(value);
+        d.categoryId = habits.categoryId;
+        d.coffee = habits.coffee;
+      }
+      if (field === 'categoryId' || field === 'vendorId') rerenderReviewCard(id);
+    }
+    function nudgeReview(id, delta) {
+      const d = reviewDraft(id);
+      d.amount = Math.max(0, Math.round((reviewAmount(id) + delta) * 2) / 2);
+      const input = document.getElementById('rv-amt-' + id);
+      if (input) input.value = d.amount;
+    }
+    function addReview(id) {
+      const p = pending[id], d = reviewDraft(id);
+      const amount = reviewAmount(id);
+      if (!p || !d.categoryId || !(amount > 0)) return;
+      const tag = d.categoryId === foodCategoryId() && d.coffee ? 'coffee' : null;
+      const expense = push(expensesRef, {
+        categoryId: d.categoryId, amount, date: p.date, note: d.note.trim() || null, tag, vendorId: d.vendorId || null,
+        createdAt: p.createdAt || Date.now(), source: 'axis', sourceId: id,
+      });
+      update(ref(db, 'budget/pending/' + id), { status: 'added', expenseId: expense.key, reviewedAt: Date.now() });
+      const key = payeeKey(p.payee);
+      if (key && d.vendorId && d.vendorId !== d.matched && d.remember) update(ref(db, `budget/vendors/${d.vendorId}/aliases`), { [key]: p.payee });
+      delete reviewDrafts[id];
+    }
+    function dismissReview(id) {
+      update(ref(db, 'budget/pending/' + id), { status: 'dismissed', reviewedAt: Date.now() });
+      delete reviewDrafts[id];
+    }
+    function addAllReviews() {
+      pendingIds().filter(id => reviewDraft(id).categoryId && reviewAmount(id) > 0).forEach(addReview);
+    }
+    function saveInrRate(value) {
+      const rate = round2(parseFloat(value));
+      if (rate > 0) update(settingsRef, { inrPerHkd: rate });
+    }
+    function timeAgo(ms) {
+      const mins = Math.round((Date.now() - ms) / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins} min ago`;
+      const hours = Math.round(mins / 60);
+      return hours < 24 ? `${hours} h ago` : fmtDateShort(fmtISO(new Date(ms)));
+    }
 
     /* ═══ PLACES ══════════════════════════════════════════════════════════════ */
     const VENDOR_FALLBACK_COLORS = ['#E0A33C', '#7FA8AE', '#C8604F', '#8C79B8', '#45A17F', '#4C6A9A', '#B58863', '#D77FA1'];
@@ -3366,6 +3626,15 @@
       <div class="hrow">
         <div><div class="hname">${ic('coin', 12)} Currency</div><div class="hrange">Hong Kong Dollar (HKD)</div></div>
       </div>`)}
+    ${win(`${ic('clock', 13)} BANK.CFG`, `
+      <div class="hrow">
+        <div><div class="hname">${ic('clock', 12)} Axis Bank alerts</div><div class="hrange">${axisSync && axisSync.lastSync ? `Checked Gmail ${timeAgo(axisSync.lastSync)}${axisSync.caughtUp === false ? ', still catching up' : ''}` : 'Not connected yet: see budget-scripts/README.md'} · ${pendingIds().length} to review</div></div>
+        ${pendingIds().length ? `<button class="btn btn--ghost" onclick="openReview()">Review</button>` : ''}
+      </div>
+      <div class="hrow">
+        <div><div class="hname">${ic('coin', 12)} Rupee rate</div><div class="hrange">₹ per HK$1, to convert payments from the alerts</div></div>
+        <input type="number" class="f-input rv-rate" min="0.01" step="0.1" inputmode="decimal" value="${inrPerHkd()}" onchange="saveInrRate(this.value)" aria-label="Rupees per Hong Kong dollar">
+      </div>`)}
     ${win(`${ic('file', 13)} DATA.CFG`, `
       <div class="hrow">
         <div><div class="hname">${ic('floppy', 12)} Export data</div><div class="hrange">Download categories, balances and expenses as JSON</div></div>
@@ -3443,6 +3712,7 @@
       togglePlacesVendor, clearPlacesVendors, shiftPlacesMonth, setFoodChartCoffeeOnly,
       setReportsCategoryFilter, selectReportsDay,
       toggleDashExpenses,
+      openReview, editReview, nudgeReview, addReview, dismissReview, addAllReviews, saveInrRate,
       exportData,
       closeModal,
       toggleTheme, setTheme,
