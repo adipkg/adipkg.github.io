@@ -1556,10 +1556,10 @@
         display: none;
       }
 
-      .tb-clock {
-        max-width: 44vw;
-        overflow: hidden;
-        text-overflow: ellipsis;
+      /* no room on phones: the theme toggle lives in Settings → DISPLAY.CFG, and the date is in the dashboard */
+      .tb-clock,
+      #tb-theme {
+        display: none;
       }
 
       .cal-month {
