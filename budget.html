@@ -2812,7 +2812,6 @@
     // Nothing counts until it's added here. Added and deleted ones keep their status,
     // so the script never queues them again.
     const reviewDrafts = {};        // id -> your edits to that payment, kept while the pop-up re-renders
-    const reviewSeen = new Set();   // ids already shown, so the pop-up opens by itself only for new ones
     let reviewShownIds = '';
     function inrPerHkd() { const r = Number(settings.inrPerHkd); return r > 0 ? r : DEFAULT_INR_PER_HKD; }
     function fmtINR(n) { return '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 }); }
@@ -2906,7 +2905,6 @@
     function renderReviewList() {
       const ids = pendingIds();
       reviewShownIds = ids.join();
-      ids.forEach(id => reviewSeen.add(id));
       document.getElementById('review-modal-title').textContent = `REVIEW PAYMENTS · ${ids.length}`;
       document.getElementById('review-list').innerHTML = ids.map(reviewCardHtml).join('');
       document.getElementById('review-add-all').hidden = ids.length < 2;
@@ -2922,20 +2920,15 @@
       btn.innerHTML = `${ic('alert', 12)} ${n}<span class="tb-review-label"> to review</span>`;
       btn.setAttribute('aria-label', `${n} payment${n === 1 ? '' : 's'} to review`);
     }
-    // keeps the badge and an open pop-up current, and opens the pop-up when a new payment arrives
+    // keeps the badge and an open pop-up current; the pop-up only opens from the badge or Settings
     function refreshReview(force) {
       if (!pendingLoaded) return;
       renderReviewBadge();
-      const ready = categoriesLoaded && vendorsLoaded && expensesLoaded;
       const ids = pendingIds();
       const modal = document.getElementById('review-modal');
-      if (!modal.hidden) {
-        if (!ids.length) { closeModal('review-modal'); return; }
-        if (force || ids.join() !== reviewShownIds) renderReviewList();
-        return;
-      }
-      const busy = [...document.querySelectorAll('.backdrop')].some(m => !m.hidden);
-      if (ready && !busy && ids.some(id => !reviewSeen.has(id))) openReview();
+      if (modal.hidden) return;
+      if (!ids.length) { closeModal('review-modal'); return; }
+      if (force || ids.join() !== reviewShownIds) renderReviewList();
     }
     function openReview() {
       if (!pendingIds().length) return;
