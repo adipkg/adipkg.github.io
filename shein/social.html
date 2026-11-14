@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="preload" as="image" href="assets/fabric.jpg">
+<title>Social Sync · SHEIN co·create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="app">
+  <header class="topbar"></header>
+  <span class="eyebrow">Onboarding · Option A</span>
+  <h1>Social Sync</h1>
+  <p class="muted">Add 2–5 outfit pictures you love: screenshots from Instagram, TikTok or Pinterest. Gemini describes each one using our catalogue's vocabulary. The images are processed once and never stored.</p>
+  <div class="panel">
+    <label class="drop" id="drop"><span id="drop-icon"></span><strong>Add 2–5 outfit images</strong><span class="muted small">Tap to choose, or drop them here</span>
+      <input type="file" id="files" accept="image/*" multiple></label>
+    <div id="previews" class="thumbs" style="margin-top:12px"></div>
+  </div>
+  <button class="btn primary block" id="go" disabled>Build my style profile</button>
+  <p id="status" class="small muted" style="margin-top:10px"></p>
+  <div id="results" class="choice-grid"></div>
+  <p style="margin-top:14px"><a href="swipe.html" class="small">Skip, and use the swipe quiz instead</a></p>
+  <footer class="footer"></footer>
+</main>
+<script type="module">
+import { chrome, toast, escapeHtml, icon } from './js/ui.js';
+import { geminiText } from './js/api.js';
+import { loadCatalog, GROUPS, options, optionLabel } from './js/taste.js';
+import { requireUser, getProfile, recordSwipe, updateUser } from './js/store.js';
+
+chrome('');
+const u = requireUser();
+const catalog = await loadCatalog();
+const $ = (s) => document.querySelector(s);
+let images = [];
+$('#drop-icon').innerHTML = icon('upload', { size: 26 });
+
+const downscale = (file, max = 512) => new Promise((res, rej) => {
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(img.src);
+    res(c.toDataURL('image/jpeg', 0.82));
+  };
+  img.onerror = rej;
+  img.src = URL.createObjectURL(file);
+});
+
+async function addFiles(files) {
+  images = await Promise.all([...files].filter((f) => f.type.startsWith('image/')).slice(0, 5).map((f) => downscale(f)));
+  $('#previews').innerHTML = images.map((d) => `<div class="thumb"><img src="${d}" alt="" style="object-fit:cover"></div>`).join('');
+  $('#go').disabled = images.length < 1;
+}
+$('#files').onchange = (e) => addFiles(e.target.files);
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, () => drop.classList.remove('over')));
+drop.addEventListener('drop', (e) => { e.preventDefault(); addFiles(e.dataTransfer.files); });
+
+$('#go').onclick = async () => {
+  $('#go').disabled = true;
+  $('#status').textContent = 'Reading your style with Gemini…';
+  const vocab = Object.fromEntries(GROUPS.map((g) => [g, options(catalog, g)]));
+  const prompt = `For each of the ${images.length} outfit images, describe the single most prominent garment using ONLY these allowed values:
+${JSON.stringify(vocab)}
+Pick the closest allowed value for every field even if the match is approximate. Return a JSON array with one object per image, in order:
+[{"block": "...", "fabric": "...", "colour": "...", "print": "...", "fit": "...", "caption": "max 8 words"}]`;
+  try {
+    const parts = [{ text: prompt }, ...images.map((d) => ({ inlineData: { mimeType: 'image/jpeg', data: d.split(',')[1] } }))];
+    const { text } = await geminiText(parts, { json: true, temperature: 0.2 });
+    const rows = JSON.parse(text.replace(/^```json|```$/g, '').trim());
+    // Keep only the allowed values; drop anything outside the catalogue
+    const specs = rows.map((r) => ({ ...r, ok: GROUPS.every((g) => options(catalog, g).includes(r[g])) })).filter((r) => r.ok);
+    if (!specs.length) throw new Error('No usable garments recognised. Try clearer outfit photos.');
+    let profile = (await getProfile(u)) || { weights: {} };
+    // Each recognised garment counts as a like
+    for (const [i, s] of specs.entries()) {
+      profile = await recordSwipe(u, profile, { spec: s, itemId: `social-${i}`, kind: 'social', dir: 'like', track: 'onboarding' });
+    }
+    await updateUser(u, { onboardingDone: true });
+    $('#status').textContent = `Recognised ${specs.length} garment${specs.length > 1 ? 's' : ''}:`;
+    $('#results').innerHTML = specs.map((s) => `<div class="choice"><strong>${escapeHtml(s.caption || '')}</strong>
+      <div class="chips">${GROUPS.map((g) => `<span class="pill">${escapeHtml(optionLabel(catalog, g, s[g]))}</span>`).join('')}</div></div>`).join('')
+      + '<a class="btn primary block" href="swipe.html">See designs made for me</a>';
+    toast('Style profile ready, +300 points');
+  } catch (e) {
+    $('#status').innerHTML = `<span class="err">${escapeHtml(e.message)}</span>`;
+    $('#go').disabled = false;
+  }
+};
+</script>
+</body>
+</html>

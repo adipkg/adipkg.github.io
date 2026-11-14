@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="preload" as="image" href="assets/fabric.jpg">
+<title>Swipe · SHEIN co·create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="app">
+  <header class="topbar"></header>
+  <div class="phase-row"><span id="phase-label" class="eyebrow" style="margin:0"></span><span id="phase-meta" class="small muted"></span></div>
+  <div class="progress" role="progressbar" aria-label="Progress"><i id="progress"></i></div>
+  <section id="deck"></section>
+  <div class="controls">
+    <button class="round nope" data-dir="left" aria-label="Not for me" title="Not for me (←)"></button>
+    <button class="round super" data-dir="up" aria-label="Order" title="Order a one-off (↑)"></button>
+    <button class="round like" data-dir="right" aria-label="Like" title="Like (→)"></button>
+  </div>
+  <p class="hint" id="hint"></p>
+  <footer class="footer"></footer>
+</main>
+<script type="module">
+import { chrome, garmentCard, toast, icon } from './js/ui.js';
+import { Deck } from './js/swipe.js';
+import { loadCatalog, loadCards } from './js/taste.js';
+import { requireUser, getUser, getProfile, updateUser, recordSwipe, touchPresence } from './js/store.js';
+import { ONBOARDING_CARDS } from './js/config.js';
+
+chrome('swipe.html');
+const u = requireUser();
+const [catalog, cards, user] = await Promise.all([loadCatalog(), loadCards(), getUser(u)]);
+if (!user) { location.replace('index.html'); }
+let profile = (await getProfile(u)) || { weights: {} };
+touchPresence(u);
+
+const $ = (s) => document.querySelector(s);
+$('.round.nope').innerHTML = icon('x', { size: 26 });
+$('.round.super').innerHTML = icon('bag', { size: 22 });
+$('.round.like').innerHTML = icon('heart', { fill: true, size: 26 });
+const deckEl = $('#deck');
+let deck;
+
+function setPhase(label, pct, meta = '') {
+  const [a, b] = label.split(' · ');
+  $('#phase-label').textContent = a; $('#phase-meta').textContent = b || meta;
+  $('#progress').style.width = `${pct}%`;
+}
+
+// ---------- phase A: onboarding (explicit vectoring) ----------
+function startOnboarding() {
+  const seen = profile.swipeCount || 0;
+  const remaining = cards.slice(seen % cards.length).slice(0, Math.max(0, ONBOARDING_CARDS - seen));
+  if (!remaining.length) return startDesigns();
+  let done = seen;
+  setPhase(`Learning your style · ${done}/${ONBOARDING_CARDS}`, (done / ONBOARDING_CARDS) * 100);
+  $('.round.super').classList.add('hidden');
+  $('#hint').innerHTML = '<kbd>←</kbd> not for me · love it <kbd>→</kbd>';
+  deck = new Deck(deckEl, {
+    render: (c) => garmentCard(catalog, c, { title: c.name }),
+    onSwipe: async (c, dir) => {
+      if (dir === 'super') dir = 'like'; // no ordering during onboarding
+      profile = await recordSwipe(u, profile, { spec: c, itemId: c.id, kind: 'card', dir, track: 'onboarding' });
+      done++;
+      setPhase(`Learning your style · ${done}/${ONBOARDING_CARDS}`, (done / ONBOARDING_CARDS) * 100);
+      if (done >= ONBOARDING_CARDS) {
+        await updateUser(u, { onboardingDone: true });
+        toast('Style profile ready, +200 points');
+        deck.destroy();
+        startDesigns();
+      }
+    },
+  });
+  deck.add(remaining);
+}
+
+// ---------- phase B: co-created design deck (lo-fi prototype) ----------
+async function startDesigns() {
+  $('.round.super').classList.remove('hidden');
+  $('#hint').innerHTML = '<kbd>←</kbd> pass · <kbd>↑</kbd> order a one-off · like <kbd>→</kbd>';
+  try {
+    const { startDesignDeck } = await import('./js/lofi.js');
+    deck = await startDesignDeck({ el: deckEl, catalog, user: u, getProfile: () => profile, setProfile: (p) => (profile = p), setPhase });
+  } catch (e) {
+    console.warn('design deck unavailable', e);
+    setPhase('Onboarding complete', 100);
+    deckEl.innerHTML = `<div class="deck-status"><h2>Your style profile is ready</h2>
+      <p class="muted">The design engine isn't reachable right now.</p>
+      <a class="btn primary" href="profile.html">See my profile</a></div>`;
+  }
+}
+
+document.querySelectorAll('.controls [data-dir]').forEach((b) => b.addEventListener('click', () => deck?.swipe(b.dataset.dir)));
+user?.onboardingDone ? startDesigns() : startOnboarding();
+</script>
+</body>
+</html>

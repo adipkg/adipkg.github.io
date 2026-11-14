@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="preload" as="image" href="assets/fabric.jpg">
+<title>Dashboard · SHEIN co·create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/" } }</script>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"></script>
+<body>
+<main class="app wide">
+  <header class="topbar"></header>
+  <span class="eyebrow">Team view · live</span>
+  <div class="head-row"><h1>Collective style dashboard</h1><span id="updated" class="small muted"></span></div>
+  <p class="muted">Live view of every shopper's swipes: trends, style cohorts, how the AI is performing, and the human-review queue.</p>
+  <section class="kpis" id="kpis" style="margin-bottom:14px"></section>
+  <div class="grid">
+    <section class="panel c8"><div class="head-row"><h2>Trending attributes</h2><span class="small muted">likes + 2×orders − ½×nopes</span></div>
+      <div class="tabs" id="trend-tabs"></div><div class="chart"><canvas id="trend"></canvas></div></section>
+    <section class="panel c4"><h2>Swipe activity</h2><div class="chart"><canvas id="activity"></canvas></div></section>
+
+    <section class="panel c8"><div class="head-row"><h2>Style cohorts</h2>
+      <div class="row"><label class="small muted">k <select id="k"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
+      <button class="btn sm" id="name-cohorts">Name with Gemini &amp; save</button></div></div>
+      <p class="small muted" id="cohort-note">k-means on each shopper's attribute-weight vector, projected to 2D with PCA. Only shoppers who opted in and made at least 5 swipes are included.</p>
+      <div class="chart" style="height:320px"><canvas id="cohorts"></canvas></div></section>
+    <section class="panel c4"><h2>Cohort profiles</h2><div id="cohort-table" class="scroll"></div></section>
+
+    <section class="panel c6"><h2>Pilot segments</h2><p class="small muted">Power vs dormant shoppers (Stream 3 pilot segmentation)</p><div class="chart"><canvas id="segments"></canvas></div></section>
+    <section class="panel c6"><h2>Is Jev calibrated?</h2><p class="small muted">Actual like rate for each predicted-appeal level (lo-fi deck). Groups with fewer than 5 swipes are hidden.</p><div class="chart"><canvas id="calib"></canvas></div></section>
+
+    <section class="panel c6"><h2>Guardrail engine</h2><div id="guard" class="kpis" style="margin-bottom:10px"></div><div class="chart" style="height:240px"><canvas id="inventory"></canvas></div></section>
+    <section class="panel c6"><h2>Hi-fi image models (A/B)</h2><div id="models" class="scroll"></div>
+      <h3 style="margin-top:16px">Body diversity of on-model shots</h3><div id="bodies" class="chips"></div></section>
+
+    <section class="panel c12"><div class="head-row"><h2>Human review queue</h2><span class="small muted">AI images wait here before entering the shared library (Stream 4, D8)</span></div><div id="queue" class="queue"></div></section>
+    <section class="panel c6"><h2>LATR escalations</h2><p class="small muted">Designs that reached the threshold and were queued for a 100–200 unit micro-batch</p><div id="escalations" class="scroll"></div></section>
+    <section class="panel c6"><h2>Recent work orders</h2><div id="orders" class="scroll"></div></section>
+    <section class="panel c12"><div class="head-row"><h2>Shoppers</h2>
+      <div class="row"><button class="btn sm" id="seed">+ 24 synthetic shoppers</button><button class="btn sm danger" id="unseed">Remove synthetic</button></div></div>
+      <div id="users" class="scroll"></div></section>
+  </div>
+  <footer class="footer"></footer>
+</main>
+<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

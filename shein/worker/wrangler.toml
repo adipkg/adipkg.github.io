@@ -1,0 +1,12 @@
+name = "shein-cocreate-worker"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# Comma-separated list of origins allowed to call the worker (localhost is always allowed).
+ALLOWED_ORIGINS = "https://adipkg.github.io"
+# Header the HKU API Management gateway expects the key in.
+HKU_KEY_HEADER = "api-key"
+
+# Secrets (never commit): wrangler secret put JEV_API_KEY / HKU_API_KEY / DEMO_PASSCODE
+# For local dev they are read from worker/.dev.vars

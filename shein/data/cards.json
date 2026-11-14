@@ -1,0 +1,22 @@
+[
+  { "id": "c01", "name": "Cyber baby tee",        "block": "crop_top",          "fabric": "mesh",          "colour": "lilac",      "print": "y2k_graphic",    "fit": "fitted" },
+  { "id": "c02", "name": "Quiet linen shirt",     "block": "shirt",             "fabric": "linen",         "colour": "cream",      "print": "solid",          "fit": "oversized" },
+  { "id": "c03", "name": "Night-out slip",        "block": "slip_dress",        "fabric": "satin",         "colour": "black",      "print": "solid",          "fit": "fitted" },
+  { "id": "c04", "name": "Skate hoodie",          "block": "hoodie",            "fabric": "french_terry",  "colour": "charcoal",   "print": "abstract_swirl", "fit": "oversized" },
+  { "id": "c05", "name": "Picnic wrap dress",     "block": "wrap_dress",        "fabric": "chiffon",       "colour": "butter",     "print": "floral",         "fit": "regular" },
+  { "id": "c06", "name": "Office power blazer",   "block": "blazer",            "fabric": "twill",         "colour": "charcoal",   "print": "solid",          "fit": "regular" },
+  { "id": "c07", "name": "Wild one mini",         "block": "a_line_skirt",      "fabric": "faux_leather",  "colour": "chocolate",  "print": "leopard",        "fit": "fitted" },
+  { "id": "c08", "name": "Coastal trousers",      "block": "wide_leg_trousers", "fabric": "linen",         "colour": "white",      "print": "solid",          "fit": "oversized" },
+  { "id": "c09", "name": "Varsity tee",           "block": "tee",               "fabric": "cotton_jersey", "colour": "cherry_red", "print": "stripe",         "fit": "oversized" },
+  { "id": "c10", "name": "Coquette dot dress",    "block": "wrap_dress",        "fabric": "crepe",         "colour": "hot_pink",   "print": "polka_dot",      "fit": "fitted" },
+  { "id": "c11", "name": "Denim A-line",          "block": "a_line_skirt",      "fabric": "denim",         "colour": "denim_blue", "print": "solid",          "fit": "regular" },
+  { "id": "c12", "name": "Sage rib top",          "block": "crop_top",          "fabric": "rib_knit",      "colour": "sage",       "print": "solid",          "fit": "fitted" },
+  { "id": "c13", "name": "Gingham picnic shirt",  "block": "shirt",             "fabric": "poplin",        "colour": "cobalt",     "print": "gingham",        "fit": "regular" },
+  { "id": "c14", "name": "Grunge cord trousers",  "block": "wide_leg_trousers", "fabric": "corduroy",      "colour": "chocolate",  "print": "solid",          "fit": "regular" },
+  { "id": "c15", "name": "Heiress tweed skirt",   "block": "a_line_skirt",      "fabric": "tweed",         "colour": "cream",      "print": "solid",          "fit": "fitted" },
+  { "id": "c16", "name": "Electric slip",         "block": "slip_dress",        "fabric": "mesh",          "colour": "cobalt",     "print": "abstract_swirl", "fit": "fitted" },
+  { "id": "c17", "name": "Everyday white tee",    "block": "tee",               "fabric": "cotton_jersey", "colour": "white",      "print": "solid",          "fit": "regular" },
+  { "id": "c18", "name": "Pastel dream hoodie",   "block": "hoodie",            "fabric": "cotton_jersey", "colour": "lilac",      "print": "polka_dot",      "fit": "oversized" },
+  { "id": "c19", "name": "Leather moto blazer",   "block": "blazer",            "fabric": "faux_leather",  "colour": "black",      "print": "solid",          "fit": "fitted" },
+  { "id": "c20", "name": "Garden party slip",     "block": "slip_dress",        "fabric": "chiffon",       "colour": "sage",       "print": "floral",         "fit": "regular" }
+]

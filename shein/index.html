@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="preload" as="image" href="assets/fabric.jpg">
+<title>SHEIN co·create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="app">
+  <header class="topbar"></header>
+
+  <!-- step 0: returning user -->
+  <section id="s-return" class="hidden">
+    <div class="hero-stack" aria-hidden="true"></div>
+    <span class="eyebrow">Welcome back</span>
+    <h1 id="ret-name"></h1>
+    <p class="muted">Your style profile is waiting. Pick up where you left off.</p>
+    <div class="choice-grid">
+      <a class="btn primary block" href="swipe.html">Continue swiping</a>
+      <button class="btn ghost block" id="switch">Use a different name</button>
+    </div>
+  </section>
+
+  <!-- step 1: username -->
+  <section id="s-name" class="hidden">
+    <div class="hero-stack" aria-hidden="true"></div>
+    <span class="eyebrow">Made for you · made to order</span>
+    <h1>Design what you'd actually wear.</h1>
+    <p class="muted">Swipe through looks, and our AI co-designs pieces from your taste. Each one is made only when you order it, so nothing sits in a warehouse.</p>
+    <div class="steps"><div><b>01</b>Swipe 20 looks</div><div><b>02</b>AI designs for you</div><div><b>03</b>Order a one-off</div></div>
+    <form id="name-form" class="panel">
+      <label for="username"><h3>Choose a username</h3></label>
+      <input id="username" type="text" autocomplete="off" maxlength="24" placeholder="e.g. mira" required>
+      <p class="muted small">No password. This is a demo, so don't use your real name.</p>
+      <p id="name-err" class="err small hidden" role="alert"></p>
+      <button class="btn primary block">Continue</button>
+    </form>
+  </section>
+
+  <!-- step 2: consent / value exchange -->
+  <section id="s-consent" class="hidden">
+    <span class="eyebrow">Step 2 of 2 · Privacy</span>
+    <h1>Your data, your call.</h1>
+    <p class="muted">We only use what you choose to share here, on this platform. You can reset or delete it any time from your profile.</p>
+    <div class="panel">
+      <label class="toggle"><input type="checkbox" id="c-swipe" checked disabled>
+        <span><strong>Style profile from swipes</strong> <span class="pill accent">+200 pts</span><br><span class="muted small">Required for personalised designs. Built only from what you swipe here.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="c-cohort" checked>
+        <span><strong>Contribute to trend cohorts</strong> <span class="pill accent">Early-access drops</span><br><span class="muted small">Your swipes are counted, without your name, towards what's trending in your style group.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="c-social">
+        <span><strong>Social Sync (optional)</strong> <span class="pill accent">+100 pts</span><br><span class="muted small">Upload a few inspiration images instead of a full swipe quiz. They're described once and not stored.</span></span></label>
+    </div>
+    <h3>How often do you shop fashion apps?</h3>
+    <div class="choice-grid" id="segment" style="grid-template-columns:1fr 1fr;margin-bottom:14px">
+      <button class="choice" data-v="power"><strong>Weekly or more</strong><span class="muted small">I'm always browsing</span></button>
+      <button class="choice" data-v="dormant"><strong>Rarely</strong><span class="muted small">Only when I need something</span></button>
+    </div>
+    <button class="btn primary block" id="consent-next" disabled>Start</button>
+  </section>
+
+  <footer class="footer"></footer>
+</main>
+<script type="module">
+import { chrome } from './js/ui.js';
+import { snapshot } from './js/garment.js';
+import { loadCatalog, loadCards } from './js/taste.js';
+import { currentUser, setCurrentUser, slugify, getUser, createUser } from './js/store.js';
+
+chrome('');
+// fanned preview of three onboarding garments
+const [catalog, cards] = await Promise.all([loadCatalog(), loadCards()]);
+const hero = ['c03', 'c06', 'c05'].map((id) => cards.find((c) => c.id === id));
+document.querySelectorAll('.hero-stack').forEach((el) => (el.innerHTML = hero.map((c) => `<img src="${snapshot(catalog, c, { w: 300, h: 376 })}" alt="">`).join('')));
+const $ = (s) => document.querySelector(s);
+const show = (id) => document.querySelectorAll('main > section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
+
+const existing = currentUser();
+if (existing && (await getUser(existing))) { $('#ret-name').textContent = existing; show('s-return'); }
+else show('s-name');
+$('#switch').onclick = () => { setCurrentUser(null); show('s-name'); };
+
+let username, segment;
+$('#name-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const slug = slugify($('#username').value);
+  const err = $('#name-err');
+  if (slug.length < 2) { err.textContent = 'Use at least 2 letters or numbers.'; err.classList.remove('hidden'); return; }
+  if (await getUser(slug)) {
+    err.innerHTML = `“${slug}” is taken. <a href="#" id="its-me">That's me, continue</a> or pick another name.`;
+    err.classList.remove('hidden');
+    $('#its-me').onclick = (ev) => { ev.preventDefault(); setCurrentUser(slug); location.href = 'swipe.html'; };
+    return;
+  }
+  username = slug;
+  show('s-consent');
+});
+
+$('#segment').addEventListener('click', (e) => {
+  const b = e.target.closest('.choice'); if (!b) return;
+  segment = b.dataset.v;
+  $('#segment').querySelectorAll('.choice').forEach((c) => c.classList.toggle('selected', c === b));
+  $('#consent-next').disabled = false;
+});
+
+$('#consent-next').onclick = async () => {
+  const social = $('#c-social').checked;
+  $('#consent-next').disabled = true;
+  await createUser(username, {
+    segment,
+    consent: { swipe: true, cohort: $('#c-cohort').checked, socialSync: social, at: Date.now() },
+    onboarding: social ? 'social' : 'swipe',
+    rewardPoints: 200 + (social ? 100 : 0),
+    onboardingDone: false,
+  });
+  setCurrentUser(username);
+  location.href = social ? 'social.html' : 'swipe.html';
+};
+</script>
+</body>
+</html>

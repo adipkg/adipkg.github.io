@@ -1,0 +1,13 @@
+{
+  "note": "Fictional creator looks used as the 30% influencer signal. Not real people.",
+  "looks": [
+    { "creator": "@studio.mira",  "block": "slip_dress",        "fabric": "satin",         "colour": "chocolate",  "print": "solid",          "fit": "fitted" },
+    { "creator": "@studio.mira",  "block": "blazer",            "fabric": "twill",         "colour": "cream",      "print": "solid",          "fit": "oversized" },
+    { "creator": "@kaito.fits",   "block": "hoodie",            "fabric": "french_terry",  "colour": "black",      "print": "y2k_graphic",    "fit": "oversized" },
+    { "creator": "@kaito.fits",   "block": "wide_leg_trousers", "fabric": "denim",         "colour": "denim_blue", "print": "solid",          "fit": "oversized" },
+    { "creator": "@lola.archive", "block": "wrap_dress",        "fabric": "chiffon",       "colour": "butter",     "print": "floral",         "fit": "regular" },
+    { "creator": "@lola.archive", "block": "a_line_skirt",      "fabric": "faux_leather",  "colour": "cherry_red", "print": "solid",          "fit": "fitted" },
+    { "creator": "@nova.y2k",     "block": "crop_top",          "fabric": "mesh",          "colour": "hot_pink",   "print": "leopard",        "fit": "fitted" },
+    { "creator": "@nova.y2k",     "block": "tee",               "fabric": "cotton_jersey", "colour": "lilac",      "print": "y2k_graphic",    "fit": "fitted" }
+  ]
+}

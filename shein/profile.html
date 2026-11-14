@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2f1ee">
+<link rel="preload" as="image" href="assets/fabric.jpg">
+<title>Style Profile · SHEIN co·create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/" } }</script>
+</head>
+<body>
+<main class="app">
+  <header class="topbar"></header>
+  <section id="head"></section>
+  <section class="panel stats" id="stats"></section>
+  <section class="panel">
+    <h2>Taste profile</h2>
+    <p class="muted small">What the design engine aims for, per attribute. Each bar is the 60/30/10 blend of your swipes, creator looks and live trends.</p>
+    <div class="legend"><span><i style="background:#111"></i>You · 60%</span><span><i style="background:#7a7a7a"></i>Creators · 30%</span><span><i style="background:#c4c4c4"></i>Trends · 10%</span></div>
+    <div id="taste"></div>
+  </section>
+  <section class="panel"><h2>Orders</h2><div id="orders" class="muted small">No orders yet. Swipe up on a design to order a one-off.</div></section>
+  <section class="panel"><h2>Swipe history</h2><div id="history" class="thumbs"></div></section>
+  <section class="panel" id="privacy">
+    <h2>Privacy controls</h2>
+    <label class="toggle"><input type="checkbox" id="cohort-toggle">
+      <span><strong>Contribute to trend cohorts</strong><br><span class="muted small">Turn off to keep your swipes out of collective trends. Personalisation still works.</span></span></label>
+    <div class="choice-grid" style="margin-top:8px">
+      <button class="btn ghost block" id="reset">Reset my style profile</button>
+      <button class="btn block danger" id="delete">Delete all my data</button>
+    </div>
+  </section>
+  <footer class="footer"></footer>
+</main>
+<script type="module">
+import { chrome, toast, escapeHtml, icon } from './js/ui.js';
+import { snapshot } from './js/garment.js';
+import { loadCatalog, loadKol, blend, topOf, optionLabel, GROUPS } from './js/taste.js';
+import { DB, currentUser, getUser, updateUser, resetPreferences, deleteUserData } from './js/store.js';
+
+chrome('profile.html');
+const $ = (s) => document.querySelector(s);
+const own = currentUser();
+const u = new URLSearchParams(location.search).get('u') || own;
+if (!u) location.replace('index.html');
+const isOwn = u === own;
+const [catalog, kol] = await Promise.all([loadCatalog(), loadKol()]);
+$('#privacy').classList.toggle('hidden', !isOwn);
+
+let user, profile, live;
+const pct = (x) => `${(x * 100).toFixed(0)}%`;
+
+function renderHead() {
+  if (!user) { $('#head').innerHTML = `<h1>${escapeHtml(u)}</h1><p class="muted">No data for this user.</p>`; return; }
+  $('#head').innerHTML = `<span class="eyebrow">${isOwn ? 'Your style profile' : 'Shopper profile · team view'}</span><h1>${escapeHtml(u)}</h1>
+    <div class="chips" style="margin-bottom:14px">
+      <span class="pill">${user.segment === 'power' ? 'Power user' : 'Dormant user'}</span>
+      <span class="pill">${user.onboarding === 'social' ? 'Social Sync' : 'Swipe quiz'}</span>
+      <span class="pill accent">${user.rewardPoints || 0} pts</span>
+      ${profile?.cohortLabel ? `<span class="pill ok">Cohort: ${escapeHtml(profile.cohortLabel)}</span>` : ''}
+      ${user.consent?.cohort === false ? '<span class="pill bad">Cohorts off</span>' : ''}
+    </div>`;
+  $('#cohort-toggle').checked = user.consent?.cohort !== false;
+}
+
+function renderTaste() {
+  if (!profile) return;
+  const b = blend(catalog, profile.weights || {}, kol.looks, live || {});
+  $('#taste').innerHTML = GROUPS.map((g) => `<h3 style="margin:16px 0 8px">${g}</h3><div class="bars">${
+    topOf(b[g], 3).map(([o, v]) => {
+      const scale = 100 / Math.max(...Object.values(b[g]).map((x) => x.p));
+      return `<div class="bar"><span>${escapeHtml(optionLabel(catalog, g, o))}</span>
+        <span class="track"><i class="u" style="width:${0.6 * v.user * scale}%"></i><i class="k" style="width:${0.3 * v.kol * scale}%"></i><i class="t" style="width:${0.1 * v.trend * scale}%"></i></span>
+        <span class="muted">${pct(v.p)}</span></div>`;
+    }).join('')}</div>`).join('');
+}
+
+async function renderOrders() {
+  const orders = (await DB.fs.list('orders', { where: [['username', '==', u]] })).sort((a, b) => b.createdAt - a.createdAt);
+  $('#stats').innerHTML = `<div><b>${profile?.swipeCount || 0}</b><span>Swipes</span></div>
+    <div><b>${profile?.likeCount || 0}</b><span>Likes</span></div><div><b>${orders.length}</b><span>Orders</span></div>`;
+  if (!orders.length) return;
+  $('#orders').innerHTML = orders.map((o) => `<div class="order-row">
+      <img src="${snapshot(catalog, o.spec)}" alt="">
+      <div style="flex:1"><strong style="color:var(--ink)">${escapeHtml(o.name || o.designKey)}</strong><br>
+      ${escapeHtml(o.workOrder?.supplierHub || '')} · $${o.workOrder?.unitCost?.toFixed(2) ?? '–'} · SUCP ${o.workOrder?.sucpPct?.toFixed(1) ?? '–'}%</div>
+      <span class="pill">${escapeHtml(o.status || 'queued')}</span></div>`).join('');
+}
+
+function renderHistory(swipes) {
+  const list = Object.values(swipes || {}).sort((a, b) => b.ts - a.ts).slice(0, 24);
+  $('#history').innerHTML = list.length ? list.map((s) => `<div class="thumb" title="${escapeHtml(s.designKey)}">
+    <img src="${snapshot(catalog, s.spec)}" alt=""><span class="tag ${s.dir}" title="${s.dir}">${{ like: icon('heart', { fill: true }), nope: icon('x'), super: icon('bag') }[s.dir]}</span></div>`).join('')
+    : '<p class="muted small" style="grid-column:1/-1">No swipes yet.</p>';
+}
+
+DB.rt.on(`users/${u}`, (v) => { user = v; renderHead(); });
+DB.rt.on('live/attr', (v) => { live = v; renderTaste(); });
+DB.rt.on(`swipes/${u}`, renderHistory);
+DB.fs.watch('profiles', { where: [['username', '==', u]] }, (rows) => { profile = rows[0]; renderHead(); renderTaste(); renderOrders(); });
+
+$('#cohort-toggle').onchange = (e) => { updateUser(u, { 'consent/cohort': e.target.checked }); toast(e.target.checked ? 'Cohort contribution on' : 'Cohort contribution off'); };
+$('#reset').onclick = async () => { await resetPreferences(u); toast('Style profile reset'); setTimeout(() => (location.href = 'swipe.html'), 800); };
+$('#delete').onclick = async () => {
+  const btn = $('#delete');
+  if (btn.dataset.armed !== '1') { btn.dataset.armed = '1'; btn.textContent = 'Tap again to permanently delete'; return; }
+  await deleteUserData(u);
+  location.replace('index.html');
+};
+</script>
+</body>
+</html>
