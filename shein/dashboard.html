@@ -17,25 +17,33 @@
   <header class="topbar"></header>
   <span class="eyebrow">Team view · live</span>
   <div class="head-row"><h1>Collective style dashboard</h1><span id="updated" class="small muted"></span></div>
-  <p class="muted">Live view of every shopper's swipes: trends, style cohorts, how the AI is performing, and the human-review queue.</p>
+  <p class="muted">Live view of every shopper's signals: trends, style cohorts and what they share, how much the engine explores, how the AI performs, and the human-review queue.</p>
   <section class="kpis" id="kpis" style="margin-bottom:14px"></section>
   <div class="grid">
-    <section class="panel c8"><div class="head-row"><h2>Trending attributes</h2><span class="small muted">likes + 2×orders − ½×nopes</span></div>
+    <section class="panel c8"><div class="head-row"><h2>Trending attributes</h2><span class="small muted">likes + 4×orders + ⅕×dwell − ½×passes</span></div>
       <div class="tabs" id="trend-tabs"></div><div class="chart"><canvas id="trend"></canvas></div></section>
     <section class="panel c4"><h2>Swipe activity</h2><div class="chart"><canvas id="activity"></canvas></div></section>
 
     <section class="panel c8"><div class="head-row"><h2>Style cohorts</h2>
       <div class="row"><label class="small muted">k <select id="k"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></label>
-      <button class="btn sm" id="name-cohorts">Name with Gemini &amp; save</button></div></div>
-      <p class="small muted" id="cohort-note">k-means on each shopper's attribute-weight vector, projected to 2D with PCA. Only shoppers who opted in and made at least 5 swipes are included.</p>
+      <button class="btn sm ghost" id="recompute">Recompute</button><button class="btn sm" id="name-cohorts">Name with Gemini</button></div></div>
+      <p class="small muted" id="cohort-note">Persistent cohorts: k-means on each shopper's normalised taste vector, recomputed automatically as shoppers join; ids and names survive recomputes. Projected to 2D with PCA.</p>
       <div class="chart" style="height:320px"><canvas id="cohorts"></canvas></div></section>
     <section class="panel c4"><h2>Cohort profiles</h2><div id="cohort-table" class="scroll"></div></section>
 
-    <section class="panel c6"><h2>Pilot segments</h2><p class="small muted">Power vs dormant shoppers (Stream 3 pilot segmentation)</p><div class="chart"><canvas id="segments"></canvas></div></section>
+    <section class="panel c6"><h2>Existing vs new customers</h2><p class="small muted">Pilot comparison (Stream 3): existing customers split by how often they shop</p><div class="chart"><canvas id="segments"></canvas></div></section>
+    <section class="panel c6"><h2>What drives profiles</h2><p class="small muted">Average share of each signal source across shopper profiles (purchases weigh 5× a like)</p>
+      <div id="signal-kpis" class="kpis" style="margin-bottom:10px"></div><div class="chart" style="height:220px"><canvas id="signals"></canvas></div></section>
+    <section class="panel c6"><div class="head-row"><h2>Exploration vs exploitation</h2><span class="small muted" id="explore-val"></span></div>
+      <p class="small muted">Each batch of 4 mixes best matches, a twist on favourites, and discovery. Slide to change the live mix for every shopper.</p>
+      <input type="range" id="explore" min="0" max="1" step="0.05" style="width:100%;accent-color:#111"><p class="small muted" id="mix-desc" style="margin:4px 0 10px"></p>
+      <div id="explore-kpis" class="kpis" style="margin-bottom:10px"></div><div class="chart" style="height:220px"><canvas id="slots"></canvas></div></section>
+    <section class="panel c6"><h2>Cohort sharing</h2><p class="small muted">A purchase is shared with the buyer's cohort straight away. Does it travel?</p><div class="chart" style="height:220px"><canvas id="sharing"></canvas></div>
+      <h3 style="margin-top:14px">Audience</h3><div class="chart" style="height:180px"><canvas id="audience"></canvas></div></section>
     <section class="panel c6"><h2>Is Jev calibrated?</h2><p class="small muted">Actual like rate for each predicted-appeal level (lo-fi deck). Groups with fewer than 5 swipes are hidden.</p><div class="chart"><canvas id="calib"></canvas></div></section>
 
     <section class="panel c6"><h2>Guardrail engine</h2><div id="guard" class="kpis" style="margin-bottom:10px"></div><div class="chart" style="height:240px"><canvas id="inventory"></canvas></div></section>
-    <section class="panel c6"><h2>Hi-fi image models (A/B)</h2><div id="models" class="scroll"></div>
+    <section class="panel c6"><h2>Hi-fi renders</h2><div id="hifi-kpis" class="kpis" style="margin-bottom:10px"></div><div id="models" class="scroll"></div>
       <h3 style="margin-top:16px">Body diversity of on-model shots</h3><div id="bodies" class="chips"></div></section>
 
     <section class="panel c12"><div class="head-row"><h2>Human review queue</h2><span class="small muted">AI images wait here before entering the shared library (Stream 4, D8)</span></div><div id="queue" class="queue"></div></section>

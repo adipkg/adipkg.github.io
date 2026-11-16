@@ -15,7 +15,7 @@
 <main class="app">
   <header class="topbar"></header>
 
-  <!-- step 0: returning user -->
+  <!-- returning shopper -->
   <section id="s-return" class="hidden">
     <div class="hero-stack" aria-hidden="true"></div>
     <span class="eyebrow">Welcome back</span>
@@ -23,17 +23,18 @@
     <p class="muted">Your style profile is waiting. Pick up where you left off.</p>
     <div class="choice-grid">
       <a class="btn primary block" href="swipe.html">Continue swiping</a>
+      <a class="btn block" href="foryou.html">Made for you</a>
       <button class="btn ghost block" id="switch">Use a different name</button>
     </div>
   </section>
 
-  <!-- step 1: username -->
+  <!-- 1 · username -->
   <section id="s-name" class="hidden">
     <div class="hero-stack" aria-hidden="true"></div>
     <span class="eyebrow">Made for you · made to order</span>
     <h1>Design what you'd actually wear.</h1>
-    <p class="muted">Swipe through looks, and our AI co-designs pieces from your taste. Each one is made only when you order it, so nothing sits in a warehouse.</p>
-    <div class="steps"><div><b>01</b>Swipe 20 looks</div><div><b>02</b>AI designs for you</div><div><b>03</b>Order a one-off</div></div>
+    <p class="muted">Tell us a little about your style and our AI co-designs pieces for you. Each one is made only when you order it, so nothing sits in a warehouse.</p>
+    <div class="steps"><div><b>01</b>Share your style</div><div><b>02</b>AI designs for you</div><div><b>03</b>Order a one-off</div></div>
     <form id="name-form" class="panel">
       <label for="username"><h3>Choose a username</h3></label>
       <input id="username" type="text" autocomplete="off" maxlength="24" placeholder="e.g. mira" required>
@@ -43,49 +44,115 @@
     </form>
   </section>
 
-  <!-- step 2: consent / value exchange -->
-  <section id="s-consent" class="hidden">
-    <span class="eyebrow">Step 2 of 2 · Privacy</span>
-    <h1>Your data, your call.</h1>
-    <p class="muted">We only use what you choose to share here, on this platform. You can reset or delete it any time from your profile.</p>
-    <div class="panel">
-      <label class="toggle"><input type="checkbox" id="c-swipe" checked disabled>
-        <span><strong>Style profile from swipes</strong> <span class="pill accent">+200 pts</span><br><span class="muted small">Required for personalised designs. Built only from what you swipe here.</span></span></label>
-      <label class="toggle"><input type="checkbox" id="c-cohort" checked>
-        <span><strong>Contribute to trend cohorts</strong> <span class="pill accent">Early-access drops</span><br><span class="muted small">Your swipes are counted, without your name, towards what's trending in your style group.</span></span></label>
-      <label class="toggle"><input type="checkbox" id="c-social">
-        <span><strong>Social Sync (optional)</strong> <span class="pill accent">+100 pts</span><br><span class="muted small">Upload a few inspiration images instead of a full swipe quiz. They're described once and not stored.</span></span></label>
+  <!-- 2 · existing vs new -->
+  <section id="s-type" class="hidden">
+    <span class="eyebrow" data-step></span>
+    <h1>Have you shopped with SHEIN before?</h1>
+    <div class="choice-grid" id="ctype">
+      <button class="choice" data-v="existing"><strong>Yes, I'm a customer</strong><span class="muted small">We'll start from what you've already bought. Pilot group</span></button>
+      <button class="choice" data-v="new"><strong>No, I'm new</strong><span class="muted small">We'll learn your taste from a few quick questions</span></button>
     </div>
-    <h3>How often do you shop fashion apps?</h3>
-    <div class="choice-grid" id="segment" style="grid-template-columns:1fr 1fr;margin-bottom:14px">
-      <button class="choice" data-v="power"><strong>Weekly or more</strong><span class="muted small">I'm always browsing</span></button>
-      <button class="choice" data-v="dormant"><strong>Rarely</strong><span class="muted small">Only when I need something</span></button>
-    </div>
-    <button class="btn primary block" id="consent-next" disabled>Start</button>
   </section>
+
+  <!-- 3a · existing: purchase history -->
+  <section id="s-persona" class="hidden">
+    <span class="eyebrow" data-step></span>
+    <h1>Your order history</h1>
+    <p class="muted">In the pilot, this comes straight from your SHEIN account. For the demo, sign in as one of these customers. Their past orders become the strongest signal in your profile.</p>
+    <div class="choice-grid" id="personas"></div>
+  </section>
+
+  <!-- 3b · about you -->
+  <section id="s-about" class="hidden">
+    <span class="eyebrow" data-step></span>
+    <h1>What are you shopping for?</h1>
+    <h3 style="margin-top:6px">I mostly wear</h3>
+    <div class="choice-grid" id="gender" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <button class="choice" data-v="women"><strong>Womenswear</strong></button>
+      <button class="choice" data-v="men"><strong>Menswear</strong></button>
+      <button class="choice" data-v="any"><strong>Both</strong></button>
+      <button class="choice" data-v="any" data-skip><strong>Prefer not to say</strong></button>
+    </div>
+    <h3>Occasions <span class="muted small" style="text-transform:none;letter-spacing:0">pick any</span></h3>
+    <div class="chips" id="occasions" style="margin-bottom:16px"></div>
+    <button class="btn primary block" id="about-next" disabled>Continue</button>
+  </section>
+
+  <!-- 4 · consent / value exchange -->
+  <section id="s-consent" class="hidden">
+    <span class="eyebrow" data-step></span>
+    <h1>Your data, your call.</h1>
+    <p class="muted">We only use what you choose to share. You can reset or delete it any time from your profile.</p>
+    <div class="panel">
+      <label class="toggle"><input type="checkbox" checked disabled>
+        <span><strong>Style profile from your activity</strong> <span class="pill accent">+200 pts</span><br><span class="muted small">Swipes, likes and time spent on designs here. Required for personalised designs.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="c-cohort" checked>
+        <span><strong>Join a style cohort</strong> <span class="pill accent">Early-access drops</span><br><span class="muted small">When someone with your taste buys a design, you see it too, and your purchases are shared anonymously with them.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="c-social">
+        <span><strong>Share your socials</strong> <span class="pill accent">+100 pts</span><br><span class="muted small">Tell us the creators, films and aesthetics you follow, or upload a few posts. Used once to shape your profile, not stored.</span></span></label>
+      <label class="toggle"><input type="checkbox" id="c-photo">
+        <span><strong>"See it on me" photo</strong><br><span class="muted small">Add a photo so designs can be rendered on you. It stays on this device only.</span></span></label>
+    </div>
+    <div id="segment-wrap">
+      <h3>How often do you shop with us?</h3>
+      <div class="choice-grid" id="segment" style="grid-template-columns:1fr 1fr;margin-bottom:14px">
+        <button class="choice" data-v="power"><strong>Weekly or more</strong><span class="muted small">I'm always browsing</span></button>
+        <button class="choice" data-v="dormant"><strong>Rarely</strong><span class="muted small">Only when I need something</span></button>
+      </div>
+    </div>
+    <button class="btn primary block" id="consent-next">Continue</button>
+  </section>
+
+  <!-- 5 · optional photo (on device only) -->
+  <section id="s-photo" class="hidden">
+    <span class="eyebrow" data-step></span>
+    <h1>Add a photo for "see it on me"</h1>
+    <p class="muted">A clear, full or half-length photo works best. It never leaves this device except when you ask for a render, and you can delete it from your profile.</p>
+    <div class="panel">
+      <label class="drop"><span id="photo-icon"></span><strong>Choose a photo</strong><span class="muted small">or take one now</span>
+        <input type="file" id="photo" accept="image/*" capture="user"></label>
+      <img id="photo-preview" alt="" class="hidden" style="width:100%;border-radius:14px;margin-top:12px">
+    </div>
+    <div class="row"><button class="btn primary" id="photo-next" disabled>Use this photo</button><button class="btn ghost" id="photo-skip">Skip for now</button></div>
+  </section>
+
+  <section id="s-saving" class="hidden"><div class="deck-status" style="position:relative;min-height:260px"><div class="spinner"></div><p class="muted" id="saving-msg">Building your style profile…</p></div></section>
 
   <footer class="footer"></footer>
 </main>
 <script type="module">
-import { chrome } from './js/ui.js';
+import { chrome, icon, escapeHtml } from './js/ui.js';
 import { snapshot } from './js/garment.js';
-import { loadCatalog, loadCards } from './js/taste.js';
-import { currentUser, setCurrentUser, slugify, getUser, createUser } from './js/store.js';
+import { loadCatalog, loadCards, loadPersonas, normalise, applyPrior, describeSpec } from './js/taste.js';
+import { currentUser, setCurrentUser, slugify, getUser, createUser, getProfile, saveProfile, importPurchaseHistory, applyAnswers } from './js/store.js';
+import { ensureCohorts, nearestCohort, cohortPrior } from './js/cohorts.js';
+import { setPhoto, downscaleFile } from './js/hifi.js';
 
 chrome('');
-// fanned preview of three onboarding garments
-const [catalog, cards] = await Promise.all([loadCatalog(), loadCards()]);
-const hero = ['c03', 'c06', 'c05'].map((id) => cards.find((c) => c.id === id));
+const [catalog, cards, personas] = await Promise.all([loadCatalog(), loadCards(), loadPersonas()]);
+const hero = ['c03', 'c26', 'c05'].map((id) => cards.find((c) => c.id === id));
 document.querySelectorAll('.hero-stack').forEach((el) => (el.innerHTML = hero.map((c) => `<img src="${snapshot(catalog, c, { w: 300, h: 376 })}" alt="">`).join('')));
 const $ = (s) => document.querySelector(s);
-const show = (id) => document.querySelectorAll('main > section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
+const choose = (wrap, b) => wrap.querySelectorAll('.choice').forEach((c) => c.classList.toggle('selected', c === b));
+
+// ---- step navigation ----
+const S = { customerType: null, persona: null, gender: null, occasions: [], segment: null, photo: null };
+const flow = () => ['s-type', ...(S.customerType === 'existing' ? ['s-persona'] : []), 's-about', 's-consent', ...($('#c-photo').checked ? ['s-photo'] : [])];
+function show(id) {
+  document.querySelectorAll('main > section').forEach((s) => s.classList.toggle('hidden', s.id !== id));
+  const steps = flow(), i = steps.indexOf(id);
+  const el = document.querySelector(`#${id} [data-step]`);
+  if (el && i >= 0) el.textContent = `Step ${i + 1} of ${steps.length}`;
+  scrollTo(0, 0);
+}
+const next = (from) => { const f = flow(); const i = f.indexOf(from); i + 1 < f.length ? show(f[i + 1]) : finish(); };
 
 const existing = currentUser();
 if (existing && (await getUser(existing))) { $('#ret-name').textContent = existing; show('s-return'); }
 else show('s-name');
 $('#switch').onclick = () => { setCurrentUser(null); show('s-name'); };
 
-let username, segment;
+let username;
 $('#name-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const slug = slugify($('#username').value);
@@ -98,29 +165,94 @@ $('#name-form').addEventListener('submit', async (e) => {
     return;
   }
   username = slug;
-  show('s-consent');
+  show('s-type');
 });
 
-$('#segment').addEventListener('click', (e) => {
+$('#ctype').addEventListener('click', (e) => {
   const b = e.target.closest('.choice'); if (!b) return;
-  segment = b.dataset.v;
-  $('#segment').querySelectorAll('.choice').forEach((c) => c.classList.toggle('selected', c === b));
-  $('#consent-next').disabled = false;
+  choose($('#ctype'), b);
+  S.customerType = b.dataset.v;
+  $('#segment-wrap').classList.toggle('hidden', S.customerType !== 'existing');
+  setTimeout(() => next('s-type'), 150);
 });
 
-$('#consent-next').onclick = async () => {
-  const social = $('#c-social').checked;
-  $('#consent-next').disabled = true;
-  await createUser(username, {
-    segment,
-    consent: { swipe: true, cohort: $('#c-cohort').checked, socialSync: social, at: Date.now() },
-    onboarding: social ? 'social' : 'swipe',
-    rewardPoints: 200 + (social ? 100 : 0),
-    onboardingDone: false,
-  });
-  setCurrentUser(username);
-  location.href = social ? 'social.html' : 'swipe.html';
+// ---- demo customers with preset histories ----
+$('#personas').innerHTML = personas.customers.map((p) => `<button class="choice" data-id="${p.id}" style="display:flex;gap:12px;align-items:center">
+  <span style="display:flex;flex:none">${p.orders.slice(0, 3).map(([block, fabric, colour, print, fit]) => `<img src="${snapshot(catalog, { block, fabric, colour, print, fit }, { w: 96, h: 120 })}" alt="" style="width:40px;height:50px;object-fit:contain;margin-right:-8px">`).join('')}</span>
+  <span><strong>${escapeHtml(p.name)} · since ${p.since}</strong><span class="muted small">${p.orders.length} orders · ${escapeHtml(p.blurb)}</span></span></button>`).join('');
+$('#personas').addEventListener('click', (e) => {
+  const b = e.target.closest('.choice'); if (!b) return;
+  choose($('#personas'), b);
+  S.persona = personas.customers.find((p) => p.id === b.dataset.id);
+  // the persona's known profile pre-fills the next questions; the shopper can still change them
+  S.gender = S.persona.gender; S.occasions = [...S.persona.occasions];
+  syncAbout();
+  setTimeout(() => next('s-persona'), 150);
+});
+
+// ---- gender & occasions ----
+$('#occasions').innerHTML = Object.entries(catalog.occasions).map(([k, o]) => `<button class="pill" data-o="${k}" style="cursor:pointer;padding:8px 12px;font-size:12px">${o.label}</button>`).join('');
+function syncAbout() {
+  $('#gender').querySelectorAll('.choice').forEach((c) => c.classList.toggle('selected', !c.dataset.skip && c.dataset.v === S.gender));
+  $('#occasions').querySelectorAll('[data-o]').forEach((c) => c.classList.toggle('accent', S.occasions.includes(c.dataset.o)));
+  $('#about-next').disabled = !S.gender;
+}
+$('#gender').addEventListener('click', (e) => { const b = e.target.closest('.choice'); if (!b) return; S.gender = b.dataset.v; syncAbout(); choose($('#gender'), b); });
+$('#occasions').addEventListener('click', (e) => {
+  const o = e.target.closest('[data-o]')?.dataset.o; if (!o) return;
+  S.occasions = S.occasions.includes(o) ? S.occasions.filter((x) => x !== o) : [...S.occasions, o];
+  syncAbout();
+});
+$('#about-next').onclick = () => next('s-about');
+
+// ---- consent ----
+$('#segment').addEventListener('click', (e) => { const b = e.target.closest('.choice'); if (!b) return; S.segment = b.dataset.v; choose($('#segment'), b); });
+$('#consent-next').onclick = () => {
+  if (S.customerType === 'existing' && !S.segment) { $('#segment').scrollIntoView({ behavior: 'smooth' }); return; }
+  next('s-consent');
 };
+
+// ---- photo ----
+$('#photo-icon').innerHTML = icon('upload', { size: 26 });
+$('#photo').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  S.photo = await downscaleFile(f, 768, 0.85);
+  $('#photo-preview').src = S.photo; $('#photo-preview').classList.remove('hidden');
+  $('#photo-next').disabled = false;
+};
+$('#photo-next').onclick = () => next('s-photo');
+$('#photo-skip').onclick = () => { S.photo = null; next('s-photo'); };
+
+// ---- create the shopper and their starting profile ----
+async function finish() {
+  show('s-saving');
+  const socials = $('#c-social').checked;
+  const user = {
+    customerType: S.customerType, segment: S.customerType === 'existing' ? S.segment : 'new', persona: S.persona?.id || null,
+    gender: S.gender, occasions: S.occasions,
+    consent: { activity: true, cohort: $('#c-cohort').checked, socials, photo: !!S.photo, at: Date.now() },
+    onboarding: socials ? 'social' : 'swipe', rewardPoints: 200 + (socials ? 100 : 0), onboardingDone: false,
+  };
+  await createUser(username, user);
+  setCurrentUser(username);
+  if (S.photo) setPhoto(username, S.photo);
+
+  let profile = await getProfile(username);
+  if (S.persona) { $('#saving-msg').textContent = `Importing ${S.persona.orders.length} past orders…`; profile = importPurchaseHistory(username, profile, S.persona); }
+  profile = applyAnswers(catalog, profile, user);
+  // net-new shoppers borrow a softened copy of the closest cohort's taste to start from
+  $('#saving-msg').textContent = 'Finding shoppers with similar taste…';
+  try {
+    const snap = await ensureCohorts(catalog);
+    const c = snap && nearestCohort(catalog, snap, profile.weights);
+    if (c) {
+      if (S.customerType === 'new') profile = applyPrior(profile, cohortPrior(catalog, c), 'cohort');
+      profile.cohortId = c.id; profile.cohortLabel = c.label;
+    }
+  } catch (e) { console.warn('cohorts unavailable', e); }
+  await saveProfile(username, profile);
+  location.href = socials ? 'social.html' : 'swipe.html';
+}
 </script>
 </body>
 </html>

@@ -4,12 +4,12 @@ Live at **https://adipkg.github.io/shein/**. Plain HTML/CSS/JS on GitHub Pages. 
 
 | Page | What it shows | Stream 2 task |
 |---|---|---|
-| `index.html` | Username, consent and value exchange, power/dormant segment | B1 |
-| `swipe.html` | 20-card onboarding swipe, then the endless **lo-fi** deck: Jev-designed garments rendered in three.js | B1, B2, B3, B4 |
-| `social.html` | Social Sync (Option A): upload inspiration images, which Gemini maps to catalogue attributes | B1 |
-| `hifi.html` | **Hi-fi**: same Jev spec, rendered photoreal by an HKU image model, Jev-screened, human-reviewed | B2, B3 |
-| `profile.html` | One shopper's 60/30/10 taste blend, history, orders, privacy controls | B1, D5 |
-| `dashboard.html` | Trends, cohorts (k-means + PCA), pilot segments, Jev calibration, guardrails, inventory, model A/B, review queue, escalations | B2–B4, C2, D6, D8 |
+| `index.html` | Username → existing or new customer → demo order history (existing) → gender & occasions → consent → optional "on me" photo | B1 |
+| `social.html` | Share socials (simulated connect): creators, films, aesthetics, liked posts → Gemini maps them to the catalogue | B1 |
+| `swipe.html` | 12-card onboarding deck (filtered by gender/occasion), then the endless **lo-fi** deck: Jev designs rendered in three.js | B1–B4 |
+| `foryou.html` | **Made for you**: curated rows (best matches, bought by your cohort, trending in your style, something new, real-life looks, on you) with like/pass on every tile, details, order and **See it for real** | B2, B3 |
+| `profile.html` | What shapes your designs (signal sources), 60/30/10 taste, past purchases, socials, photo & private looks, orders, privacy | B1, D5 |
+| `dashboard.html` | Trends, persistent cohorts, existing vs new, signal mix, exploration slider + metrics, cohort sharing funnel, audience, Jev calibration, guardrails, hi-fi, review queue, escalations | B2–B4, C2, D6, D8 |
 
 ## Look and feel
 The app is black and white, with matte frosted-glass cards (`backdrop-filter` blur plus a faint grain) over a woven-canvas background (`assets/fabric.jpg`). The SHEIN wordmark sits with an italic "co·create". The fonts are Fraunces for display and Inter for UI. Buttons follow SHEIN's retail style: square, uppercase and tracked.
@@ -19,18 +19,28 @@ The app is black and white, with matte frosted-glass cards (`backdrop-filter` bl
 - **Disclaimer**: the footer disclaimer must stay, because the SHEIN name is used.
 
 ## How a design is made
-1. **Taste**: every swipe updates a weight for each catalogue attribute (block, fabric, colour, print, fit).
-2. **Blend**: 60% the shopper's own weights, 30% creator looks (`data/kol.json`), 10% live trend counters.
-3. **Jev** (TypeSafe System One, `jev-latest`) returns a probability for every catalogue option, and specs are sampled from those probabilities.
-4. **Guardrails** (`js/guardrails.js`):
-   - (1) master pattern block + compatible fabric
-   - (2) fabric in stock (live RTDB inventory)
-   - (3) SUCP ≤ 18% and ≤ 7 days
-   - (4) IP risk ≤ 35% (Jev `noul`; on the real image pixels for hi-fi)
-5. **Swipe**: ← nope, → like, ↑ order. An order creates a single-unit work order and draws down fabric stock.
-6. **Escalation**: when likes + 3×orders ≥ 6, the design is queued for an LATR micro-batch and shown to shoppers with similar taste.
+1. **Signals, weighted:** purchase 5 · order 4 · social 1.5 · like 1 · answers 0.6 · cohort prior 0.4 · dwell 0.3 · pass −0.7. Each source is kept separately (`bySource`), and every new signal fades the old ones a little (×0.985), so the profile keeps up with the shopper.
+2. **Cold start:**
+   - Existing customers start from their order history; older orders count less.
+   - New customers start from their answers plus a softened copy of the nearest cohort's taste.
+3. **Jev** gives a probability for every catalogue option, from the 60/30/10 blend, purchases, socials, occasions and recent reactions.
+4. **Exploration vs exploitation:**
+   - Each option is scored as Jev probability^0.6 × Thompson sample × novelty. The Thompson sample is a plausible like-rate drawn from that option's evidence, so rarely-seen options get a fair chance.
+   - Each batch is a slate of best matches, one twist (1–2 attributes changed) and discovery. The dashboard slider sets the mix.
+   - Within a batch, every pick pushes the next one away from the attributes just used.
+5. **Guardrails:** (1) master pattern block + compatible fabric, (2) live fabric stock, (3) SUCP ≤ 18% and ≤ 7 days, (4) Jev IP check, run on the image pixels for hi-fi.
+6. **Cohorts:**
+   - Persistent: k-means on unit taste vectors, recomputed automatically, with ids and names kept across recomputes.
+   - A purchase goes straight into the buyer's cohort pool, and other members see "Bought by N people with your taste".
+   - Designs with a trend score ≥ 8 escalate to an LATR micro-batch.
+7. **See it for real:**
+   - *On a model*: shared, cached per design, Jev-screened, and held for human review.
+   - *On me*: the onboarding photo is edited to wear the design. The photo and result stay in the browser only.
+   - Each shopper gets 3 renders a day; cache hits are free.
 
 ## Run locally
+Set `localStorage.sd_db = 'local'` in the browser to use the in-browser database instead of Firebase (offline fallback; tests).
+
 ```bash
 # 1. static site
 python3 -m http.server 5173 --bind 127.0.0.1        # open http://127.0.0.1:5173
@@ -47,6 +57,7 @@ Set `FIREBASE_CONFIG` in `js/config.js` to `null` to keep data in the browser in
 
 ## Limits to know before the pitch
 - **HKU image quota**: `gemini-2.5-flash-image` allows 2/min and 70/week; `gemini-3.1-flash-image` allows 2/min and 35/week. The quota is shared with the HKU GenAI app. Generate a library ahead of time and approve it on the dashboard.
+- **HKU AI credits**: the gateway answers "Insufficient token." when the account's image credits run out (shared with the HKU GenAI app); the app then shows a clear message. "On me" edits send the photo as `inlineData` (Gemini's documented edit format) and haven't been verified live yet, because credits ran out during testing.
 - **gpt-image-1.5** is not in the HKU portal docs yet. `/openai-image` in the worker returns 501 until it is wired up.
 - **Gemini text** allows 3/min and 300/day. It is used only for Social Sync and cohort naming, never per swipe.
 - **Jev image input** is experimental (`TypeSafe-Danger-Zone-Images` header, 512×512 JPEG).

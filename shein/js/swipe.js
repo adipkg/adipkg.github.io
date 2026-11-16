@@ -51,6 +51,7 @@ export class Deck {
       card.style.zIndex = String(VISIBLE - i);
       card.style.setProperty('--depth', i);
       card.classList.toggle('top', i === 0);
+      if (i === 0 && !card._topAt) card._topAt = Date.now(); // for time-on-card (dwell) tracking
       if (i === 0 && !card._bound) this.bind(card);
     });
     let status = this.el.querySelector('.deck-status');
@@ -109,7 +110,7 @@ export class Deck {
     this.paint();
     // swipe handlers run strictly in order (each one builds on the previous profile) without blocking the UI
     this.chain = (this.chain || Promise.resolve())
-      .then(() => this.onSwipe(item, DIRS[direction]))
+      .then(() => this.onSwipe(item, DIRS[direction], { viewedMs: Date.now() - (card._topAt || Date.now()) }))
       .catch((e) => console.error('[deck] onSwipe failed', e))
       .then(() => this.refill());
     return this.chain;

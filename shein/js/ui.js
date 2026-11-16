@@ -6,7 +6,7 @@ import { DB } from './db.js';
 
 export { escapeHtml };
 
-const PAGES = [['swipe.html', 'Swipe'], ['hifi.html', 'Hi-fi'], ['profile.html', 'Profile'], ['dashboard.html', 'Dashboard']];
+const PAGES = [['swipe.html', 'Swipe'], ['foryou.html', 'For you'], ['profile.html', 'Profile'], ['dashboard.html', 'Dashboard']];
 
 const PATHS = {
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
@@ -44,14 +44,16 @@ export function toast(msg) {
 }
 
 // The visual card for any garment spec. `extra` is HTML added under the chips (badges etc).
-export function garmentCard(catalog, spec, { title, subtitle, extra = '', badge = '', onInspect } = {}) {
+export function garmentCard(catalog, spec, { title, subtitle, extra = '', badge = '', onInspect, onReal } = {}) {
   const frag = document.createDocumentFragment();
   const art = document.createElement('div');
   art.className = 'art';
   art.innerHTML = `<img alt="${escapeHtml(describeSpec(catalog, spec))}" src="${snapshot(catalog, spec)}">
     ${badge ? `<div class="badge">${badge}</div>` : ''}
-    <div class="corner"><button class="icon-btn" title="Inspect in 3D" aria-label="Inspect in 3D">${icon('rotate')}</button></div>`;
-  art.querySelector('button').addEventListener('click', () => (onInspect ? onInspect() : inspect(catalog, spec)));
+    <div class="corner">${onReal ? `<button class="icon-btn" data-real title="See it for real" aria-label="See it for real">${icon('spark')}</button>` : ''}
+      <button class="icon-btn" data-inspect title="Inspect in 3D" aria-label="Inspect in 3D">${icon('rotate')}</button></div>`;
+  art.querySelector('[data-inspect]').addEventListener('click', () => (onInspect ? onInspect() : inspect(catalog, spec)));
+  art.querySelector('[data-real]')?.addEventListener('click', onReal);
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.innerHTML = `<h3>${escapeHtml(title || describeSpec(catalog, spec))}</h3>
@@ -62,16 +64,19 @@ export function garmentCard(catalog, spec, { title, subtitle, extra = '', badge 
   return frag;
 }
 
-export function inspect(catalog, spec, bodyHtml = '') {
+// 3D inspector sheet. opts.onMount(dlg) wires extra buttons; opts.onClose(msOpen) reports how long it was viewed.
+export function inspect(catalog, spec, bodyHtml = '', { onMount, onClose } = {}) {
   const dlg = document.createElement('dialog');
   dlg.innerHTML = `<div class="inspector-stage"></div>
     <div class="sheet-body"><span class="eyebrow">Drag to rotate · scroll to zoom</span><h2>${escapeHtml(describeSpec(catalog, spec))}</h2>${bodyHtml}
-    <button class="btn block" value="close" style="margin-top:16px">Close</button></div>`;
+    <button class="btn ghost block" value="close" style="margin-top:12px">Close</button></div>`;
   document.body.append(dlg);
   dlg.showModal();
+  const opened = Date.now();
   const stop = openInspector(dlg.querySelector('.inspector-stage'), catalog, spec);
-  const close = () => { stop(); dlg.remove(); };
   dlg.querySelector('button[value=close]').addEventListener('click', () => dlg.close());
-  dlg.addEventListener('close', close);
+  dlg.addEventListener('close', () => { stop(); dlg.remove(); onClose?.(Date.now() - opened); });
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  onMount?.(dlg);
+  return dlg;
 }

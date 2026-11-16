@@ -16,6 +16,14 @@ const OUTLINES = {
   a_line_skirt: [[0, 1.0], [0.5, 1.0], [0.52, 0.86], [0.96, -0.24], [0, -0.3]],
   wide_leg_trousers: [[0, 1.0], [0.56, 1.0], [0.58, 0.84], [0.76, -0.92], [0.2, -0.92], [0.04, 0.28], [0, 0.3]],
   blazer: [[0, 1.6], [0.2, 1.72], [0.5, 1.72], [1.06, 1.42], [1.18, 0.28], [0.94, 0.24], [0.74, 1.1], [0.76, 0], [0.08, -0.08], [0, 0.02]],
+  tank_top: [[0, 1.38], [0.2, 1.62], [0.3, 1.66], [0.38, 1.42], [0.6, 1.2], [0.64, 0], [0, 0]],
+  polo: [[0, 1.5], [0.14, 1.74], [0.42, 1.7], [0.96, 1.42], [1.1, 1.1], [0.84, 0.94], [0.68, 1.1], [0.68, 0], [0, 0]],
+  bomber_jacket: [[0, 1.62], [0.22, 1.7], [0.5, 1.68], [1.08, 1.38], [1.24, 0.36], [1.0, 0.3], [0.76, 1.08], [0.78, 0.12], [0.7, 0], [0, 0]],
+  maxi_gown: [[0, 1.3], [0.24, 1.5], [0.3, 1.86], [0.36, 1.86], [0.42, 1.44], [0.5, 1.3], [0.42, 0.8], [0.9, -1.6], [0, -1.66]],
+  shorts: [[0, 1.0], [0.56, 1.0], [0.58, 0.84], [0.7, 0.1], [0.18, 0.06], [0.04, 0.5], [0, 0.52]],
+  joggers: [[0, 1.0], [0.54, 1.0], [0.56, 0.84], [0.6, 0.0], [0.46, -0.9], [0.16, -0.9], [0.04, 0.28], [0, 0.3]],
+  leggings: [[0, 1.0], [0.46, 1.0], [0.48, 0.6], [0.36, -0.95], [0.12, -0.95], [0.03, 0.3], [0, 0.32]],
+  tailored_trousers: [[0, 1.0], [0.54, 1.0], [0.56, 0.84], [0.6, -0.95], [0.16, -0.95], [0.04, 0.28], [0, 0.3]],
 };
 
 function shapeFor(block, fit) {
@@ -177,6 +185,38 @@ function buildGarment(catalog, spec) {
     case 'wide_leg_trousers':
       group.add(plate(1.12 * sx, 0.14, 0, 0.93 * sy, trimMat));
       group.add(button(0, 0.93 * sy));
+      break;
+    case 'tailored_trousers':
+      group.add(plate(1.08 * sx, 0.12, 0, 0.94 * sy, trimMat), button(0, 0.94 * sy));
+      for (const k of [-1, 1]) { const crease = plate(0.012, 1.7 * sy, 0.36 * k * sx, -0.05 * sy, trimMat); crease.rotation.z = -0.02 * k; group.add(crease); }
+      break;
+    case 'joggers':
+      group.add(plate(1.06 * sx, 0.16, 0, 0.93 * sy, trimMat));
+      for (const k of [-1, 1]) { group.add(plate(0.32 * sx, 0.12, 0.31 * k * sx, -0.86 * sy, trimMat)); const cord = plate(0.02, 0.22, 0.07 * k, 0.78 * sy, darkMat); group.add(cord); }
+      break;
+    case 'leggings':
+    case 'shorts':
+      group.add(plate((spec.block === 'leggings' ? 0.94 : 1.12) * sx, 0.14, 0, 0.94 * sy, trimMat));
+      break;
+    case 'bomber_jacket': {
+      const zip = plate(0.03, 1.58 * sy, 0, 0.84 * sy, metal); zip.position.z = front + 0.01; group.add(zip);
+      group.add(plate(1.5 * sx, 0.16, 0, 0.07 * sy, trimMat, front - 0.02), plate(0.5 * sx, 0.1, 0, 1.66 * sy, trimMat, front - 0.03));
+      for (const k of [-1, 1]) { const cuff = plate(0.28, 0.12, 1.12 * k * sx, 0.36 * sy, trimMat); cuff.rotation.z = 0.42 * k; group.add(cuff); }
+      break;
+    }
+    case 'polo':
+      for (const k of [-1, 1]) {
+        const collar = new THREE.Shape([[0, 1.5], [0.06 * k, 1.74], [0.28 * k, 1.68], [0.18 * k, 1.5]].map(([x, y]) => new THREE.Vector2(x * sx, y * sy)));
+        const c = new THREE.Mesh(new THREE.ExtrudeGeometry(collar, { depth: 0.04, bevelEnabled: false }), trimMat); c.position.z = front - 0.01; group.add(c);
+      }
+      group.add(plate(0.09, 0.42 * sy, 0, 1.3 * sy, trimMat), button(0, 1.42 * sy), button(0, 1.24 * sy));
+      break;
+    case 'maxi_gown':
+      group.add(plate(0.9 * sx, 0.06, 0, 0.84 * sy, trimMat));
+      break;
+    case 'tank_top':
+      { const neck = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.022, 8, 24, Math.PI), trimMat);
+        neck.rotation.z = Math.PI; neck.position.set(0, 1.6 * sy, front - 0.02); group.add(neck); }
       break;
     case 'tee':
     case 'crop_top':

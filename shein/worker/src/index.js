@@ -2,7 +2,7 @@
 //   GET  /health         → which keys are configured
 //   POST /jev            → TypeSafe Jev System One   { state, questions, assets? }
 //   POST /gemini         → HKU Gemini text / vision  { model, body }
-//   POST /image          → HKU Gemini image models   { model, prompt, aspectRatio }
+//   POST /image          → HKU Gemini image models   { model, prompt, aspectRatio, image? }
 //   POST /openai-image   → gpt-image-1.5 (waiting on HKU portal docs)
 const JEV_URL = 'https://api.typesafe.ai/v1/systemone';
 const JEV_MODEL = 'jev-latest';
@@ -10,7 +10,7 @@ const HKU_BASE = 'https://api.hku.hk/gemini/student/';
 const TEXT_MODELS = ['gemini-3-flash-preview', 'gemini-3.5-flash', 'gemini-3.1-pro-preview'];
 const IMAGE_MODELS = ['gemini-2.5-flash-image', 'gemini-3.1-flash-image', 'gemini-3-pro-image'];
 const PASSCODE_ROUTES = ['/gemini', '/image', '/openai-image'];
-const MAX_BODY = { '/jev': 1_500_000, '/gemini': 6_000_000, '/image': 8_000 };
+const MAX_BODY = { '/jev': 1_500_000, '/gemini': 6_000_000, '/image': 2_000_000 };
 
 export default {
   async fetch(req, env) {
@@ -73,7 +73,13 @@ async function hku(model, payload, env) {
     headers: { [env.HKU_KEY_HEADER || 'api-key']: env.HKU_API_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  const data = await r.json().catch(() => ({ error: `non-JSON response from HKU (${r.status})` }));
+  const raw = await r.text();
+  let data;
+  try { data = JSON.parse(raw); }
+  catch { // the gateway answers some errors in plain text, e.g. "Insufficient token." when credits run out
+    const msg = raw.trim().slice(0, 200);
+    data = { error: /insufficient token/i.test(msg) ? 'HKU AI credits for this model are used up for now. Try again later or switch model.' : `HKU ${r.status}: ${msg || 'no details'}` };
+  }
   return [{ ...data, latencyMs: Date.now() - t0 }, r.status];
 }
 
@@ -83,11 +89,14 @@ function gemini({ model, body }, env) {
   return hku(model, body, env);
 }
 
-function geminiImage({ model, prompt, aspectRatio = '4:5' }, env) {
+// Optional `image` ({ mimeType, data }) makes it an edit of that photo ("see it on me").
+function geminiImage({ model, prompt, aspectRatio = '4:5', image }, env) {
   if (!IMAGE_MODELS.includes(model)) return [{ error: `model must be one of ${IMAGE_MODELS.join(', ')}` }, 400];
   if (!prompt || prompt.length > 4000) return [{ error: 'prompt required (max 4000 chars)' }, 400];
+  if (image && (!/^image\/(jpeg|png|webp)$/.test(image.mimeType || '') || typeof image.data !== 'string')) return [{ error: 'image must be { mimeType, data }' }, 400];
+  const parts = image ? [{ inlineData: { mimeType: image.mimeType, data: image.data } }, { text: prompt }] : [{ text: prompt }];
   return hku(model, {
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    contents: [{ role: 'user', parts }],
     generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio } },
   }, env);
 }

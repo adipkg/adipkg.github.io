@@ -57,8 +57,9 @@ export async function geminiText(parts, { model = 'gemini-3-flash-preview', syst
 }
 
 // HKU Gemini image models. Returns { mimeType, data(base64), latencyMs }.
-export async function geminiImage(prompt, { model = 'gemini-2.5-flash-image', aspectRatio = '4:5' } = {}) {
-  const data = await post('/image', { model, prompt, aspectRatio });
+// `image` ({ mimeType, data }) turns it into an edit of that photo (used for "see it on me").
+export async function geminiImage(prompt, { model = 'gemini-2.5-flash-image', aspectRatio = '4:5', image } = {}) {
+  const data = await post('/image', { model, prompt, aspectRatio, ...(image ? { image } : {}) });
   const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData);
   if (!part) {
     console.warn('[image] no inlineData in response', data);

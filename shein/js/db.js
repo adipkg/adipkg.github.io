@@ -133,4 +133,6 @@ function localBackend() {
   };
 }
 
-export const DB = FIREBASE_CONFIG ? await firebaseBackend(FIREBASE_CONFIG) : localBackend();
+// localStorage sd_db=local forces the in-browser database (offline pitch fallback, and tests that must not touch live data)
+const forceLocal = (() => { try { return localStorage.getItem('sd_db') === 'local'; } catch { return false; } })();
+export const DB = FIREBASE_CONFIG && !forceLocal ? await firebaseBackend(FIREBASE_CONFIG) : localBackend();

@@ -172,7 +172,7 @@ kbd { font: 600 10px var(--font); border: 1px solid var(--line-strong); border-r
 /* ---------- dialogs ---------- */
 dialog { padding: 0; border-radius: 24px; color: var(--ink); width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); background: var(--grain), var(--glass-strong); }
 dialog::backdrop { background: rgba(17, 17, 17, .35); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
-.inspector-stage { height: 360px; background: radial-gradient(90% 70% at 50% 40%, #f4f3f0 0%, #e4e2dd 100%); cursor: grab; }
+.inspector-stage { height: min(360px, 40dvh); background: radial-gradient(90% 70% at 50% 40%, #f4f3f0 0%, #e4e2dd 100%); cursor: grab; }
 .sheet-body { padding: 18px 20px 20px; }
 .kv { display: grid; grid-template-columns: auto 1fr auto; gap: 7px 14px; font-size: 13px; align-items: center; }
 .kv .k { color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: .08em; }
@@ -241,3 +241,26 @@ select { font: 600 12px var(--font); padding: 6px 8px; border-radius: var(--radi
   .panel, .glass, .card, dialog, .kpi, .round, .choice, .icon-btn, .topbar { background: rgba(255, 255, 255, .92); }
 }
 details > summary::-webkit-details-marker { display: none; }
+
+/* ---------- "Made for you" gallery ---------- */
+.gallery-row { margin: 18px 0 8px; }
+.gallery-row .head-row { margin-bottom: 10px; }
+.rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 46%); gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 2px 10px; scrollbar-width: thin; }
+@media (min-width: 700px) { .rail { grid-auto-columns: minmax(170px, 23%); } }
+.tile { scroll-snap-align: start; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+  background: var(--grain), var(--glass-strong); border: 1px solid var(--glass-edge); box-shadow: var(--shadow); transition: opacity .2s; }
+.tile.skeleton { min-height: 250px; background: linear-gradient(100deg, rgba(255,255,255,.5) 30%, rgba(255,255,255,.85) 50%, rgba(255,255,255,.5) 70%) 0 0 / 300% 100%;
+  animation: shimmer 1.3s linear infinite; }
+@keyframes shimmer { to { background-position: -150% 0; } }
+.tile-art { position: relative; border: 0; padding: 0; cursor: pointer; background: radial-gradient(90% 70% at 50% 40%, #f4f3f0 0%, #e4e2dd 100%); }
+.tile-art img { width: 100%; aspect-ratio: 4/5; object-fit: contain; display: block; }
+.tile-badge { position: absolute; top: 8px; left: 8px; font-size: 10px; }
+.tile-meta { padding: 9px 10px 2px; font-size: 12px; display: grid; gap: 2px; }
+.tile-meta strong { font: 600 14px/1.25 var(--display); }
+.tile-meta .muted { font-size: 11px; line-height: 1.35; }
+.tile-acts { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 9px; margin-top: auto; }
+.tile-acts .icon-btn { width: 34px; height: 34px; font-size: 15px; }
+.tile.liked .tile-acts [data-s=like] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tile.passed { opacity: .45; }
+@media (prefers-reduced-motion: reduce) { .tile.skeleton { animation: none; } }

@@ -1,22 +1,362 @@
 [
-  { "id": "c01", "name": "Cyber baby tee",        "block": "crop_top",          "fabric": "mesh",          "colour": "lilac",      "print": "y2k_graphic",    "fit": "fitted" },
-  { "id": "c02", "name": "Quiet linen shirt",     "block": "shirt",             "fabric": "linen",         "colour": "cream",      "print": "solid",          "fit": "oversized" },
-  { "id": "c03", "name": "Night-out slip",        "block": "slip_dress",        "fabric": "satin",         "colour": "black",      "print": "solid",          "fit": "fitted" },
-  { "id": "c04", "name": "Skate hoodie",          "block": "hoodie",            "fabric": "french_terry",  "colour": "charcoal",   "print": "abstract_swirl", "fit": "oversized" },
-  { "id": "c05", "name": "Picnic wrap dress",     "block": "wrap_dress",        "fabric": "chiffon",       "colour": "butter",     "print": "floral",         "fit": "regular" },
-  { "id": "c06", "name": "Office power blazer",   "block": "blazer",            "fabric": "twill",         "colour": "charcoal",   "print": "solid",          "fit": "regular" },
-  { "id": "c07", "name": "Wild one mini",         "block": "a_line_skirt",      "fabric": "faux_leather",  "colour": "chocolate",  "print": "leopard",        "fit": "fitted" },
-  { "id": "c08", "name": "Coastal trousers",      "block": "wide_leg_trousers", "fabric": "linen",         "colour": "white",      "print": "solid",          "fit": "oversized" },
-  { "id": "c09", "name": "Varsity tee",           "block": "tee",               "fabric": "cotton_jersey", "colour": "cherry_red", "print": "stripe",         "fit": "oversized" },
-  { "id": "c10", "name": "Coquette dot dress",    "block": "wrap_dress",        "fabric": "crepe",         "colour": "hot_pink",   "print": "polka_dot",      "fit": "fitted" },
-  { "id": "c11", "name": "Denim A-line",          "block": "a_line_skirt",      "fabric": "denim",         "colour": "denim_blue", "print": "solid",          "fit": "regular" },
-  { "id": "c12", "name": "Sage rib top",          "block": "crop_top",          "fabric": "rib_knit",      "colour": "sage",       "print": "solid",          "fit": "fitted" },
-  { "id": "c13", "name": "Gingham picnic shirt",  "block": "shirt",             "fabric": "poplin",        "colour": "cobalt",     "print": "gingham",        "fit": "regular" },
-  { "id": "c14", "name": "Grunge cord trousers",  "block": "wide_leg_trousers", "fabric": "corduroy",      "colour": "chocolate",  "print": "solid",          "fit": "regular" },
-  { "id": "c15", "name": "Heiress tweed skirt",   "block": "a_line_skirt",      "fabric": "tweed",         "colour": "cream",      "print": "solid",          "fit": "fitted" },
-  { "id": "c16", "name": "Electric slip",         "block": "slip_dress",        "fabric": "mesh",          "colour": "cobalt",     "print": "abstract_swirl", "fit": "fitted" },
-  { "id": "c17", "name": "Everyday white tee",    "block": "tee",               "fabric": "cotton_jersey", "colour": "white",      "print": "solid",          "fit": "regular" },
-  { "id": "c18", "name": "Pastel dream hoodie",   "block": "hoodie",            "fabric": "cotton_jersey", "colour": "lilac",      "print": "polka_dot",      "fit": "oversized" },
-  { "id": "c19", "name": "Leather moto blazer",   "block": "blazer",            "fabric": "faux_leather",  "colour": "black",      "print": "solid",          "fit": "fitted" },
-  { "id": "c20", "name": "Garden party slip",     "block": "slip_dress",        "fabric": "chiffon",       "colour": "sage",       "print": "floral",         "fit": "regular" }
+ {
+  "id": "c01",
+  "name": "Cyber baby tee",
+  "block": "crop_top",
+  "fabric": "mesh",
+  "colour": "lilac",
+  "print": "y2k_graphic",
+  "fit": "fitted"
+ },
+ {
+  "id": "c02",
+  "name": "Quiet linen shirt",
+  "block": "shirt",
+  "fabric": "linen",
+  "colour": "cream",
+  "print": "solid",
+  "fit": "oversized"
+ },
+ {
+  "id": "c03",
+  "name": "Night-out slip",
+  "block": "slip_dress",
+  "fabric": "satin",
+  "colour": "black",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c04",
+  "name": "Skate hoodie",
+  "block": "hoodie",
+  "fabric": "french_terry",
+  "colour": "charcoal",
+  "print": "abstract_swirl",
+  "fit": "oversized"
+ },
+ {
+  "id": "c05",
+  "name": "Picnic wrap dress",
+  "block": "wrap_dress",
+  "fabric": "chiffon",
+  "colour": "butter",
+  "print": "floral",
+  "fit": "regular"
+ },
+ {
+  "id": "c06",
+  "name": "Office power blazer",
+  "block": "blazer",
+  "fabric": "twill",
+  "colour": "charcoal",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c07",
+  "name": "Wild one mini",
+  "block": "a_line_skirt",
+  "fabric": "faux_leather",
+  "colour": "chocolate",
+  "print": "leopard",
+  "fit": "fitted"
+ },
+ {
+  "id": "c08",
+  "name": "Coastal trousers",
+  "block": "wide_leg_trousers",
+  "fabric": "linen",
+  "colour": "white",
+  "print": "solid",
+  "fit": "oversized"
+ },
+ {
+  "id": "c09",
+  "name": "Varsity tee",
+  "block": "tee",
+  "fabric": "cotton_jersey",
+  "colour": "cherry_red",
+  "print": "stripe",
+  "fit": "oversized"
+ },
+ {
+  "id": "c10",
+  "name": "Coquette dot dress",
+  "block": "wrap_dress",
+  "fabric": "crepe",
+  "colour": "hot_pink",
+  "print": "polka_dot",
+  "fit": "fitted"
+ },
+ {
+  "id": "c11",
+  "name": "Denim A-line",
+  "block": "a_line_skirt",
+  "fabric": "denim",
+  "colour": "denim_blue",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c12",
+  "name": "Sage rib top",
+  "block": "crop_top",
+  "fabric": "rib_knit",
+  "colour": "sage",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c13",
+  "name": "Gingham picnic shirt",
+  "block": "shirt",
+  "fabric": "poplin",
+  "colour": "cobalt",
+  "print": "gingham",
+  "fit": "regular"
+ },
+ {
+  "id": "c14",
+  "name": "Grunge cord trousers",
+  "block": "wide_leg_trousers",
+  "fabric": "corduroy",
+  "colour": "chocolate",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c15",
+  "name": "Heiress tweed skirt",
+  "block": "a_line_skirt",
+  "fabric": "tweed",
+  "colour": "cream",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c16",
+  "name": "Electric slip",
+  "block": "slip_dress",
+  "fabric": "mesh",
+  "colour": "cobalt",
+  "print": "abstract_swirl",
+  "fit": "fitted"
+ },
+ {
+  "id": "c17",
+  "name": "Everyday white tee",
+  "block": "tee",
+  "fabric": "cotton_jersey",
+  "colour": "white",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c18",
+  "name": "Pastel dream hoodie",
+  "block": "hoodie",
+  "fabric": "cotton_jersey",
+  "colour": "lilac",
+  "print": "polka_dot",
+  "fit": "oversized"
+ },
+ {
+  "id": "c19",
+  "name": "Leather moto blazer",
+  "block": "blazer",
+  "fabric": "faux_leather",
+  "colour": "black",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c20",
+  "name": "Garden party slip",
+  "block": "slip_dress",
+  "fabric": "chiffon",
+  "colour": "sage",
+  "print": "floral",
+  "fit": "regular"
+ },
+ {
+  "id": "c21",
+  "name": "Studio joggers",
+  "block": "joggers",
+  "fabric": "french_terry",
+  "colour": "charcoal",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c22",
+  "name": "Pace leggings",
+  "block": "leggings",
+  "fabric": "performance_knit",
+  "colour": "black",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c23",
+  "name": "Run club tank",
+  "block": "tank_top",
+  "fabric": "performance_knit",
+  "colour": "cobalt",
+  "print": "stripe",
+  "fit": "fitted"
+ },
+ {
+  "id": "c24",
+  "name": "Satin bomber",
+  "block": "bomber_jacket",
+  "fabric": "satin",
+  "colour": "sage",
+  "print": "solid",
+  "fit": "oversized"
+ },
+ {
+  "id": "c25",
+  "name": "Weekend polo",
+  "block": "polo",
+  "fabric": "cotton_jersey",
+  "colour": "cream",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c26",
+  "name": "Boardroom trousers",
+  "block": "tailored_trousers",
+  "fabric": "suiting_wool",
+  "colour": "charcoal",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c27",
+  "name": "Gala gown",
+  "block": "maxi_gown",
+  "fabric": "satin",
+  "colour": "cherry_red",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c28",
+  "name": "Beach shorts",
+  "block": "shorts",
+  "fabric": "linen",
+  "colour": "butter",
+  "print": "gingham",
+  "fit": "regular"
+ },
+ {
+  "id": "c29",
+  "name": "Flight bomber",
+  "block": "bomber_jacket",
+  "fabric": "nylon",
+  "colour": "black",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c30",
+  "name": "Wedding guest gown",
+  "block": "maxi_gown",
+  "fabric": "chiffon",
+  "colour": "lilac",
+  "print": "floral",
+  "fit": "regular"
+ },
+ {
+  "id": "c31",
+  "name": "Court polo",
+  "block": "polo",
+  "fabric": "performance_knit",
+  "colour": "white",
+  "print": "stripe",
+  "fit": "fitted"
+ },
+ {
+  "id": "c32",
+  "name": "Denim cut-offs",
+  "block": "shorts",
+  "fabric": "denim",
+  "colour": "denim_blue",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c33",
+  "name": "Graphic gym tank",
+  "block": "tank_top",
+  "fabric": "cotton_jersey",
+  "colour": "charcoal",
+  "print": "y2k_graphic",
+  "fit": "oversized"
+ },
+ {
+  "id": "c34",
+  "name": "Leopard joggers",
+  "block": "joggers",
+  "fabric": "cotton_jersey",
+  "colour": "chocolate",
+  "print": "leopard",
+  "fit": "oversized"
+ },
+ {
+  "id": "c35",
+  "name": "Sage linen trousers",
+  "block": "tailored_trousers",
+  "fabric": "linen",
+  "colour": "sage",
+  "print": "solid",
+  "fit": "regular"
+ },
+ {
+  "id": "c36",
+  "name": "Tweed power blazer",
+  "block": "blazer",
+  "fabric": "suiting_wool",
+  "colour": "black",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c37",
+  "name": "Abstract board shorts",
+  "block": "shorts",
+  "fabric": "performance_knit",
+  "colour": "cobalt",
+  "print": "abstract_swirl",
+  "fit": "regular"
+ },
+ {
+  "id": "c38",
+  "name": "Mesh dance tank",
+  "block": "tank_top",
+  "fabric": "mesh",
+  "colour": "hot_pink",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c39",
+  "name": "Crepe column gown",
+  "block": "maxi_gown",
+  "fabric": "crepe",
+  "colour": "black",
+  "print": "solid",
+  "fit": "fitted"
+ },
+ {
+  "id": "c40",
+  "name": "Dot sculpt leggings",
+  "block": "leggings",
+  "fabric": "rib_knit",
+  "colour": "lilac",
+  "print": "polka_dot",
+  "fit": "fitted"
+ }
 ]

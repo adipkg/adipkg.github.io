@@ -15,5 +15,5 @@ export const WORKER_URL = location.hostname === 'localhost' || location.hostname
   ? 'http://localhost:8787'
   : 'https://shein-cocreate-worker.guduruadip.workers.dev';
 
-export const ONBOARDING_CARDS = 20;
+export const ONBOARDING_CARDS = 12;
 export const BLEND = { user: 0.6, kol: 0.3, trend: 0.1 };

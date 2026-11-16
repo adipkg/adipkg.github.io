@@ -28,15 +28,16 @@
 <script type="module">
 import { chrome, garmentCard, toast, icon } from './js/ui.js';
 import { Deck } from './js/swipe.js';
-import { loadCatalog, loadCards } from './js/taste.js';
-import { requireUser, getUser, getProfile, updateUser, recordSwipe, touchPresence } from './js/store.js';
+import { loadCatalog, loadCards, allowedBlocks } from './js/taste.js';
+import { requireUser, getUser, getProfile, updateUser, recordSignal, touchPresence } from './js/store.js';
+import { assignCohort } from './js/cohorts.js';
 import { ONBOARDING_CARDS } from './js/config.js';
 
 chrome('swipe.html');
 const u = requireUser();
 const [catalog, cards, user] = await Promise.all([loadCatalog(), loadCards(), getUser(u)]);
 if (!user) { location.replace('index.html'); }
-let profile = (await getProfile(u)) || { weights: {} };
+let profile = await getProfile(u);
 touchPresence(u);
 
 const $ = (s) => document.querySelector(s);
@@ -52,31 +53,48 @@ function setPhase(label, pct, meta = '') {
   $('#progress').style.width = `${pct}%`;
 }
 
-// ---------- phase A: onboarding (explicit vectoring) ----------
+// The onboarding deck: cards that fit the shopper's gender and occasions, one per garment type first,
+// in a stable per-user order so a reload resumes where they left off.
+function onboardingDeck() {
+  const ok = new Set(allowedBlocks(catalog, user));
+  let h = [...u].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const rnd = () => ((h = (h * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const pool = cards.filter((c) => ok.has(c.block)).map((c) => ({ c, r: rnd() })).sort((a, b) => a.r - b.r).map((x) => x.c);
+  const firsts = [], rest = [], seenBlock = new Set();
+  pool.forEach((c) => (seenBlock.has(c.block) ? rest : (seenBlock.add(c.block), firsts)).push(c));
+  return [...firsts, ...rest].slice(0, ONBOARDING_CARDS);
+}
+
+// ---------- phase A: onboarding swipes (explicit taste) ----------
 function startOnboarding() {
-  const seen = profile.swipeCount || 0;
-  const remaining = cards.slice(seen % cards.length).slice(0, Math.max(0, ONBOARDING_CARDS - seen));
-  if (!remaining.length) return startDesigns();
-  let done = seen;
-  setPhase(`Learning your style · ${done}/${ONBOARDING_CARDS}`, (done / ONBOARDING_CARDS) * 100);
+  const list = onboardingDeck();
+  const total = list.length;
+  let done = Math.min(profile.swipeCount || 0, total);
+  const remaining = list.slice(done);
+  if (!remaining.length) return finishOnboarding();
+  setPhase(`Learning your style · ${done}/${total}`, (done / total) * 100);
   $('.round.super').classList.add('hidden');
   $('#hint').innerHTML = '<kbd>←</kbd> not for me · love it <kbd>→</kbd>';
   deck = new Deck(deckEl, {
     render: (c) => garmentCard(catalog, c, { title: c.name }),
-    onSwipe: async (c, dir) => {
-      if (dir === 'super') dir = 'like'; // no ordering during onboarding
-      profile = await recordSwipe(u, profile, { spec: c, itemId: c.id, kind: 'card', dir, track: 'onboarding' });
+    onSwipe: async (c, dir, { viewedMs }) => {
+      const sig = dir === 'nope' ? 'nope' : 'like'; // no ordering during onboarding
+      if (viewedMs >= 4000 && sig === 'nope') profile = recordSignal(u, profile, { spec: c, signal: 'dwell', itemId: c.id, kind: 'card', track: 'onboarding' });
+      profile = recordSignal(u, profile, { spec: c, signal: sig, itemId: c.id, kind: 'card', track: 'onboarding' });
       done++;
-      setPhase(`Learning your style · ${done}/${ONBOARDING_CARDS}`, (done / ONBOARDING_CARDS) * 100);
-      if (done >= ONBOARDING_CARDS) {
-        await updateUser(u, { onboardingDone: true });
-        toast('Style profile ready, +200 points');
-        deck.destroy();
-        startDesigns();
-      }
+      setPhase(`Learning your style · ${done}/${total}`, (done / total) * 100);
+      if (done >= total) { deck.destroy(); finishOnboarding(); }
     },
   });
   deck.add(remaining);
+}
+
+async function finishOnboarding() {
+  await updateUser(u, { onboardingDone: true });
+  setPhase('Matching you with shoppers like you', 100);
+  try { profile = await assignCohort(catalog, u, profile); } catch (e) { console.warn(e); }
+  toast(profile.cohortLabel ? `Style profile ready · cohort: ${profile.cohortLabel}` : 'Style profile ready, +200 points');
+  startDesigns();
 }
 
 // ---------- phase B: co-created design deck (lo-fi prototype) ----------
@@ -85,7 +103,7 @@ async function startDesigns() {
   $('#hint').innerHTML = '<kbd>←</kbd> pass · <kbd>↑</kbd> order a one-off · like <kbd>→</kbd>';
   try {
     const { startDesignDeck } = await import('./js/lofi.js');
-    deck = await startDesignDeck({ el: deckEl, catalog, user: u, getProfile: () => profile, setProfile: (p) => (profile = p), setPhase });
+    deck = await startDesignDeck({ el: deckEl, catalog, u, user, getProfile: () => profile, setProfile: (p) => (profile = p), setPhase });
   } catch (e) {
     console.warn('design deck unavailable', e);
     setPhase('Onboarding complete', 100);

@@ -1,13 +1,15 @@
 // Single-unit orders → supplier work orders, and cohort-trend escalation to LATR micro-batches (Stream 2, task B4).
 import { DB, rtKey } from './db.js';
-import { describeSpec } from './taste.js';
+import { describeSpec, trendScore } from './taste.js';
 import { toast } from './ui.js';
+import { publishToPool } from './cohorts.js';
+import { cohortConsent } from './store.js';
 
-export const ESCALATE_AT = 6; // likes + 3 × orders, summed across all shoppers
+export const ESCALATE_AT = 8; // trend score (likes + 4 × orders …), summed across all shoppers
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-// it = { key, spec, guard: { cost }, track, model? }
-export async function placeOrder(catalog, u, it) {
+// it = { key, spec, guard: { cost }, track, model?, ipRisk? }; opts.cohortId shares the purchase with that cohort
+export async function placeOrder(catalog, u, it, { cohortId } = {}) {
   const { cost } = it.guard;
   const F = catalog.fabrics[it.spec.fabric];
   const stock = await DB.rt.txn(`inventory/${it.spec.fabric}`, (cur) => {
@@ -26,13 +28,15 @@ export async function placeOrder(catalog, u, it) {
     },
   });
   await DB.rt.txn(`users/${u}/rewardPoints`, (p) => (p || 0) + 50);
-  toast(`Ordered! Single-unit work order sent to ${F.hub}`);
+  // a purchase is shared with the buyer's style cohort immediately (unless they opted out)
+  if (cohortId && cohortConsent(u)) await publishToPool(cohortId, u, it);
+  toast(`Ordered! Single-unit work order sent to ${F.hub}${cohortId && cohortConsent(u) ? ', and shared with your style cohort' : ''}`);
   return true;
 }
 
 export async function maybeEscalate(it) {
   const c = (await DB.rt.get(`live/designs/${rtKey(it.key)}`)) || {};
-  const score = (c.likes || 0) + 3 * (c.orders || 0);
+  const score = Math.round(trendScore(c));
   if (score < ESCALATE_AT) return false;
   const r = await DB.rt.txn(`escalations/${rtKey(it.key)}`, (cur) => (cur ? undefined : {
     spec: it.spec, key: it.key, triggeredAt: Date.now(), likes: c.likes || 0, orders: c.orders || 0, score,
