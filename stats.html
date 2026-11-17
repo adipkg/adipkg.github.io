@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Listening Room</title>
+<link rel="apple-touch-icon" href="apple-touch-icon-stats.png">
+<meta name="apple-mobile-web-app-title" content="Listening Room">
+<meta name="theme-color" content="#16241B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap" rel="stylesheet">
@@ -235,6 +238,39 @@ svg.chart g[data-tip]:hover rect.b{filter:brightness(1.15)}
   .card{padding:18px 16px 20px}
   .trio{grid-template-columns:1fr}
   .card .figure{font-size:40px}
+}
+/* ---------- phones / touch ---------- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-tap-highlight-color:transparent}
+.stack header.top{padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left))}
+.stack .hero{padding:0 calc(16px + env(safe-area-inset-right)) 28px calc(16px + env(safe-area-inset-left))}
+.stack .panel{padding:0 calc(16px + env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
+.stack nav.tabs,.stack .years{scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.stack nav.tabs::-webkit-scrollbar,.stack .years::-webkit-scrollbar{display:none}
+.stack nav.tabs button,.stack .years button{scroll-snap-align:center;min-height:36px}
+.stack .years button{padding:8px 13px}
+.stack .yearbar{flex-wrap:wrap;gap:6px 12px}
+.stack .yearbar .years{flex:1 1 100%}
+.stack .search input{font-size:16px}
+.stack .daily .scroller{-webkit-overflow-scrolling:touch}
+.stack .daily canvas{touch-action:pan-x}
+.stack .tip{max-width:calc(100vw - 24px)}
+@media (max-width:520px){
+  .hero .big{font-size:clamp(36px,11vw,52px)}
+  .hero p{font-size:12.5px}
+  .card h2{font-size:20px}
+  .card .figure{font-size:36px}
+  .trio .figure{font-size:32px}
+  dl.sum{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 16px}
+  dl.sum dd{font-size:18px}
+  .eras{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .heat{grid-template-columns:28px repeat(24,minmax(0,1fr));gap:2px;font-size:9px}
+  .heat .c{border-radius:2px}
+  .hbars .row{grid-template-columns:minmax(80px,34%) 1fr auto;gap:8px}
+  .cdetail h3{font-size:26px}
+  .statrow{gap:10px 22px}
+  .statrow b{font-size:22px}
+  .clist button{padding:12px 10px}
 }
 @media (prefers-reduced-motion:reduce){
   .enter{animation:none}
@@ -861,7 +897,7 @@ const DRAW = {
     draw(-1);
     if (state.year === 'all') sc.scrollLeft = W;
     let last = -1;
-    cv.addEventListener('pointermove', e => {
+    const onDay = e => {
       const rect = cv.getBoundingClientRect(), d = d0 + Math.floor((e.clientX - rect.left) / bw);
       if (d < d0 || d > d1) return;
       if (d !== last) { last = d; draw(d); }
@@ -869,8 +905,10 @@ const DRAW = {
       let topT = '';
       if (hi > lo) { const c = new Map(); let bt = -1, bv = 0; for (let i = lo; i < hi; i++) { const v = (c.get(TR[i]) || 0) + 1; c.set(TR[i], v); if (v > bv) { bv = v; bt = TR[i]; } } topT = `<br>Most played: ${esc(TRACKS[bt][0])} <span style="opacity:.7">— ${esc(ARTISTS[TRACKS[bt][1]])}</span>`; }
       showTip(`<b>${fmtDay(d, true)}</b><br>${fmt(daySecs[k] / 60)} min · ${fmt(dayPlays[k])} plays${topT}`, e.clientX, e.clientY);
-    });
-    cv.addEventListener('pointerleave', () => { last = -1; draw(-1); hideTip(); });
+    };
+    cv.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') onDay(e); });
+    cv.addEventListener('pointerdown', onDay);
+    cv.addEventListener('pointerleave', e => { if (e.pointerType !== 'mouse') return; last = -1; draw(-1); hideTip(); });
     const lg = document.createElement('ul'); lg.className = 'legend';
     lg.innerHTML = `<li><i style="background:var(--yellow)"></i>Minutes listened</li><li><i style="background:var(--coral)"></i>6 hours or more</li>`;
     el.appendChild(lg);
@@ -909,7 +947,7 @@ $('#tabs').innerHTML = TABS.map(([k, v]) => `<button role="tab" data-tab="${k}">
 $('#years').innerHTML = `<button data-y="all">All</button>` + YEARS.map(y => `<button data-y="${y}">${y}</button>`).join('');
 const go = (patch, scrollTop = true) => {
   Object.assign(state, patch); render();
-  if (scrollTop) (L.stack ? scrollTo({ top: $('#panel').offsetTop - 140, behavior: reduced ? 'auto' : 'smooth' }) : $('#panel').scrollTo({ top: 0 }));
+  if (scrollTop) (L.stack ? scrollTo({ top: $('#panel').offsetTop - $('header.top').offsetHeight - 8, behavior: reduced ? 'auto' : 'smooth' }) : $('#panel').scrollTo({ top: 0 }));
 };
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go({ tab: b.dataset.tab }, !L.stack); });
 $('#years').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go({ year: b.dataset.y === 'all' ? 'all' : +b.dataset.y }, false); });
@@ -944,14 +982,26 @@ function showTip(html, x, y) {
 }
 function hideTip() { tip.classList.remove('on'); }
 document.addEventListener('pointermove', e => {
-  if (e.target.tagName === 'CANVAS') return;
+  if (e.pointerType !== 'mouse' || e.target.tagName === 'CANVAS') return;
   const t = e.target.closest?.('[data-tip]');
   if (t && t.dataset.tip) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
 });
 
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' || e.target.tagName === 'CANVAS') return;
+  const t = e.target.closest?.('[data-tip]');
+  if (t && t.dataset.tip) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+});
+addEventListener('scroll', hideTip, { passive: true, capture: true });
+
 // layout + resize
 let rz;
-addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { layout(); render({ animate: false }); }, 140); });
+let lastW = innerWidth;
+addEventListener('resize', () => {
+  if (L.stack && innerWidth === lastW) return;
+  lastW = innerWidth;
+  clearTimeout(rz); rz = setTimeout(() => { layout(); render({ animate: false }); }, 140);
+});
 addEventListener('hashchange', () => { readHash(); render(); });
 
 readHash();
