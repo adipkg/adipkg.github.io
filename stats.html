@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Listening Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#F4B82E;
+  --yellow-ink:#2A1C02;
+  --cobalt:#2E3F9F;
+  --cobalt-lt:#8494F2;
+  --coral:#EE6E55;
+  --leaf:#8DBF8F;
+  --wood:#C89463;
+  --forest:#1E3528;
+  --cream:#F3E6C8;
+  --cream-2:rgba(243,230,200,.74);
+  --cream-3:rgba(243,230,200,.52);
+  --line:rgba(243,230,200,.14);
+  --glass:rgba(17,32,24,.56);
+  --glass-strong:rgba(14,27,20,.82);
+  --serif:'Caprasimo', 'Cooper Black', Georgia, serif;
+  --mono:'Martian Mono', ui-monospace, Menlo, monospace;
+  --header:72px;
+  --r:16px;
+  --ease:cubic-bezier(.16,1,.3,1);
+  /* set by layout() */
+  --panel-left:56vw;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:#16241B}
+body{
+  margin:0;min-height:100vh;color:var(--cream);background:#16241B;
+  font-family:var(--mono);font-size:12.5px;line-height:1.55;font-stretch:87.5%;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+::selection{background:var(--yellow);color:var(--yellow-ink)}
+*{scrollbar-width:thin;scrollbar-color:rgba(243,230,200,.28) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(243,230,200,.25);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:3px;border-radius:6px}
+a{color:var(--yellow);text-underline-offset:3px}
+
+/* ---------- scene ---------- */
+.scene{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.scene .layer{position:absolute;background:url(bg.jpeg) center/100% 100% no-repeat}
+.scene .soft{filter:blur(14px) brightness(.72) saturate(1.1)}
+.scene .mirror{transform:scaleX(-1)}
+.scene .sharp{-webkit-mask-image:linear-gradient(90deg,#000 76%,transparent 99%);mask-image:linear-gradient(90deg,#000 76%,transparent 99%)}
+.scene .shade{position:absolute;inset:0;background:
+  linear-gradient(0deg,rgba(10,18,13,.78) 0%,rgba(10,18,13,.32) 22%,transparent 42%),
+  linear-gradient(90deg,transparent calc(var(--panel-left) - 140px),rgba(10,18,13,.34) var(--panel-left))}
+.stack .scene .mirror,.stack .scene .sharp{-webkit-mask-image:none;mask-image:none}
+.stack .scene .mirror{display:none}
+.stack .scene .shade{background:linear-gradient(0deg,rgba(10,18,13,.85) 0%,rgba(10,18,13,.2) 45%,transparent 70%)}
+
+.ring{position:fixed;z-index:1;pointer-events:none;overflow:visible}
+.ring .groove{fill:none;stroke:var(--cream)}
+.ring .under{fill:none;stroke:rgba(12,20,15,.38)}
+.ring text{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;fill:var(--cream);font-stretch:100%;font-weight:600;text-transform:uppercase;paint-order:stroke;stroke:rgba(12,20,15,.72);stroke-width:3.5px;stroke-linejoin:round}
+.ring text tspan.v{fill:var(--yellow);font-weight:700}
+.ring .needle{fill:var(--yellow);stroke:var(--cream);stroke-width:2}
+
+/* ---------- header ---------- */
+header.top{position:fixed;top:0;left:0;right:0;height:var(--header);z-index:20;display:flex;align-items:center;padding:0 28px;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 16px 6px 6px;margin-left:-6px;border-radius:999px;background:var(--glass);backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);box-shadow:inset 1px 1px 0 rgba(255,236,200,.14);font-family:var(--serif);font-size:19px;letter-spacing:-.01em;white-space:nowrap}
+.brand svg{flex:none}
+nav.tabs{position:absolute;left:var(--panel-left);display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--glass);backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);box-shadow:inset 1px 1px 0 rgba(255,236,200,.14)}
+nav.tabs button{border:0;background:none;padding:9px 15px;border-radius:999px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;color:var(--cream-2);transition:background .3s var(--ease),color .3s var(--ease)}
+nav.tabs button:hover{color:var(--cream);background:rgba(243,230,200,.08)}
+nav.tabs button[aria-selected="true"]{background:var(--yellow);color:var(--yellow-ink);font-weight:700}
+
+/* ---------- hero (left) ---------- */
+.hero{position:fixed;z-index:2;left:32px;bottom:30px;width:calc(var(--panel-left) - 80px);text-shadow:0 2px 18px rgba(6,12,8,.6)}
+.hero .big{font-family:var(--serif);font-size:clamp(40px,7.4vh,76px);line-height:.98;letter-spacing:-.02em;margin:0 0 10px;color:var(--cream);overflow-wrap:anywhere;text-wrap:balance}
+.hero .big em{font-style:normal;color:var(--yellow)}
+.hero p{margin:0;max-width:46ch;font-size:13px;line-height:1.6;color:var(--cream)}
+.hero .meta{margin-top:10px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2)}
+
+/* ---------- panel (right) ---------- */
+.panel{position:fixed;z-index:3;top:var(--header);left:var(--panel-left);right:0;bottom:0;overflow-y:auto;overflow-x:hidden;padding:4px 28px 48px 0;overscroll-behavior:contain}
+.yearbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:10px 0 14px}
+.years{display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--glass-strong);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:inset 1px 1px 0 rgba(255,236,200,.12);overflow-x:auto;max-width:100%}
+.years button{border:0;background:none;color:var(--cream-2);padding:6px 11px;border-radius:999px;font-size:11px;letter-spacing:.04em;white-space:nowrap;transition:color .25s,background .25s,box-shadow .25s}
+.years button:hover{color:var(--cream)}
+.years button[aria-pressed="true"]{color:var(--cream);box-shadow:inset 0 0 0 1.5px var(--yellow);background:rgba(244,184,46,.12)}
+.yearbar .scope{font-size:10.5px;color:var(--cream-2);letter-spacing:.06em;white-space:nowrap}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-items:start}
+.card{position:relative;border-radius:var(--r);padding:20px 22px 22px;min-width:0;
+  background:linear-gradient(135deg,rgba(255,236,200,.08),rgba(255,236,200,0) 42%),var(--glass);
+  backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25);
+  box-shadow:inset 1px 1px 0 rgba(255,236,200,.16),0 26px 50px -26px rgba(3,9,6,.75)}
+.card.full{grid-column:1/-1}
+.card h2{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.15;letter-spacing:-.01em;margin:0 0 4px}
+.card .note{color:var(--cream-2);font-size:11px;margin:0 0 18px;max-width:70ch}
+.card .figure{font-family:var(--serif);font-size:48px;line-height:1;color:var(--yellow);letter-spacing:-.02em;margin:6px 0 10px}
+.card .figure small{font-size:.42em;color:var(--cream);letter-spacing:0;margin-left:6px}
+.card p.body{margin:0;color:var(--cream);font-size:12.5px}
+.muted{color:var(--cream-2)}
+.y{color:var(--yellow)}
+
+.enter{animation:rise .7s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+
+/* ranked lists */
+ol.rank{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+ol.rank li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;column-gap:10px;align-items:start}
+ol.rank .n{font-family:var(--serif);font-size:17px;line-height:1.2;color:var(--yellow);text-align:right}
+ol.rank .name{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+ol.rank .by{display:block;font-size:11px;color:var(--cream-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ol.rank .v{font-size:11px;color:var(--cream-2);text-align:right;white-space:nowrap;line-height:1.7}
+ol.rank .bar{display:block;height:2px;margin-top:5px;border-radius:2px;background:var(--cobalt-lt);opacity:.8}
+ol.rank.wide li{grid-template-columns:30px minmax(0,1fr) 150px auto}
+.spark{display:flex;align-items:flex-end;gap:3px;height:26px;padding-top:2px}
+.spark i{flex:1;background:var(--yellow);border-radius:2px 2px 0 0;min-height:1px;opacity:.9}
+.spark i.off{background:rgba(243,230,200,.16)}
+
+/* summary list */
+dl.sum{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 24px;margin:0}
+dl.sum button{all:unset;display:block;cursor:pointer;padding:12px 0;border-bottom:1px solid var(--line);min-width:0}
+dl.sum button:hover dd{color:var(--yellow)}
+dl.sum button:focus-visible{outline:2px solid var(--yellow);outline-offset:4px;border-radius:6px}
+dl.sum dt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2)}
+dl.sum dd{margin:4px 0 0;font-family:var(--serif);font-size:21px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}
+dl.sum dd small{display:block;font-family:var(--mono);font-size:11px;color:var(--cream-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* charts */
+svg.chart{display:block;overflow:visible}
+svg.chart text{font-family:var(--mono);font-size:10.5px;fill:var(--cream-2);font-stretch:87.5%}
+svg.chart text.vlab{fill:var(--cream);font-size:10.5px}
+svg.chart .hit{fill:transparent}
+svg.chart g[data-tip]:hover rect.b{filter:brightness(1.15)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0 0;padding:0;list-style:none;font-size:11px;color:var(--cream-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+
+.daily{position:relative}
+.daily .scroller{overflow-x:auto;overflow-y:hidden;padding-bottom:6px;margin-left:44px}
+.daily canvas{display:block;cursor:crosshair}
+.daily .yaxis{position:absolute;left:0;top:0;width:40px;height:200px;font-size:10px;color:var(--cream-2)}
+.daily .yaxis span{position:absolute;right:0;transform:translateY(-50%)}
+
+.heat{display:grid;grid-template-columns:34px repeat(24,minmax(0,1fr));gap:3px;font-size:10px;color:var(--cream-2)}
+.heat .c{aspect-ratio:1/1;border-radius:4px;background:rgba(243,230,200,.05)}
+.heat .rl{align-self:center}
+.heat .hl{text-align:center;grid-row:8}
+
+.hbars{display:grid;gap:9px}
+.hbars .row{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:12px;align-items:center;font-size:11.5px}
+.hbars .row .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbars .row .trk{height:10px;border-radius:5px;background:rgba(243,230,200,.07);overflow:hidden}
+.hbars .row .trk span{display:block;height:100%;border-radius:5px;background:var(--yellow)}
+.hbars .row .val{color:var(--cream-2);font-size:11px;min-width:5ch;text-align:right}
+
+.stack100{display:grid;gap:8px}
+.stack100 .row{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;font-size:11px;color:var(--cream-2)}
+.stack100 .row.on{color:var(--cream)}
+.stack100 .row.dim{opacity:.45}
+.stack100 .seg{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px}
+.stack100 .seg span{display:block;height:100%}
+
+.eras{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.eras button{all:unset;cursor:pointer;display:block;padding:14px 14px 16px;border-radius:12px;background:rgba(243,230,200,.05);transition:background .25s}
+.eras button:hover{background:rgba(243,230,200,.1)}
+.eras button.on{background:rgba(244,184,46,.16);box-shadow:inset 0 0 0 1.5px var(--yellow)}
+.eras button:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.eras .yr{font-size:10.5px;letter-spacing:.12em;color:var(--cream-2)}
+.eras .who{display:block;font-family:var(--serif);font-size:18px;line-height:1.15;margin:6px 0 6px;overflow-wrap:anywhere}
+.eras .h{font-size:11px;color:var(--yellow)}
+
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.trio div{min-width:0}
+.trio .figure{font-size:38px}
+.trio .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2)}
+.trio p{margin:4px 0 0;font-size:11px;color:var(--cream-2)}
+
+/* places */
+.places{display:grid;grid-template-columns:minmax(220px,.9fr) 1.4fr;gap:22px}
+.clist{display:grid;gap:4px;align-content:start}
+.clist button{all:unset;cursor:pointer;display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;transition:background .2s}
+.clist button:hover{background:rgba(243,230,200,.07)}
+.clist button[aria-pressed="true"]{background:rgba(244,184,46,.15);box-shadow:inset 0 0 0 1.5px var(--yellow)}
+.clist button:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.clist .cc{font-family:var(--serif);font-size:18px;color:var(--yellow)}
+.clist .cn{font-size:12px;font-weight:500}
+.clist .cs{display:block;font-size:10.5px;color:var(--cream-2)}
+.clist .cv{font-size:11px;color:var(--cream-2);text-align:right}
+.cdetail h3{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.05;margin:0 0 6px}
+.cdetail .note{margin-bottom:18px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px}
+.two h4{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream-2);font-weight:500;margin:0 0 12px}
+
+/* search */
+.search{position:relative}
+.search input{width:100%;border:0;border-radius:12px;padding:15px 16px 15px 46px;background:rgba(8,16,11,.5);font-size:14px;color:var(--cream);box-shadow:inset 0 0 0 1px var(--line);caret-color:var(--yellow);font-stretch:87.5%}
+.search input::placeholder{color:var(--cream-3)}
+.search input:focus{outline:none;box-shadow:inset 0 0 0 1.5px var(--yellow)}
+.search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);pointer-events:none}
+.sugg{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sugg button{border:0;background:rgba(243,230,200,.07);padding:8px 12px;border-radius:999px;font-size:11.5px;color:var(--cream);transition:background .2s}
+.sugg button:hover,.sugg button.first{background:rgba(244,184,46,.18)}
+.sugg .empty{color:var(--cream-2);font-size:11.5px}
+.statrow{display:flex;flex-wrap:wrap;gap:12px 32px;margin-top:8px}
+.statrow div{min-width:0}
+.statrow b{display:block;font-family:var(--serif);font-weight:400;font-size:26px;color:var(--yellow);line-height:1.1}
+.statrow span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream-2)}
+
+/* tooltip, states */
+.tip{position:fixed;z-index:50;pointer-events:none;max-width:300px;padding:9px 11px;border-radius:10px;background:rgba(12,22,16,.94);box-shadow:inset 1px 1px 0 rgba(255,236,200,.14),0 14px 30px -10px rgba(0,0,0,.6);font-size:11px;line-height:1.5;color:var(--cream);opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.tip.on{opacity:1;transform:none}
+.tip b{color:var(--yellow);font-weight:600}
+.status{font-size:12px;color:var(--cream-2)}
+
+/* ---------- stacked (narrow / portrait) ---------- */
+.stack .brand{background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;margin:0}
+.stack header.top{position:sticky;height:auto;flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px 10px;background:linear-gradient(180deg,rgba(14,26,19,.78),rgba(14,26,19,.5));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.stack nav.tabs{position:static;overflow-x:auto;align-self:flex-start;max-width:100%}
+.stack nav.tabs button{padding:8px 12px;white-space:nowrap}
+.stack .hero{position:relative;left:auto;bottom:auto;width:auto;min-height:calc(100svh - 120px);display:flex;flex-direction:column;justify-content:flex-end;padding:0 16px 28px}
+.stack .panel{position:relative;top:auto;left:auto;right:auto;bottom:auto;overflow:visible;padding:0 16px 48px}
+.stack .yearbar{top:var(--stack-head,108px)}
+.stack .grid{grid-template-columns:minmax(0,1fr)}
+.stack .places{grid-template-columns:1fr}
+.stack ol.rank.wide li{grid-template-columns:30px minmax(0,1fr) auto}
+.stack ol.rank.wide .spark{display:none}
+@media (max-width:520px){
+  .card{padding:18px 16px 20px}
+  .trio{grid-template-columns:1fr}
+  .card .figure{font-size:40px}
+}
+@media (prefers-reduced-motion:reduce){
+  .enter{animation:none}
+  *{transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+  <div class="layer soft" id="softA"></div>
+  <div class="layer soft mirror" id="softB"></div>
+  <div class="layer sharp" id="sharp"></div>
+  <div class="shade"></div>
+</div>
+<svg class="ring" id="ring" aria-hidden="true"></svg>
+
+<header class="top">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+      <circle cx="15" cy="15" r="14" fill="#16241B" stroke="#F3E6C8" stroke-width="1.5"/>
+      <circle cx="15" cy="15" r="10" fill="none" stroke="#F3E6C8" stroke-opacity=".35"/>
+      <circle cx="15" cy="15" r="7" fill="none" stroke="#F3E6C8" stroke-opacity=".35"/>
+      <circle cx="15" cy="15" r="4.2" fill="#F4B82E"/>
+      <circle cx="15" cy="15" r="1.2" fill="#16241B"/>
+    </svg>
+    <span>Adip’s listening room</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Sections" id="tabs"></nav>
+</header>
+
+<section class="hero" id="hero" aria-live="polite">
+  <h1 class="big" id="heroBig">Tuning in…</h1>
+  <p id="heroText">Reading seven years of plays.</p>
+  <div class="meta" id="heroMeta"></div>
+</section>
+
+<main class="panel" id="panel">
+  <div class="yearbar">
+    <div class="years" id="years" role="group" aria-label="Filter by year"></div>
+    <span class="scope" id="scope"></span>
+  </div>
+  <div class="grid" id="grid"><p class="status">Loading your history…</p></div>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script type="module">
+/* ============ helpers ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DOWS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DOW_LONG = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtH = s => {
+  const h = s / 3600;
+  if (h >= 100) return fmt(h) + ' h';
+  if (h >= 1) return h.toFixed(1).replace(/\.0$/, '') + ' h';
+  return Math.max(1, Math.round(s / 60)) + ' min';
+};
+const dateOf = d => new Date(d * 86400000);
+const fmtDay = (d, wd) => { const x = dateOf(d); return `${wd ? DOWS[(d + 3) % 7] + ' ' : ''}${x.getUTCDate()} ${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
+const fmtMonth = m => `${MONTHS[m % 12]} ${Math.floor(m / 12)}`;
+const plural = (n, w) => `${fmt(n)} ${w}${n === 1 ? '' : 's'}`;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============ load ============ */
+let raw;
+try {
+  const res = await fetch('https://adip-hku-default-rtdb.asia-southeast1.firebasedatabase.app/listening/stats.json');
+  if (!res.ok) throw new Error(res.status);
+  const body = await res.json();
+  if (body == null) throw new Error('no data');
+  raw = typeof body === 'string' ? JSON.parse(body) : body;
+} catch (e) {
+  $('#heroBig').textContent = 'No signal';
+  $('#heroText').innerHTML = 'Couldn’t load listening data from Firebase. Check your connection and refresh.';
+  $('#grid').innerHTML = '';
+  throw e;
+}
+
+const P = raw.plays, N = P.t.length;
+const ARTISTS = raw.artists, TRACKS = raw.tracks, ALBUMS = raw.albums;
+const DEVICES = raw.devices, COUNTRIES = raw.countries, RSTART = raw.reasonStart;
+const nA = ARTISTS.length, nT = TRACKS.length, nAl = ALBUMS.length;
+const T = new Int32Array(N), S = Int32Array.from(P.s), TR = Int32Array.from(P.tr);
+const DV = Uint8Array.from(P.dv), CO = Uint8Array.from(P.co), RS = Uint8Array.from(P.rs), F = Uint8Array.from(P.f);
+const DAY = new Int32Array(N), YR = new Uint16Array(N), HR = new Uint8Array(N), DOW = new Uint8Array(N), MON = new Int32Array(N);
+const TA = Int32Array.from(TRACKS, t => t[1]), TAL = Int32Array.from(TRACKS, t => t[2]);
+{
+  let acc = 0;
+  for (let i = 0; i < N; i++) {
+    acc += P.t[i]; T[i] = acc;
+    const d = Math.floor(acc / 1440); DAY[i] = d;
+    HR[i] = Math.floor((acc % 1440) / 60);
+    DOW[i] = (d + 3) % 7; // 1970-01-01 was a Thursday; Monday = 0
+    const x = new Date(acc * 60000);
+    YR[i] = x.getUTCFullYear(); MON[i] = YR[i] * 12 + x.getUTCMonth();
+  }
+}
+const FIRST_DAY = DAY[0], LAST_DAY = DAY[N - 1], NDAYS = LAST_DAY - FIRST_DAY + 1;
+const Y0 = YR[0], Y1 = YR[N - 1], YEARS = [];
+for (let y = Y0; y <= Y1; y++) YEARS.push(y);
+const NY = YEARS.length;
+const yearRange = {};
+{
+  let lo = 0;
+  for (let i = 1; i <= N; i++) if (i === N || YR[i] !== YR[lo]) { yearRange[YR[lo]] = [lo, i]; lo = i; }
+}
+const rangeOf = y => y === 'all' ? [0, N] : (yearRange[y] || [0, 0]);
+
+// all-time per-day arrays
+const daySecs = new Float64Array(NDAYS), dayPlays = new Int32Array(NDAYS), dayStart = new Int32Array(NDAYS + 1).fill(-1);
+for (let i = 0; i < N; i++) { const k = DAY[i] - FIRST_DAY; daySecs[k] += S[i]; dayPlays[k]++; if (dayStart[k] < 0) dayStart[k] = i; }
+const dayRange = k => { const lo = dayStart[k]; if (lo < 0) return [0, 0]; let hi = lo; while (hi < N && DAY[hi] === DAY[lo]) hi++; return [lo, hi]; };
+// artist x year seconds
+const artistYear = new Float64Array(nA * NY);
+for (let i = 0; i < N; i++) artistYear[TA[TR[i]] * NY + (YR[i] - Y0)] += S[i];
+
+/* ============ aggregations ============ */
+const memo = new Map();
+const cached = (key, fn) => { if (!memo.has(key)) memo.set(key, fn()); return memo.get(key); };
+
+function topIdx(score, n, keep = () => true) {
+  const idx = [];
+  for (let i = 0; i < score.length; i++) if (score[i] > 0 && keep(i)) idx.push(i);
+  idx.sort((a, b) => score[b] - score[a]);
+  return idx.slice(0, n);
+}
+function core(lo, hi) {
+  let secs = 0, sk = 0, sh = 0, off = 0, inc = 0, nd = 0, last = -1, na = 0, nt = 0;
+  const am = new Uint8Array(nA), tm = new Uint8Array(nT);
+  for (let i = lo; i < hi; i++) {
+    secs += S[i];
+    const t = TR[i]; if (!tm[t]) { tm[t] = 1; nt++; }
+    const a = TA[t]; if (!am[a]) { am[a] = 1; na++; }
+    if (DAY[i] !== last) { nd++; last = DAY[i]; }
+    const f = F[i]; if (f & 1) sh++; if (f & 2) sk++; if (f & 4) off++; if (f & 8) inc++;
+  }
+  return { plays: hi - lo, secs, artists: na, tracks: nt, days: nd, skips: sk, shuffle: sh, offline: off, incog: inc };
+}
+function agg(lo, hi, cond = null) {
+  const aP = new Int32Array(nA), aS = new Float64Array(nA), tP = new Int32Array(nT), tS = new Float64Array(nT), tK = new Int32Array(nT), alP = new Int32Array(nAl);
+  for (let i = lo; i < hi; i++) {
+    if (cond && !cond(i)) continue;
+    const t = TR[i], a = TA[t];
+    aP[a]++; aS[a] += S[i]; tP[t]++; tS[t] += S[i]; alP[TAL[t]]++;
+    if (F[i] & 2) tK[t]++;
+  }
+  return { aP, aS, tP, tS, tK, alP };
+}
+const statsFor = y => cached('s' + y, () => {
+  const [lo, hi] = rangeOf(y);
+  const c = core(lo, hi), g = agg(lo, hi);
+  // loudest day + streak + longest gap + weekday + heat
+  let best = -1, bestPlays = 0, run = 0, bestRun = 0, runStart = 0, bestRunStart = 0, prevDay = null, gap = 0, gapFrom = 0;
+  const wd = new Float64Array(7), heat = new Float64Array(168), heatP = new Int32Array(168);
+  const dSeen = new Set();
+  for (let i = lo; i < hi; i++) {
+    wd[DOW[i]] += S[i]; heat[DOW[i] * 24 + HR[i]] += S[i]; heatP[DOW[i] * 24 + HR[i]]++;
+    const d = DAY[i];
+    if (dSeen.has(d)) continue; dSeen.add(d);
+    const k = d - FIRST_DAY;
+    if (dayPlays[k] > bestPlays) { bestPlays = dayPlays[k]; best = d; }
+    if (prevDay !== null && d === prevDay + 1) run++; else { run = 1; runStart = d; }
+    if (run > bestRun) { bestRun = run; bestRunStart = runStart; }
+    if (prevDay !== null && d - prevDay - 1 > gap) { gap = d - prevDay - 1; gapFrom = prevDay; }
+    prevDay = d;
+  }
+  // most looped (day, track)
+  const loop = new Map(); let lk = -1, lv = 0;
+  for (let i = lo; i < hi; i++) { const k = DAY[i] * 16384 + TR[i]; const v = (loop.get(k) || 0) + 1; loop.set(k, v); if (v > lv) { lv = v; lk = k; } }
+  let oneHit = 0; for (let a = 0; a < nA; a++) if (g.aP[a] === 1) oneHit++;
+  const rs = new Int32Array(RSTART.length); for (let i = lo; i < hi; i++) rs[RS[i]]++;
+  const dv = new Int32Array(DEVICES.length); for (let i = lo; i < hi; i++) dv[DV[i]]++;
+  const co = COUNTRIES.map(() => ({ plays: 0, secs: 0, first: Infinity, last: -1 }));
+  for (let i = lo; i < hi; i++) { const c2 = co[CO[i]]; c2.plays++; c2.secs += S[i]; if (DAY[i] < c2.first) c2.first = DAY[i]; c2.last = DAY[i]; }
+  return { ...c, g, best, bestPlays, bestRun, bestRunStart, gap, gapFrom, wd, heat, heatP, loopDay: Math.floor(lk / 16384), loopTrack: lk % 16384, loopN: lv, oneHit, rs, dv, co };
+});
+const allYears = () => cached('years', () => {
+  const secs = new Float64Array(NY), plays = new Int32Array(NY), top = [], fresh = new Int32Array(NY), back = new Int32Array(NY);
+  const firstYear = new Int16Array(nA).fill(-1);
+  for (let i = 0; i < N; i++) { const a = TA[TR[i]]; if (firstYear[a] < 0) firstYear[a] = YR[i] - Y0; }
+  YEARS.forEach((y, yi) => {
+    const [lo, hi] = rangeOf(y); const g = agg(lo, hi);
+    for (let i = lo; i < hi; i++) { secs[yi] += S[i]; plays[yi]++; }
+    const a = topIdx(g.aS, 1)[0]; top.push({ y, a, secs: g.aS[a], plays: g.aP[a] });
+    for (let x = 0; x < nA; x++) if (g.aP[x]) (firstYear[x] === yi ? fresh : back)[yi]++;
+  });
+  const dvy = YEARS.map(y => { const [lo, hi] = rangeOf(y); const c = new Int32Array(DEVICES.length); for (let i = lo; i < hi; i++) c[DV[i]]++; return c; });
+  return { secs, plays, top, fresh, back, dvy };
+});
+
+/* ============ state ============ */
+const TABS = [['overview','Overview'],['taste','Taste'],['rhythm','Rhythm'],['habits','Habits'],['places','Places'],['search','Search']];
+const state = { tab: 'overview', year: 'all', country: null, artist: null };
+function readHash() {
+  const [t, y, extra] = location.hash.slice(1).split('/');
+  state.tab = TABS.some(x => x[0] === t) ? t : 'overview';
+  state.year = YEARS.includes(+y) ? +y : 'all';
+  if (state.tab === 'search' && extra) state.artist = ARTISTS.indexOf(decodeURIComponent(extra));
+}
+function writeHash() {
+  let h = `#${state.tab}${state.year !== 'all' ? '/' + state.year : (state.tab === 'search' && state.artist >= 0 && state.artist != null ? '/all' : '')}`;
+  if (state.tab === 'search' && state.artist >= 0 && state.artist != null) h += '/' + encodeURIComponent(ARTISTS[state.artist]);
+  history.replaceState(null, '', h);
+}
+const periodLabel = () => state.year === 'all' ? `${fmtDay(FIRST_DAY)} – ${fmtDay(LAST_DAY)}` : (state.year === Y1 ? `${state.year}, through ${fmtDay(LAST_DAY)}` : String(state.year));
+const inPeriod = () => state.year === 'all' ? 'since ' + MONTHS[dateOf(FIRST_DAY).getUTCMonth()] + ' ' + Y0 : 'in ' + state.year;
+
+/* ============ layout: place the painting and the ring around the face ============ */
+const IMG_W = 640, IMG_H = 1280, FACE_X = 300, FACE_Y = 790, EARS = 262;
+const L = {};
+function layout() {
+  const vw = innerWidth, vh = innerHeight, root = document.documentElement;
+  const head = 72;
+  let s = vh * 1.75 / IMG_H;
+  let r = Math.min(EARS * s, vh * .4);
+  let faceX = FACE_X * s, faceY = head + r + 16;
+  let panelLeft = Math.round(faceX + r + 52);
+  const stack = vw - panelLeft < 560 || vw < 900;
+  root.classList.toggle('stack', stack); root.classList.toggle('wide', !stack);
+  let artX, artY, artW, artH;
+  if (!stack) {
+    artW = IMG_W * s; artH = IMG_H * s; artX = 0; artY = faceY - FACE_Y * s;
+  } else {
+    s = Math.max(vw / IMG_W, vh * 1.25 / IMG_H);
+    artW = IMG_W * s; artH = IMG_H * s;
+    artX = Math.min(0, Math.max(vw - artW, vw / 2 - FACE_X * s));
+    artY = Math.min(0, Math.max(vh - artH, vh * .42 - FACE_Y * s));
+    faceX = artX + FACE_X * s; faceY = artY + FACE_Y * s;
+    r = Math.min(EARS * s, faceX - 26, vw - faceX - 26);
+    panelLeft = 0;
+  }
+  Object.assign(L, { s, r, faceX, faceY, panelLeft, stack, vw, vh });
+  root.style.setProperty('--panel-left', panelLeft + 'px');
+  const place = (el, x, w) => Object.assign(el.style, { left: x + 'px', top: artY + 'px', width: w + 'px', height: artH + 'px' });
+  place($('#sharp'), artX, artW); place($('#softA'), artX, artW); place($('#softB'), artX + artW, artW);
+  if (stack) root.style.setProperty('--stack-head', $('header.top').offsetHeight + 'px');
+}
+
+/* ============ ring ============ */
+const NS = 'http://www.w3.org/2000/svg';
+let needleAnim = 0;
+function polar(c, rad, deg) { const a = deg * Math.PI / 180; return [c + rad * Math.sin(a), c - rad * Math.cos(a)]; }
+function arcD(c, rad, a0, a1, sweep = 1) {
+  const [x0, y0] = polar(c, rad, a0), [x1, y1] = polar(c, rad, a1);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${rad} ${rad} 0 ${Math.abs(a1 - a0) > 180 ? 1 : 0} ${sweep} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function drawRing(st) {
+  const svg = $('#ring'), r = L.r, pad = 48, size = 2 * (r + pad), c = size / 2;
+  Object.assign(svg.style, { left: L.faceX - c + 'px', top: L.faceY - c + 'px' });
+  svg.setAttribute('width', size); svg.setAttribute('height', size); svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+  const labels = [
+    [0, st.plays, 'plays'], [90, st.artists, 'artists'], [180, st.tracks, 'tracks'], [270, st.days, 'days']
+  ];
+  svg.innerHTML = `
+    <circle class="groove" cx="${c}" cy="${c}" r="${r + 16}" stroke-opacity=".16"/>
+    <circle class="groove" cx="${c}" cy="${c}" r="${r - 13}" stroke-opacity=".1"/>
+    <defs>
+      <path id="arcTop" d="${arcD(c, r - 3.6, -80, 80, 1)}"/>
+      <path id="arcBot" d="${arcD(c, r + 3.6, 260, 100, 0)}"/>
+    </defs>
+    <text><textPath href="#arcTop" startOffset="50%" text-anchor="middle"><tspan class="v">${fmt(labels[0][1])}</tspan> ${labels[0][2]}</textPath></text>
+    <text><textPath href="#arcBot" startOffset="50%" text-anchor="middle"><tspan class="v">${fmt(labels[2][1])}</tspan> ${labels[2][2]}</textPath></text>
+    <text x="${c + r}" y="${c}" text-anchor="middle" dominant-baseline="central" transform="rotate(90 ${c + r} ${c})"><tspan class="v">${fmt(labels[1][1])}</tspan> ${labels[1][2]}</text>
+    <text x="${c - r}" y="${c}" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 ${c - r} ${c})"><tspan class="v">${fmt(labels[3][1])}</tspan> days with music</text>
+    <g id="arcs"></g>
+    <circle class="needle" r="6.5" cx="${c}" cy="${c - r}"/>`;
+  // gaps sized to the rendered labels
+  const texts = [...svg.querySelectorAll('text')];
+  const order = [0, 2, 1, 3]; // text element order -> label angle index
+  const half = [];
+  texts.forEach((t, i) => { const len = t.getComputedTextLength(); half[order[i]] = (len / 2 + 12) / r * 180 / Math.PI; });
+  const angles = [0, 90, 180, 270];
+  let d = '';
+  for (let i = 0; i < 4; i++) {
+    const a0 = angles[i] + half[i], a1 = angles[(i + 1) % 4] + (i === 3 ? 360 : 0) - half[(i + 1) % 4];
+    if (a1 > a0) d += arcD(c, r, a0, a1, 1);
+  }
+  svg.querySelector('#arcs').innerHTML = `<path class="under" d="${d}" stroke-width="3.5"/><path class="groove" d="${d}" stroke-opacity=".78" stroke-width="1.3"/>`;
+  // needle: one sweep, rests between the plays and artists labels
+  const needle = svg.querySelector('.needle'), rest = 45, start = performance.now(), dur = 1700;
+  cancelAnimationFrame(needleAnim);
+  const place = deg => { const [x, y] = polar(c, r, deg); needle.setAttribute('cx', x); needle.setAttribute('cy', y); };
+  if (reduced) return place(rest);
+  const tick = now => {
+    const k = Math.min(1, (now - start) / dur), e = 1 - Math.pow(2, -10 * k);
+    place(rest - 360 + 360 * e);
+    if (k < 1) needleAnim = requestAnimationFrame(tick);
+  };
+  needleAnim = requestAnimationFrame(tick);
+}
+
+/* ============ hero copy ============ */
+let countAnim = 0;
+function countUp(el, to, render) {
+  cancelAnimationFrame(countAnim);
+  if (reduced) { el.innerHTML = render(to); return; }
+  const start = performance.now(), dur = 1100;
+  const tick = now => { const k = Math.min(1, (now - start) / dur), e = 1 - Math.pow(2, -10 * k); el.innerHTML = render(to * e); if (k < 1) countAnim = requestAnimationFrame(tick); };
+  countAnim = requestAnimationFrame(tick);
+}
+function hero(st) {
+  const big = $('#heroBig'), txt = $('#heroText'), meta = $('#heroMeta');
+  big.style.fontSize = '';
+  meta.textContent = periodLabel();
+  const topA = topIdx(st.g.aS, 1)[0];
+  switch (state.tab) {
+    case 'overview': {
+      const daysOn = st.secs / 86400;
+      countUp(big, st.secs / 3600, v => `<em>${fmt(v)}</em> hours`);
+      txt.textContent = state.year === 'all'
+        ? `of music ${inPeriod()}. Stacked end to end, that’s ${fmt(daysOn)} days with headphones on.`
+        : `of music ${inPeriod()}, about ${(st.secs / 3600 / st.days).toFixed(1)} hours on each day you pressed play.`;
+      break;
+    }
+    case 'taste':
+      big.textContent = ARTISTS[topA];
+      if (ARTISTS[topA].length > 16) big.style.fontSize = 'clamp(34px,5.4vh,58px)';
+      txt.textContent = `led everything ${inPeriod()}: ${fmtH(st.g.aS[topA])} across ${fmt(st.g.aP[topA])} plays, out of ${fmt(st.artists)} artists you heard.`;
+      break;
+    case 'rhythm':
+      big.innerHTML = `<em>${fmtDay(st.best)}</em>`;
+      txt.textContent = `was your loudest day ${inPeriod()}: ${fmt(st.bestPlays)} plays and ${fmtH(daySecs[st.best - FIRST_DAY])} of music, on a ${DOW_LONG[(st.best + 3) % 7]}.`;
+      break;
+    case 'habits':
+      countUp(big, pct(st.skips, st.plays), v => `<em>${Math.round(v)}%</em> skipped`);
+      txt.textContent = `You let ${100 - pct(st.skips, st.plays)}% of songs play out ${inPeriod()}, and had shuffle on for ${pct(st.shuffle, st.plays)}% of them.`;
+      break;
+    case 'places': {
+      const cs = st.co.map((c, i) => ({ ...c, i })).filter(c => c.plays && COUNTRIES[c.i][0] !== 'ZZ').sort((a, b) => b.plays - a.plays);
+      big.innerHTML = `<em>${cs.length}</em> ${cs.length === 1 ? 'country' : 'countries'}`;
+      txt.textContent = cs.length ? `${COUNTRIES[cs[0].i][1]} heard ${pct(cs[0].plays, st.plays)}% of your plays ${inPeriod()}.${cs[1] ? ` ${COUNTRIES[cs[1].i][1]} came second.` : ''}` : 'No location data for this period.';
+      break;
+    }
+    case 'search': {
+      const a = state.artist;
+      if (a != null && a >= 0) {
+        big.textContent = ARTISTS[a];
+        if (ARTISTS[a].length > 16) big.style.fontSize = 'clamp(34px,5.4vh,58px)';
+        txt.textContent = st.g.aP[a] ? `${fmt(st.g.aP[a])} plays and ${fmtH(st.g.aS[a])} ${inPeriod()}.` : `No plays ${inPeriod()}. Switch the year to All to see the full story.`;
+      } else {
+        big.innerHTML = 'Find an <em>artist</em>';
+        txt.textContent = `Look up any of the ${fmt(nA)} artists in your history and see when they mattered.`;
+      }
+      break;
+    }
+  }
+}
+
+/* ============ chart builders ============ */
+function vbars(data, { w, h = 190, color = 'var(--yellow)', fmtV = v => v, label = '' }) {
+  const pad = { t: 22, b: 26, l: 2, r: 2 }, n = data.length, max = Math.max(...data.map(d => d.v)) || 1;
+  const bw = (w - pad.l - pad.r) / n, gap = Math.min(14, bw * .3);
+  let s = `<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">`;
+  data.forEach((d, i) => {
+    const bh = Math.max(1, (h - pad.t - pad.b) * d.v / max), x = pad.l + i * bw + gap / 2, y = h - pad.b - bh, cx = x + (bw - gap) / 2;
+    s += `<g data-tip="${esc(d.tip || '')}"><rect class="hit" x="${pad.l + i * bw}" y="0" width="${bw}" height="${h}"/>
+      <rect class="b" x="${x}" y="${y}" width="${bw - gap}" height="${bh}" rx="5" fill="${d.color || color}" opacity="${d.dim ? .32 : 1}"/>
+      <text class="vlab" x="${cx}" y="${y - 7}" text-anchor="middle" opacity="${d.dim ? .55 : 1}">${fmtV(d.v)}</text>
+      <text x="${cx}" y="${h - 7}" text-anchor="middle">${esc(d.label)}</text></g>`;
+  });
+  return s + '</svg>';
+}
+function stackBars(rows, series, { w, h = 200, label = '' }) {
+  const pad = { t: 22, b: 26, l: 2, r: 2 }, n = rows.length;
+  const max = Math.max(...rows.map(r => series.reduce((a, s) => a + r[s.key], 0))) || 1;
+  const bw = (w - pad.l - pad.r) / n, gap = Math.min(14, bw * .3);
+  let s = `<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">`;
+  rows.forEach((r, i) => {
+    let y = h - pad.b; const x = pad.l + i * bw + gap / 2, cx = x + (bw - gap) / 2, tot = series.reduce((a, s2) => a + r[s2.key], 0);
+    s += `<g data-tip="${esc(r.tip)}"><rect class="hit" x="${pad.l + i * bw}" y="0" width="${bw}" height="${h}"/>`;
+    series.forEach((se, j) => {
+      const bh = (h - pad.t - pad.b) * r[se.key] / max; y -= bh;
+      s += `<rect class="b" x="${x}" y="${y + (j ? 2 : 0)}" width="${bw - gap}" height="${Math.max(0, bh - (j ? 2 : 0))}" rx="4" fill="${se.color}" opacity="${r.dim ? .32 : 1}"/>`;
+    });
+    s += `<text class="vlab" x="${cx}" y="${y - 7}" text-anchor="middle" opacity="${r.dim ? .55 : 1}">${fmt(tot)}</text><text x="${cx}" y="${h - 7}" text-anchor="middle">${esc(r.label)}</text></g>`;
+  });
+  return s + '</svg>';
+}
+function areaChart(vals, { w, h = 190, startMonth, hi = null, label = '' }) {
+  const pad = { t: 14, b: 26, l: 2, r: 2 }, n = vals.length, max = Math.max(...vals) || 1;
+  const X = i => pad.l + (n === 1 ? 0 : i * (w - pad.l - pad.r) / (n - 1)), Y = v => h - pad.b - (h - pad.t - pad.b) * v / max;
+  let line = '';
+  vals.forEach((v, i) => { line += (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); });
+  const gid = 'g' + Math.random().toString(36).slice(2, 7);
+  let s = `<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4B82E" stop-opacity=".42"/><stop offset="1" stop-color="#F4B82E" stop-opacity="0"/></linearGradient></defs>`;
+  if (hi) s += `<rect x="${X(hi[0])}" y="${pad.t - 6}" width="${Math.max(2, X(hi[1]) - X(hi[0]))}" height="${h - pad.b - pad.t + 6}" rx="6" fill="rgba(243,230,200,.08)"/>`;
+  for (let i = 0; i < n; i++) {
+    const m = startMonth + i;
+    if (m % 12 === 0) s += `<line x1="${X(i)}" x2="${X(i)}" y1="${pad.t}" y2="${h - pad.b + 4}" stroke="rgba(243,230,200,.14)"/><text x="${X(i) + 4}" y="${h - 7}">${m / 12}</text>`;
+  }
+  s += `<path d="${line}L${X(n - 1)} ${h - pad.b}L${X(0)} ${h - pad.b}Z" fill="url(#${gid})"/><path d="${line}" fill="none" stroke="#F4B82E" stroke-width="1.6" stroke-linejoin="round"/>`;
+  const step = (w - pad.l - pad.r) / Math.max(1, n - 1);
+  vals.forEach((v, i) => { s += `<rect class="hit" x="${X(i) - step / 2}" y="0" width="${step}" height="${h}" data-tip="<b>${fmtMonth(startMonth + i)}</b><br>${fmtH(v * 3600)}"/>`; });
+  return s + '</svg>';
+}
+const rankList = (items, cls = '') => `<ol class="rank ${cls}">${items.map((it, i) => `
+  <li><span class="n">${i + 1}</span><span style="min-width:0"><span class="name" title="${esc(it.name)}">${esc(it.name)}</span>${it.by ? `<span class="by">${esc(it.by)}</span>` : ''}${it.share != null ? `<span class="bar" style="width:${Math.max(2, it.share * 100)}%"></span>` : ''}</span>${it.extra || ''}<span class="v">${it.v}</span></li>`).join('')}</ol>`;
+const hbars = rows => { const max = Math.max(...rows.map(r => r.v)) || 1; return `<div class="hbars">${rows.map(r => `<div class="row" data-tip="${esc(r.tip || '')}"><span class="lbl">${esc(r.label)}</span><span class="trk"><span style="width:${100 * r.v / max}%;${r.color ? 'background:' + r.color : ''}"></span></span><span class="val">${r.text}</span></div>`).join('')}</div>`; };
+const cardW = el => Math.max(200, el.clientWidth);
+
+/* ============ tabs ============ */
+const DEVICE_COLORS = { 'Android phone': '#F4B82E', 'iPhone': '#8494F2', 'Mac': '#EE6E55', 'Echo / Alexa': '#8DBF8F', 'Speakers': '#C89463', 'TV & Cast': '#E7B7D6', 'Tablet': '#6FC2C0', 'Windows': '#B9C1D6', 'Web player': '#D9D2B4', 'Unknown': 'rgba(243,230,200,.28)' };
+const START_LABEL = { trackdone: 'Played on after the last song', clickrow: 'You picked it from a list', fwdbtn: 'Skipped forward to it', backbtn: 'Went back to it', playbtn: 'Pressed play', remote: 'Started from another device', appload: 'Resumed when the app opened', trackerror: 'After a playback error', 'switched-to-video': 'Switched from video', unknown: 'Not recorded' };
+
+function card(title, note, body, cls = '') {
+  return `<article class="card ${cls}"><h2>${title}</h2>${note ? `<p class="note">${note}</p>` : ''}${body}</article>`;
+}
+function topArtistsCard(st, n = 10, full = true) {
+  const ids = topIdx(st.g.aS, n), max = st.g.aS[ids[0]] || 1;
+  return card('Top artists', `By hours listened, ${periodLabel()}. The small bars show each artist’s hours by year, ${Y0}–${Y1}.`,
+    rankList(ids.map(a => {
+      const ys = YEARS.map((y, yi) => artistYear[a * NY + yi]); const m = Math.max(...ys) || 1;
+      return { name: ARTISTS[a], by: `${fmt(st.g.aP[a])} plays`, share: st.g.aS[a] / max, v: fmtH(st.g.aS[a]),
+        extra: `<span class="spark" data-tip="${esc(YEARS.map((y, yi) => `${y}: ${fmtH(ys[yi])}`).join('<br>'))}">${ys.map((v, yi) => `<i class="${state.year !== 'all' && YEARS[yi] !== state.year ? 'off' : ''}" style="height:${Math.max(4, 100 * v / m)}%"></i>`).join('')}</span>` };
+    }), 'wide'), full ? 'full' : '');
+}
+function topTracksCard(st, n = 10) {
+  const ids = topIdx(st.g.tP, n), max = st.g.tP[ids[0]] || 1;
+  return card('Top tracks', `By plays, ${periodLabel()}.`, rankList(ids.map(t => ({ name: TRACKS[t][0], by: ARTISTS[TRACKS[t][1]], share: st.g.tP[t] / max, v: `${fmt(st.g.tP[t])}×` }))));
+}
+function topAlbumsCard(st, n = 10) {
+  const ids = topIdx(st.g.alP, n), max = st.g.alP[ids[0]] || 1;
+  return card('Top albums', `By plays, ${periodLabel()}.`, rankList(ids.map(a => ({ name: ALBUMS[a][0], by: ARTISTS[ALBUMS[a][1]], share: st.g.alP[a] / max, v: `${fmt(st.g.alP[a])}×` }))));
+}
+function erasCard() {
+  const Y = allYears();
+  return card('Artist of each year', 'Your #1 artist by hours, every year. Pick one to filter the whole room to that year.',
+    `<div class="eras">${Y.top.map(t => `<button data-year="${t.y}" class="${state.year === t.y ? 'on' : ''}" aria-pressed="${state.year === t.y}"><span class="yr">${t.y}${t.y === Y1 ? ' · so far' : ''}</span><span class="who">${esc(ARTISTS[t.a])}</span><span class="h">${fmtH(t.secs)} · ${fmt(t.plays)} plays</span></button>`).join('')}</div>`, 'full');
+}
+function hoursYearCard(full) {
+  const Y = allYears();
+  return card('Hours per year', `${Y1} runs through ${fmtDay(LAST_DAY)}.`,
+    `<div data-chart="years"></div>`, full ? 'full' : '');
+}
+function drawYears(el) {
+  const Y = allYears();
+  el.innerHTML = vbars(YEARS.map((y, i) => ({ label: "’" + String(y).slice(2), v: Y.secs[i] / 3600, dim: state.year !== 'all' && state.year !== y, tip: `<b>${y}</b><br>${fmtH(Y.secs[i])} · ${fmt(Y.plays[i])} plays` })), { w: cardW(el), fmtV: fmt, label: 'Hours per year' });
+}
+
+const TABVIEWS = {
+  overview(st) {
+    const topA = topIdx(st.g.aS, 1)[0], topT = topIdx(st.g.tP, 1)[0];
+    const cs = st.co.map((c, i) => ({ ...c, i })).filter(c => c.plays).sort((a, b) => b.plays - a.plays)[0];
+    const sum = [
+      ['taste', 'Top artist', ARTISTS[topA], `${fmtH(st.g.aS[topA])} · ${fmt(st.g.aP[topA])} plays`],
+      ['taste', 'Top track', TRACKS[topT][0], `${ARTISTS[TRACKS[topT][1]]} · ${fmt(st.g.tP[topT])} plays`],
+      ['rhythm', 'Loudest day', fmtDay(st.best), `${fmt(st.bestPlays)} plays · ${fmtH(daySecs[st.best - FIRST_DAY])}`],
+      ['rhythm', 'Longest streak', plural(st.bestRun, 'day'), `${fmtDay(st.bestRunStart)} → ${fmtDay(st.bestRunStart + st.bestRun - 1)}`],
+      ['habits', 'Skip rate', `${pct(st.skips, st.plays)}%`, `${fmt(st.skips)} of ${fmt(st.plays)} plays`],
+      ['places', 'Mostly heard in', COUNTRIES[cs.i][1], `${pct(cs.plays, st.plays)}% of plays`],
+    ];
+    return card('The short version', `Every play of 10 seconds or more, ${periodLabel()}.`,
+      `<dl class="sum">${sum.map(([t, k, v, s]) => `<button data-goto="${t}"><dt>${k}</dt><dd title="${esc(v)}">${esc(v)}<small>${esc(s)}</small></dd></button>`).join('')}</dl>`, 'full')
+      + hoursYearCard(true) + erasCard();
+  },
+  taste(st) {
+    const loopT = st.loopTrack;
+    const Y = allYears();
+    return topArtistsCard(st) + topTracksCard(st) + topAlbumsCard(st) + erasCard()
+      + card('Most-looped day', `The most times one song played in a single day, ${periodLabel()}.`,
+        `<div class="figure">${st.loopN}<small>times</small></div><p class="body"><b>${esc(TRACKS[loopT][0])}</b> <span class="muted">by ${esc(ARTISTS[TRACKS[loopT][1]])}</span></p><p class="body muted" style="margin-top:6px">on ${fmtDay(st.loopDay, true)}</p>`)
+      + card('One-play artists', 'Artists who got exactly one play from you.',
+        `<div class="figure">${pct(st.oneHit, st.artists)}%</div><p class="body">${fmt(st.oneHit)} of the ${fmt(st.artists)} artists you heard ${inPeriod()} only came up once.</p>`)
+      + card('Discovery vs. loyalty', 'Artists you heard each year, split into first-timers and ones you already knew.',
+        `<div data-chart="disc"></div><ul class="legend"><li><i style="background:var(--yellow)"></i>New that year</li><li><i style="background:var(--cobalt-lt)"></i>Returning</li></ul>`, 'full');
+  },
+  rhythm(st) {
+    const wdTot = st.wd.reduce((a, b) => a + b, 0) || 1, weekend = (st.wd[5] + st.wd[6]) / wdTot;
+    const [blo, bhi] = dayRange(st.best - FIRST_DAY); const bd = agg(blo, bhi);
+    return card('Minutes per day', `Every day from ${fmtDay(state.year === 'all' ? FIRST_DAY : Math.max(FIRST_DAY, Date.UTC(state.year, 0, 1) / 864e5))} to ${fmtDay(state.year === 'all' || state.year === Y1 ? LAST_DAY : Date.UTC(state.year, 11, 31) / 864e5)}. Hover a bar for that day.${state.year === 'all' ? ' Scroll sideways to go back in time.' : ''}`,
+      `<div class="daily" data-chart="daily"></div>`, 'full')
+      + card('Month by month', `Hours each month, ${Y0}–${Y1}${state.year !== 'all' ? `, with ${state.year} highlighted` : ''}.`, `<div data-chart="months"></div>`, 'full')
+      + card('Your listening clock', `Hours by weekday and hour of the day, local time, ${periodLabel()}.`, `<div data-chart="heat"></div>`, 'full')
+      + hoursYearCard(false)
+      + card('Weekdays', `${Math.round(weekend * 100)}% of your listening happens on weekends, ${inPeriod()}.`,
+        hbars(DOWS.map((d, i) => ({ label: DOW_LONG[i], v: st.wd[i], text: fmtH(st.wd[i]), color: i >= 5 ? 'var(--coral)' : null }))))
+      + card('Loudest day', `${fmtDay(st.best, true)}: ${fmt(st.bestPlays)} plays, ${fmtH(daySecs[st.best - FIRST_DAY])}. What was on:`,
+        rankList(topIdx(bd.tP, 5).map(t => ({ name: TRACKS[t][0], by: ARTISTS[TRACKS[t][1]], v: `${bd.tP[t]}×` }))))
+      + card('Streaks and silences', '',
+        `<div class="trio" style="grid-template-columns:1fr 1fr"><div><span class="lbl">Longest streak</span><div class="figure">${st.bestRun}<small>days</small></div><p>${fmtDay(st.bestRunStart)} → ${fmtDay(st.bestRunStart + st.bestRun - 1)}</p></div><div><span class="lbl">Longest silence</span><div class="figure">${st.gap}<small>days</small></div><p>${st.gap ? `${fmtDay(st.gapFrom + 1)} → ${fmtDay(st.gapFrom + st.gap)}` : 'Not a single day off'}</p></div></div>`);
+  },
+  habits(st) {
+    const minPlays = state.year === 'all' ? 12 : 5, minA = state.year === 'all' ? 150 : 30;
+    const skipped = topIdx(st.g.tK, 8, t => st.g.tP[t] >= minPlays);
+    const loyal = [];
+    for (let a = 0; a < nA; a++) if (st.g.aP[a] >= minA) loyal.push(a);
+    const aSk = new Int32Array(nA); { const [lo, hi] = rangeOf(state.year); for (let i = lo; i < hi; i++) if (F[i] & 2) aSk[TA[TR[i]]]++; }
+    loyal.sort((a, b) => aSk[a] / st.g.aP[a] - aSk[b] / st.g.aP[b] || st.g.aP[b] - st.g.aP[a]);
+    const rsRows = [...st.rs].map((v, i) => ({ k: RSTART[i], v })).filter(r => r.v).sort((a, b) => b.v - a.v);
+    const dvRows = [...st.dv].map((v, i) => ({ k: DEVICES[i], v })).filter(r => r.v).sort((a, b) => b.v - a.v);
+    return card('Skips', 'A skip is a song you jumped past before it ended.',
+        `<div class="figure">${pct(st.skips, st.plays)}%</div><p class="body">${fmt(st.skips)} of ${fmt(st.plays)} plays ${inPeriod()} were cut short.</p>`)
+      + card('Shuffle, offline, incognito', '',
+        `<div class="trio"><div><span class="lbl">Shuffle</span><div class="figure">${pct(st.shuffle, st.plays)}%</div><p>of plays</p></div><div><span class="lbl">Offline</span><div class="figure">${pct(st.offline, st.plays)}%</div><p>${fmt(st.offline)} downloaded plays</p></div><div><span class="lbl">Incognito</span><div class="figure">${fmt(st.incog)}</div><p>secret listens</p></div></div>`)
+      + card('Most skipped', `Songs you skipped most often (at least ${minPlays} plays).`,
+        skipped.length ? rankList(skipped.map(t => ({ name: TRACKS[t][0], by: ARTISTS[TRACKS[t][1]], v: `${st.g.tK[t]} of ${st.g.tP[t]}` }))) : '<p class="body muted">Not enough plays this year to call it.</p>')
+      + card('Rarely skipped', `Artists with ${minA}+ plays whose songs you let finish.`,
+        loyal.length ? rankList(loyal.slice(0, 8).map(a => ({ name: ARTISTS[a], by: `${fmt(st.g.aP[a])} plays`, v: `${pct(aSk[a], st.g.aP[a])}% skipped` }))) : '<p class="body muted">Not enough plays this year to call it.</p>')
+      + card('How songs started', `What kicked off each play, ${periodLabel()}.`,
+        hbars(rsRows.map(r => ({ label: START_LABEL[r.k] || r.k, v: r.v, text: `${pct(r.v, st.plays)}%`, tip: `${fmt(r.v)} plays` }))), 'full')
+      + card('Devices over the years', 'Share of plays on each device, per year. Hover for the split.',
+        `<div data-chart="devices"></div>`, 'full')
+      + card('Devices', `Where you played music, ${periodLabel()}.`,
+        hbars(dvRows.map(r => ({ label: r.k, v: r.v, text: `${pct(r.v, st.plays)}%`, color: DEVICE_COLORS[r.k], tip: `${fmt(r.v)} plays` }))));
+  },
+  places(st) {
+    const cs = st.co.map((c, i) => ({ ...c, i })).filter(c => c.plays).sort((a, b) => b.plays - a.plays);
+    if (!cs.length) return card('Where you listened', '', '<p class="body muted">No plays in this period.</p>', 'full');
+    if (state.country == null || !st.co[state.country].plays) state.country = cs[0].i;
+    return card('Where you listened', `Countries are from the connection Spotify logged, ${periodLabel()}. Pick one to see what played there.`,
+      `<div class="places"><div class="clist" role="group" aria-label="Countries">${cs.map(c => `<button data-country="${c.i}" aria-pressed="${state.country === c.i}"><span class="cc">${COUNTRIES[c.i][0] === 'ZZ' ? '??' : COUNTRIES[c.i][0]}</span><span><span class="cn">${esc(COUNTRIES[c.i][1])}</span><span class="cs">${c.first === c.last ? fmtDay(c.first) : fmtDay(c.first) + ' – ' + fmtDay(c.last)}</span></span><span class="cv">${pct(c.plays, st.plays) || '<1'}%<br>${fmt(c.plays)}</span></button>`).join('')}</div><div class="cdetail" id="cdetail"></div></div>`, 'full');
+  },
+  search(st) {
+    const top = topIdx(artistTotals(), 6);
+    let html = card('Search artists', '', `<div class="search"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="7.5" cy="7.5" r="5.5" fill="none" stroke="#F3E6C8" stroke-width="1.6"/><path d="M11.6 11.6 16 16" stroke="#F3E6C8" stroke-width="1.6" stroke-linecap="round"/></svg><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search ${fmt(nA)} artists" aria-label="Search artists" value="${state.artist >= 0 && state.artist != null ? esc(ARTISTS[state.artist]) : ''}"></div><div class="sugg" id="sugg">${top.map(a => `<button data-artist="${a}">${esc(ARTISTS[a])}</button>`).join('')}</div>`, 'full');
+    if (state.artist != null && state.artist >= 0) html += artistDetail(state.artist, st);
+    return html;
+  },
+};
+const artistTotals = () => cached('at', () => { const s = new Float64Array(nA); for (let i = 0; i < N; i++) s[TA[TR[i]]] += S[i]; return s; });
+
+function artistDetail(a, st) {
+  // all-time facts
+  let first = -1, last = -1, tot = 0, secs = 0;
+  const monthSecs = new Map();
+  for (let i = 0; i < N; i++) if (TA[TR[i]] === a) { if (first < 0) first = i; last = i; tot++; secs += S[i]; monthSecs.set(MON[i], (monthSecs.get(MON[i]) || 0) + S[i]); }
+  let peakM = null, peakV = 0; monthSecs.forEach((v, m) => { if (v > peakV) { peakV = v; peakM = m; } });
+  const rank = (() => { const s = artistTotals(); let r = 1; for (let x = 0; x < nA; x++) if (s[x] > s[a]) r++; return r; })();
+  const [lo, hi] = rangeOf(state.year);
+  const g = agg(lo, hi, i => TA[TR[i]] === a);
+  const tops = topIdx(g.tP, 10), max = g.tP[tops[0]] || 1;
+  return card(esc(ARTISTS[a]), `All time: #${rank} of ${fmt(nA)} artists.`,
+      `<div class="statrow"><div><b>${fmt(tot)}</b><span>plays</span></div><div><b>${fmtH(secs)}</b><span>listened</span></div><div><b>${fmtDay(DAY[first])}</b><span>first play</span></div><div><b>${fmtDay(DAY[last])}</b><span>latest play</span></div><div><b>${peakM != null ? fmtMonth(peakM) : '–'}</b><span>peak month</span></div></div>`, 'full')
+    + card('Their timeline', `Hours each month, all time${state.year !== 'all' ? `, ${state.year} highlighted` : ''}.`, `<div data-chart="artistTimeline" data-a="${a}"></div>`, 'full')
+    + card('Top songs', `${periodLabel()}.`, tops.length ? rankList(tops.map(t => ({ name: TRACKS[t][0], by: ALBUMS[TRACKS[t][2]][0], share: g.tP[t] / max, v: `${g.tP[t]}×` }))) : `<p class="body muted">No plays ${inPeriod()}.</p>`)
+    + card('Where it started', 'The first song of theirs you played.', `<p class="body"><b>${esc(TRACKS[TR[first]][0])}</b></p><p class="body muted" style="margin-top:6px">${fmtDay(DAY[first], true)} · ${esc(COUNTRIES[CO[first]][1])}</p><p class="body" style="margin-top:16px"><span class="muted">Most recent:</span> <b>${esc(TRACKS[TR[last]][0])}</b> <span class="muted">on ${fmtDay(DAY[last])}</span></p>`);
+}
+
+/* ============ chart drawing after render ============ */
+const DRAW = {
+  years: drawYears,
+  disc(el) {
+    const Y = allYears();
+    el.innerHTML = stackBars(YEARS.map((y, i) => ({ label: "’" + String(y).slice(2), fresh: Y.fresh[i], back: Y.back[i], dim: state.year !== 'all' && state.year !== y, tip: `<b>${y}</b><br>${fmt(Y.fresh[i])} new artists<br>${fmt(Y.back[i])} returning` })),
+      [{ key: 'back', color: 'var(--cobalt-lt)' }, { key: 'fresh', color: 'var(--yellow)' }], { w: cardW(el), label: 'New and returning artists per year' });
+  },
+  months(el) {
+    const m0 = MON[0], m1 = MON[N - 1], vals = new Array(m1 - m0 + 1).fill(0);
+    for (let i = 0; i < N; i++) vals[MON[i] - m0] += S[i] / 3600;
+    let hi = null;
+    if (state.year !== 'all') hi = [Math.max(0, state.year * 12 - m0), Math.min(vals.length - 1, state.year * 12 + 11 - m0)];
+    el.innerHTML = areaChart(vals, { w: cardW(el), startMonth: m0, hi, label: 'Hours per month' });
+  },
+  artistTimeline(el) {
+    const a = +el.dataset.a, m0 = MON[0], m1 = MON[N - 1], vals = new Array(m1 - m0 + 1).fill(0);
+    for (let i = 0; i < N; i++) if (TA[TR[i]] === a) vals[MON[i] - m0] += S[i] / 3600;
+    let hi = null;
+    if (state.year !== 'all') hi = [Math.max(0, state.year * 12 - m0), Math.min(vals.length - 1, state.year * 12 + 11 - m0)];
+    el.innerHTML = areaChart(vals, { w: cardW(el), startMonth: m0, hi, label: 'Hours per month for this artist' });
+  },
+  heat(el) {
+    const st = statsFor(state.year), max = Math.max(...st.heat) || 1;
+    let h = '';
+    for (let d = 0; d < 7; d++) {
+      h += `<span class="rl" style="grid-row:${d + 1}">${DOWS[d]}</span>`;
+      for (let hr = 0; hr < 24; hr++) {
+        const v = st.heat[d * 24 + hr], a = v ? .1 + .9 * Math.pow(v / max, .75) : 0;
+        h += `<span class="c" style="grid-row:${d + 1};${v ? `background:rgba(244,184,46,${a.toFixed(3)})` : ''}" data-tip="<b>${DOW_LONG[d]}s, ${String(hr).padStart(2, '0')}:00</b><br>${fmtH(v)} · ${fmt(st.heatP[d * 24 + hr])} plays"></span>`;
+      }
+    }
+    for (let hr = 0; hr < 24; hr += 3) h += `<span class="hl" style="grid-column:${hr + 2}">${String(hr).padStart(2, '0')}</span>`;
+    el.innerHTML = `<div class="heat" role="img" aria-label="Listening by weekday and hour">${h}</div>`;
+  },
+  devices(el) {
+    const Y = allYears(), present = DEVICES.map((d, i) => i).filter(i => Y.dvy.some(c => c[i]));
+    present.sort((a, b) => Y.dvy.reduce((s, c) => s + c[b], 0) - Y.dvy.reduce((s, c) => s + c[a], 0));
+    el.innerHTML = `<div class="stack100">${YEARS.map((y, yi) => {
+      const c = Y.dvy[yi], tot = c.reduce((a, b) => a + b, 0) || 1, cls = state.year === 'all' ? '' : state.year === y ? 'on' : 'dim';
+      return `<div class="row ${cls}"><span>${y}</span><span class="seg">${present.filter(i => c[i]).map(i => `<span style="width:${100 * c[i] / tot}%;background:${DEVICE_COLORS[DEVICES[i]]}" data-tip="<b>${y} · ${esc(DEVICES[i])}</b><br>${pct(c[i], tot) || '<1'}% · ${fmt(c[i])} plays"></span>`).join('')}</span></div>`;
+    }).join('')}</div><ul class="legend">${present.map(i => `<li><i style="background:${DEVICE_COLORS[DEVICES[i]]}"></i>${esc(DEVICES[i])}</li>`).join('')}</ul>`;
+  },
+  daily(el) {
+    const d0 = state.year === 'all' ? FIRST_DAY : Math.max(FIRST_DAY, Date.UTC(state.year, 0, 1) / 864e5);
+    const d1 = state.year === 'all' ? LAST_DAY : Math.min(LAST_DAY, Date.UTC(state.year, 11, 31) / 864e5);
+    const n = d1 - d0 + 1, H = 200, padB = 24, padT = 8;
+    el.innerHTML = `<div class="yaxis"></div><div class="scroller"><canvas aria-label="Minutes listened per day" role="img"></canvas></div>`;
+    const sc = el.querySelector('.scroller'), cv = el.querySelector('canvas');
+    const avail = sc.clientWidth;
+    const bw = state.year === 'all' ? Math.max(3, avail / n) : avail / n;
+    const W = Math.ceil(bw * n), dpr = devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+    let maxMin = 0; for (let d = d0; d <= d1; d++) maxMin = Math.max(maxMin, daySecs[d - FIRST_DAY] / 60);
+    const step = maxMin > 600 ? 240 : maxMin > 300 ? 120 : 60, top = Math.ceil(maxMin / step) * step || 60;
+    const Y = m => H - padB - (H - padB - padT) * m / top;
+    const ax = el.querySelector('.yaxis'); let axh = '';
+    for (let m = 0; m <= top; m += step) {
+      ctx.fillStyle = 'rgba(243,230,200,.1)'; ctx.fillRect(0, Math.round(Y(m)), W, 1);
+      axh += `<span style="top:${Y(m)}px">${m / 60}h</span>`;
+    }
+    ax.innerHTML = axh;
+    ctx.font = '500 10px "Martian Mono", monospace';
+    const draw = hover => {
+      ctx.clearRect(0, 0, W, H);
+      for (let m = 0; m <= top; m += step) { ctx.fillStyle = 'rgba(243,230,200,.1)'; ctx.fillRect(0, Math.round(Y(m)), W, 1); }
+      for (let d = d0; d <= d1; d++) {
+        const k = d - FIRST_DAY, m = daySecs[k] / 60, x = (d - d0) * bw;
+        const dt = dateOf(d);
+        if (dt.getUTCDate() === 1 && (state.year !== 'all' || dt.getUTCMonth() === 0)) {
+          ctx.fillStyle = 'rgba(243,230,200,.22)'; ctx.fillRect(Math.round(x), padT, 1, H - padB - padT + 4);
+          ctx.fillStyle = 'rgba(243,230,200,.74)';
+          ctx.fillText(state.year === 'all' ? String(dt.getUTCFullYear()) : MONTHS[dt.getUTCMonth()], x + 4, H - 6);
+        }
+        if (!m) continue;
+        ctx.fillStyle = d === hover ? '#F3E6C8' : m >= 360 ? '#EE6E55' : '#F4B82E';
+        const y = Y(m);
+        ctx.fillRect(x + (bw > 3 ? bw * .15 : 0), y, Math.max(1, bw > 3 ? bw * .7 : bw - 1), H - padB - y);
+      }
+    };
+    draw(-1);
+    if (state.year === 'all') sc.scrollLeft = W;
+    let last = -1;
+    cv.addEventListener('pointermove', e => {
+      const rect = cv.getBoundingClientRect(), d = d0 + Math.floor((e.clientX - rect.left) / bw);
+      if (d < d0 || d > d1) return;
+      if (d !== last) { last = d; draw(d); }
+      const k = d - FIRST_DAY, [lo, hi] = dayRange(k);
+      let topT = '';
+      if (hi > lo) { const c = new Map(); let bt = -1, bv = 0; for (let i = lo; i < hi; i++) { const v = (c.get(TR[i]) || 0) + 1; c.set(TR[i], v); if (v > bv) { bv = v; bt = TR[i]; } } topT = `<br>Most played: ${esc(TRACKS[bt][0])} <span style="opacity:.7">— ${esc(ARTISTS[TRACKS[bt][1]])}</span>`; }
+      showTip(`<b>${fmtDay(d, true)}</b><br>${fmt(daySecs[k] / 60)} min · ${fmt(dayPlays[k])} plays${topT}`, e.clientX, e.clientY);
+    });
+    cv.addEventListener('pointerleave', () => { last = -1; draw(-1); hideTip(); });
+    const lg = document.createElement('ul'); lg.className = 'legend';
+    lg.innerHTML = `<li><i style="background:var(--yellow)"></i>Minutes listened</li><li><i style="background:var(--coral)"></i>6 hours or more</li>`;
+    el.appendChild(lg);
+  },
+};
+
+function renderCountry(st) {
+  const box = $('#cdetail'); if (!box) return;
+  const c = state.country, info = st.co[c], [lo, hi] = rangeOf(state.year);
+  const g = agg(lo, hi, i => CO[i] === c);
+  const ta = topIdx(g.aP, 8), tt = topIdx(g.tP, 8), maxA = g.aP[ta[0]] || 1, maxT = g.tP[tt[0]] || 1;
+  box.innerHTML = `<h3>${esc(COUNTRIES[c][1])}</h3><p class="note">${fmt(info.plays)} plays · ${fmtH(info.secs)} · ${info.first === info.last ? fmtDay(info.first) : `${fmtDay(info.first)} to ${fmtDay(info.last)}`}</p>
+    <div class="two"><div><h4>Top artists there</h4>${rankList(ta.map(a => ({ name: ARTISTS[a], share: g.aP[a] / maxA, v: `${fmt(g.aP[a])}` })))}</div>
+    <div><h4>Top songs there</h4>${rankList(tt.map(t => ({ name: TRACKS[t][0], by: ARTISTS[TRACKS[t][1]], share: g.tP[t] / maxT, v: `${fmt(g.tP[t])}×` })))}</div></div>`;
+  box.classList.remove('enter'); void box.offsetWidth; box.classList.add('enter');
+}
+
+/* ============ render ============ */
+function render({ animate = true } = {}) {
+  const st = statsFor(state.year);
+  $('#tabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === state.tab));
+  $('#years').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.y) === String(state.year)));
+  $('#scope').textContent = state.tab === 'search' ? 'Timeline is always all-time' : '';
+  const grid = $('#grid');
+  grid.innerHTML = TABVIEWS[state.tab](st);
+  grid.querySelectorAll('[data-chart]').forEach(el => DRAW[el.dataset.chart](el));
+  if (state.tab === 'places') renderCountry(st);
+  if (animate && !reduced) grid.querySelectorAll('.card').forEach((c, i) => { c.style.animationDelay = `${Math.min(i, 6) * 55}ms`; c.classList.add('enter'); });
+  hero(st);
+  drawRing(st);
+  writeHash();
+}
+
+/* ============ controls ============ */
+$('#tabs').innerHTML = TABS.map(([k, v]) => `<button role="tab" data-tab="${k}">${v}</button>`).join('');
+$('#years').innerHTML = `<button data-y="all">All</button>` + YEARS.map(y => `<button data-y="${y}">${y}</button>`).join('');
+const go = (patch, scrollTop = true) => {
+  Object.assign(state, patch); render();
+  if (scrollTop) (L.stack ? scrollTo({ top: $('#panel').offsetTop - 140, behavior: reduced ? 'auto' : 'smooth' }) : $('#panel').scrollTo({ top: 0 }));
+};
+$('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go({ tab: b.dataset.tab }, !L.stack); });
+$('#years').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go({ year: b.dataset.y === 'all' ? 'all' : +b.dataset.y }, false); });
+$('#grid').addEventListener('click', e => {
+  const g = e.target.closest('[data-goto]'); if (g) return go({ tab: g.dataset.goto });
+  const y = e.target.closest('[data-year]'); if (y) { const v = +y.dataset.year; return go({ year: state.year === v ? 'all' : v }, false); }
+  const c = e.target.closest('[data-country]'); if (c) { state.country = +c.dataset.country; $('#grid').querySelectorAll('[data-country]').forEach(b => b.setAttribute('aria-pressed', b === c)); return renderCountry(statsFor(state.year)); }
+  const a = e.target.closest('[data-artist]'); if (a) return go({ artist: +a.dataset.artist }, false);
+});
+// search
+const lower = ARTISTS.map(a => a.toLowerCase());
+$('#grid').addEventListener('input', e => {
+  if (e.target.id !== 'q') return;
+  const q = e.target.value.trim().toLowerCase(), box = $('#sugg'), tot = artistTotals();
+  if (!q) { box.innerHTML = topIdx(tot, 6).map(a => `<button data-artist="${a}">${esc(ARTISTS[a])}</button>`).join(''); return; }
+  const hits = [];
+  for (let a = 0; a < nA; a++) if (lower[a].includes(q)) hits.push(a);
+  hits.sort((a, b) => (lower[b].startsWith(q) - lower[a].startsWith(q)) || tot[b] - tot[a]);
+  box.innerHTML = hits.length ? hits.slice(0, 10).map((a, i) => `<button data-artist="${a}" class="${i ? '' : 'first'}">${esc(ARTISTS[a])} <span class="muted">${fmtH(tot[a])}</span></button>`).join('') : `<span class="empty">No artist matches “${esc(e.target.value)}”.</span>`;
+});
+$('#grid').addEventListener('keydown', e => {
+  if (e.target.id === 'q' && e.key === 'Enter') { const f = $('#sugg [data-artist]'); if (f) go({ artist: +f.dataset.artist }, false); }
+});
+
+// tooltips
+const tip = $('#tip');
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.classList.add('on');
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(innerWidth - w - 10, Math.max(10, x + 14)) + 'px';
+  tip.style.top = (y - h - 14 < 8 ? y + 18 : y - h - 14) + 'px';
+}
+function hideTip() { tip.classList.remove('on'); }
+document.addEventListener('pointermove', e => {
+  if (e.target.tagName === 'CANVAS') return;
+  const t = e.target.closest?.('[data-tip]');
+  if (t && t.dataset.tip) showTip(t.dataset.tip, e.clientX, e.clientY); else hideTip();
+});
+
+// layout + resize
+let rz;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { layout(); render({ animate: false }); }, 140); });
+addEventListener('hashchange', () => { readHash(); render(); });
+
+readHash();
+await document.fonts.ready;
+layout();
+render();
+</script>
+</body>
+</html>
