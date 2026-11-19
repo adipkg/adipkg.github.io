@@ -223,10 +223,13 @@ svg.chart g[data-tip]:hover rect.b{filter:brightness(1.15)}
 .status{font-size:12px;color:var(--cream-2)}
 
 /* ---------- stacked (narrow / portrait) ---------- */
-.stack .brand{background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0;margin:0}
-.stack header.top{position:sticky;height:auto;flex-direction:column;align-items:stretch;gap:10px;padding:14px 16px 10px;background:linear-gradient(180deg,rgba(22,14,27,.78),rgba(22,14,27,.5));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.stack .brand{align-self:flex-start;gap:8px;padding:4px 13px 4px 4px;margin:0;font-size:14.5px;background:#1C1222;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:inset 1px 1px 0 rgba(255,236,246,.14),0 6px 18px -8px rgba(0,0,0,.55)}
+.stack .brand svg{width:22px;height:22px}
+.stack header.top{position:sticky;height:auto;flex-direction:column;align-items:stretch;gap:7px;padding:10px 16px 8px;background:none;pointer-events:none}
+.stack header.top>*{pointer-events:auto}
 .stack nav.tabs{position:static;overflow-x:auto;align-self:flex-start;max-width:100%}
-.stack nav.tabs button{padding:8px 12px;white-space:nowrap}
+.stack nav.tabs{padding:3px;box-shadow:inset 1px 1px 0 rgba(255,236,246,.14),0 6px 18px -8px rgba(0,0,0,.45)}
+.stack nav.tabs button{padding:6px 10px;font-size:10px;white-space:nowrap}
 .stack .hero{position:relative;left:auto;bottom:auto;width:auto;min-height:calc(100svh - 120px);display:flex;flex-direction:column;justify-content:flex-end;padding:0 16px 28px}
 .stack .panel{position:relative;top:auto;left:auto;right:auto;bottom:auto;overflow:visible;padding:0 16px 48px}
 .stack .yearbar{top:var(--stack-head,108px)}
@@ -242,12 +245,13 @@ svg.chart g[data-tip]:hover rect.b{filter:brightness(1.15)}
 /* ---------- phones / touch ---------- */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{-webkit-tap-highlight-color:transparent}
-.stack header.top{padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 10px calc(16px + env(safe-area-inset-left))}
+.stack header.top{padding:calc(8px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left))}
 .stack .hero{padding:0 calc(16px + env(safe-area-inset-right)) 28px calc(16px + env(safe-area-inset-left))}
 .stack .panel{padding:0 calc(16px + env(safe-area-inset-right)) calc(48px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left))}
 .stack nav.tabs,.stack .years{scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
 .stack nav.tabs::-webkit-scrollbar,.stack .years::-webkit-scrollbar{display:none}
 .stack nav.tabs button,.stack .years button{scroll-snap-align:center;min-height:36px}
+.stack nav.tabs button{min-height:30px}
 .stack .years button{padding:8px 13px}
 .stack .yearbar{flex-wrap:wrap;gap:6px 12px}
 .stack .yearbar .years{flex:1 1 100%}
