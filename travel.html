@@ -1,0 +1,1906 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>30 before 30 · a flight log</title>
+<meta name="description" content="Thirty countries before thirty: an animated flight log.">
+<meta name="theme-color" content="#16275c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2316275c'/%3E%3Ccircle cx='20' cy='44' r='15' fill='%234a74cc'/%3E%3Ccircle cx='40' cy='50' r='16' fill='%23f5d3ae'/%3E%3Cpath d='M12 27h30' stroke='%23fffaf0' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M38 22l14 3c3 1 3 4 0 5l-14 2z' fill='%23fffaf0'/%3E%3Cpath d='M38 20l-5-8h5l5 9z' fill='%23e2513f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&display=swap" rel="stylesheet">
+<style>
+/* ───────── palette lifted from the painting ───────── */
+:root{
+  --ink:#101b45; --navy:#16275c; --navy2:#1d3373; --b1:#2b4a9c; --b2:#3a5fb8; --b3:#4a74cc; --b4:#6189de;
+  --peri:#8aa9ec; --peri2:#b9cbf6; --cream:#f9e6cd; --peach:#f5d3ae; --peach2:#eab98d; --tan:#c9905f;
+  --red:#e2513f; --red2:#b93a33; --white:#fffaf0;
+  --disp:'Caprasimo','Cooper Black','Rockwell Extra Bold',Georgia,serif;
+  --serif:'Fraunces','Iowan Old Style',Georgia,serif;
+  --mono:'DM Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;overflow-x:clip}
+body{margin:0;background:var(--navy);color:var(--cream);font-family:var(--serif);font-size:17px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
+a{color:inherit}
+button{font:inherit;color:inherit}
+svg{display:block}
+::selection{background:var(--red);color:var(--white)}
+:focus-visible{outline:2px dashed var(--peach);outline-offset:3px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;font-size:11.5px}
+
+/* ───────── fixed layers ───────── */
+#grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.55}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:80;pointer-events:none}
+#planeHit{position:fixed;left:0;top:0;width:88px;height:88px;border-radius:50%;z-index:81;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent}
+#planeHit.grab{cursor:grabbing}
+#tip{position:fixed;left:0;top:0;z-index:95;pointer-events:none;max-width:260px;padding:9px 12px 10px;border-radius:14px;background:var(--ink);color:var(--cream);font:400 12px/1.45 var(--mono);box-shadow:-2px -2px 0 var(--peach),0 12px 26px -8px rgba(5,9,30,.7);opacity:0;transform:translate3d(-999px,-999px,0);transition:opacity .14s}
+#tip.on{opacity:1}
+#tip b{display:block;font:400 17px/1.15 var(--disp);letter-spacing:.01em;margin-bottom:2px;color:var(--white)}
+#tip i{font-style:normal;color:var(--peri2)}
+#toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:85;display:flex;flex-direction:column-reverse;gap:10px;align-items:center;pointer-events:none;width:min(520px,calc(100% - 28px))}
+.toast{display:flex;gap:12px;align-items:center;padding:11px 18px 11px 12px;border-radius:999px;background:var(--ink);color:var(--cream);font:400 12.5px/1.35 var(--mono);box-shadow:-3px -3px 0 var(--peach),0 16px 30px -10px rgba(5,9,30,.75);animation:toastIn .5s cubic-bezier(.2,1.4,.4,1) both}
+.toast.out{animation:toastOut .35s ease-in both}
+.toast b{font:400 16px/1 var(--disp);color:var(--white)}
+.toast .ts{width:38px;height:38px;flex:none;color:var(--peach)}
+@keyframes toastIn{from{opacity:0;transform:translateY(26px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(14px) scale(.96)}}
+
+/* ───────── HUD ───────── */
+#hud{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:8px;padding:6px;border-radius:999px;background:rgba(16,27,69,.78);-webkit-backdrop-filter:blur(12px) saturate(1.2);backdrop-filter:blur(12px) saturate(1.2);box-shadow:-2px -2px 0 rgba(245,211,174,.9),0 14px 30px -14px rgba(5,9,30,.8);max-width:calc(100% - 20px)}
+.brand{display:flex;align-items:baseline;gap:3px;padding:6px 12px 6px 14px;text-decoration:none;font:400 19px/1 var(--disp);color:var(--white)}
+.brand i{font:italic 500 13px var(--serif);color:var(--peach)}
+.tabs{display:flex;gap:2px}
+.tabs a{position:relative;padding:10px 14px;border-radius:999px;text-decoration:none;font:500 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--peri2);white-space:nowrap;transition:color .2s,background .25s}
+.tabs a:hover{color:var(--white)}
+.tabs a.on{background:var(--cream);color:var(--ink)}
+.stampmeter{display:flex;align-items:center;gap:7px;padding:7px 13px 7px 8px;border:0;border-radius:999px;background:rgba(138,169,236,.16);font:500 11.5px/1 var(--mono);letter-spacing:.08em;color:var(--cream);cursor:pointer;white-space:nowrap}
+.stampmeter svg{width:22px;height:22px;color:var(--peach)}
+.stampmeter.bump{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
+.stampmeter.all{background:var(--red);color:var(--white)}
+.stampmeter.all svg{color:var(--white)}
+@keyframes bump{40%{transform:scale(1.22) rotate(-6deg)}}
+#pilot{position:fixed;left:16px;bottom:16px;z-index:70;display:flex;align-items:center;gap:12px;padding:10px 16px 10px 10px;border-radius:20px;background:rgba(16,27,69,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:-2px -2px 0 rgba(245,211,174,.9);font:400 10.5px/1.5 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--peri2);transition:opacity .5s,transform .5s}
+#pilot.dim{opacity:.38}
+#pilot:hover{opacity:1}
+.keys{display:grid;grid-template-columns:repeat(3,24px);grid-template-rows:repeat(2,24px);gap:3px}
+kbd{display:grid;place-items:center;min-width:24px;height:24px;padding:0 5px;border-radius:7px;background:var(--navy2);color:var(--cream);font:500 10.5px/1 var(--mono);box-shadow:0 2px 0 var(--ink),inset 0 0 0 1px rgba(185,203,246,.25);transition:transform .08s,background .08s}
+.keys kbd:nth-child(1){grid-column:2;grid-row:1}
+.keys kbd:nth-child(2){grid-column:1;grid-row:2}
+.keys kbd:nth-child(3){grid-column:2;grid-row:2}
+.keys kbd:nth-child(4){grid-column:3;grid-row:2}
+#pilot.mini{padding:8px;gap:0;border-radius:16px}
+#pilot.mini p{display:none}
+#pilot.mini:hover{padding:10px 16px 10px 10px;gap:12px}
+#pilot.mini:hover p.desk{display:block}
+kbd.on{background:var(--red);color:var(--white);transform:translateY(2px);box-shadow:none}
+#pilot p kbd{display:inline-grid;height:18px;min-width:18px;font-size:9.5px;vertical-align:middle;margin:0 1px}
+#pilot .touch{display:none}
+
+/* ───────── the painting: hero ───────── */
+.hero{position:relative;height:100vh;height:100svh;min-height:600px;overflow:hidden;isolation:isolate;container-type:size;background:linear-gradient(155deg,#0f1a44 0%,#16275c 42%,#1d3373 100%)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:150px;z-index:85;pointer-events:none;background:linear-gradient(180deg,rgba(29,51,115,0),rgba(29,51,115,.7) 60%,#1d3373)}
+.stage{position:absolute;--w:max(100cqw,166.7cqh);width:var(--w);height:calc(var(--w)*.6);left:calc(50% - var(--w)/2);top:calc(50% - var(--w)*.3)}
+.skyglow{position:absolute;inset:0;z-index:2;background:
+  radial-gradient(ellipse 15% 30% at 55% 47%,#8eabec 0%,#7495e2 38%,rgba(86,124,212,.6) 62%,transparent 82%),
+  radial-gradient(ellipse 22% 26% at 63% 26%,rgba(97,137,222,.75),transparent 72%),
+  radial-gradient(ellipse 30% 40% at 40% 78%,rgba(58,95,184,.7),transparent 75%)}
+.stars{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.beam{position:absolute;inset:0;z-index:25;pointer-events:none;clip-path:polygon(3.5% -2%,25.3% -2%,72% 46%,46% 77%);background:linear-gradient(128deg,rgba(150,178,240,.30) 0%,rgba(138,169,236,.17) 42%,rgba(138,169,236,0) 82%)}
+.cloud{position:absolute;pointer-events:none;will-change:transform}
+.cloud canvas{display:block;width:100%;height:100%;animation:drift var(--d,28s) ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(calc(var(--a,10px)*-1),0,0)}to{transform:translate3d(var(--a,10px),calc(var(--a,10px)*.3),0)}}
+.hero-title{position:absolute;left:0;right:0;top:44%;z-index:76;text-align:center;pointer-events:none;padding:0 12px}
+.kicker{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;align-items:center;white-space:nowrap;font:500 clamp(10px,1.05vw,12.5px)/1 var(--mono);letter-spacing:.24em;text-transform:uppercase;color:var(--peach);margin-bottom:clamp(8px,1.6vh,18px);text-shadow:0 1px 0 var(--ink)}
+.kicker span+span::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--red);margin-right:14px;vertical-align:middle;transform:translateY(-1px)}
+.title{position:relative;display:flex;justify-content:center;align-items:center;gap:.1em;width:fit-content;margin:0 auto;font:400 clamp(80px,min(16.5vw,28vh),250px)/.82 var(--disp);color:var(--cream);letter-spacing:-.02em;text-shadow:-.012em -.016em 0 var(--white),.042em .05em 0 var(--ink)}
+.title .n{display:inline-block;animation:rise 1.1s cubic-bezier(.2,1.3,.3,1) both}
+.title .n:last-child{animation-delay:.16s}
+.title .w{font:italic 500 .3em/1 var(--serif);letter-spacing:0;color:var(--white);transform:rotate(-7deg) translateY(-.12em);text-shadow:.07em .09em 0 var(--ink);animation:rise 1s .3s cubic-bezier(.2,1.3,.3,1) both}
+.title .cloud{z-index:3}
+@keyframes rise{from{opacity:0;transform:translateY(.35em) scale(.92)}}
+.hero-plate{position:absolute;left:50%;bottom:clamp(70px,10vh,104px);transform:translateX(-50%);z-index:90;width:min(700px,calc(100% - 28px));padding:16px 22px 16px;border-radius:26px;background:rgba(16,27,69,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:-3px -3px 0 var(--peach),0 24px 44px -20px rgba(5,9,30,.85);animation:plateIn .9s .7s cubic-bezier(.2,1.2,.3,1) both}
+@keyframes plateIn{from{opacity:0;transform:translate(-50%,30px)}}
+.lede{font:400 clamp(15px,1.5vw,18.5px)/1.4 var(--serif);text-align:center;color:var(--cream)}
+.lede b{font:400 1.18em/1 var(--disp);color:var(--white);padding:0 .08em}
+.descend{position:absolute;left:50%;bottom:-18px;margin-left:-18px;z-index:2;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--cream);color:var(--ink);box-shadow:2px 3px 0 var(--ink);transition:transform .15s}
+.descend:hover{transform:translateY(3px)}
+.descend svg{width:18px;height:18px;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(5px)}}
+
+/* trail bar: the contrail as a meter */
+.tb{margin-top:12px}
+.tb-rail{position:relative;padding-top:20px}
+.tb-line{position:absolute;left:0;top:9px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,250,240,.25),var(--white));transform-origin:left;animation:lineIn 1.6s 1.1s cubic-bezier(.3,.8,.3,1) both}
+@keyframes lineIn{from{transform:scaleX(0)}}
+.tb-plane{position:absolute;top:-2px;width:34px;height:22px;margin-left:-6px;color:var(--white);animation:planeIn 1.6s 1.1s cubic-bezier(.3,.8,.3,1) both}
+@keyframes planeIn{from{left:0}}
+.tb-segs{display:grid;grid-template-columns:repeat(var(--n,30),1fr);gap:3px}
+.tb-segs i{height:9px;border-radius:3px;background:rgba(138,169,236,.2)}
+.tb-segs i.d{background:var(--cream)}
+.tb-segs i.p{background:repeating-linear-gradient(135deg,rgba(245,211,174,.75) 0 2px,rgba(245,211,174,.22) 2px 4px)}
+.tb-key{display:flex;flex-wrap:wrap;justify-content:center;gap:5px 18px;margin-top:10px;font:400 10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--peri2)}
+.tb-key span{display:inline-flex;align-items:center;gap:6px}
+.tb-key i{width:12px;height:8px;border-radius:2.5px;background:rgba(138,169,236,.28)}
+.tb-key i.d{background:var(--cream)}
+.tb-key i.p{background:repeating-linear-gradient(135deg,rgba(245,211,174,.75) 0 2px,rgba(245,211,174,.22) 2px 4px)}
+.tb-key b{font-weight:500;color:var(--cream)}
+
+/* ───────── zones ───────── */
+.zone{position:relative;padding:clamp(170px,24vh,250px) 0 clamp(120px,16vh,180px)}
+.wrap{position:relative;z-index:2;width:min(1180px,calc(100% - 40px));margin:0 auto}
+.bank{position:absolute;left:0;right:0;top:-104px;height:300px;pointer-events:none;z-index:1;overflow-x:clip}
+.bank .cloud{left:50%!important;width:max(100%,1050px)!important;margin-left:calc(max(100%,1050px)/-2)}
+.zhead{max-width:760px;margin-bottom:clamp(30px,5vh,58px)}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:500 11.5px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--peach)}
+.eyebrow::before{content:"";width:34px;height:2px;border-radius:2px;background:currentColor}
+h2{font:400 clamp(48px,7.6vw,104px)/.9 var(--disp);letter-spacing:-.015em;margin:.16em 0 .2em;color:var(--cream);text-shadow:-.012em -.016em 0 var(--white),.04em .05em 0 var(--ink)}
+.sub{font:400 clamp(16.5px,1.5vw,20px)/1.5 var(--serif);max-width:54ch;color:var(--peri2)}
+.sub em{color:var(--cream)}
+.night{background:linear-gradient(180deg,#1d3373 0,#16275c 170px,#101b45 48%,#132051 78%,#16275c 100%)}
+.day{background:linear-gradient(180deg,#16275c 0,#20397f 170px,#2f50a6 480px,#3a5fb8 70%,#4169c4 100%)}
+.day .sub{color:#d5e0fa}
+.dawn{background:linear-gradient(180deg,#4169c4 0,#6f90de 150px,#b9b6d3 300px,#f1c9a3 470px,#f6d8b6 62%,#f9e6cd 100%);color:var(--ink)}
+.dawn h2{color:var(--navy);text-shadow:-.012em -.016em 0 var(--white),.04em .05em 0 var(--b3)}
+.dawn .eyebrow{color:var(--red2)}
+.dawn .sub{color:#2c3f7c}
+.dawn .sub em{color:var(--red2)}
+.zone>.stars{z-index:0;opacity:.8}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 17px;border:0;border-radius:999px;background:var(--cream);color:var(--ink);font:500 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:3px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s,background .2s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn svg{width:13px;height:13px}
+.btn:hover{transform:translate(-1px,-2px);box-shadow:4px 6px 0 var(--ink)}
+.btn:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn.red{background:var(--red);color:var(--white)}
+.btn.ghost{background:rgba(138,169,236,.14);color:var(--cream);box-shadow:inset 0 0 0 1.5px rgba(185,203,246,.4)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--cream);transform:none}
+.dawn .btn{box-shadow:3px 4px 0 var(--b3)}
+.dawn .btn.navy{background:var(--navy);color:var(--cream)}
+
+.card{position:relative;overflow:hidden;border-radius:26px;padding:22px 24px 24px;background:linear-gradient(158deg,#20397f 0%,#16275c 62%);color:var(--cream);box-shadow:-3px -3px 0 var(--peach),0 26px 46px -24px rgba(5,9,30,.8)}
+.card::after{content:"";position:absolute;right:-90px;bottom:-90px;width:250px;height:250px;border-radius:50%;pointer-events:none;background:repeating-radial-gradient(circle,transparent 0 10px,rgba(138,169,236,.085) 10px 11.5px)}
+.card>*{position:relative;z-index:1}
+.card h3{font:500 11.5px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--peri2);margin-bottom:14px;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.card h3 small{font:inherit;letter-spacing:.1em;color:rgba(185,203,246,.7)}
+.card.paper{background:linear-gradient(160deg,#fbecd8,#f5d8b8);color:var(--ink);box-shadow:-3px -3px 0 var(--white),7px 9px 0 var(--navy)}
+.card.paper::after{background:repeating-radial-gradient(circle,transparent 0 10px,rgba(201,144,95,.16) 10px 11.5px)}
+.card.paper h3{color:#5a4a63}
+.card.paper h3 small{color:#8a7388}
+.reveal{opacity:0;transform:translateY(34px) scale(.985);transition:opacity .7s,transform .8s cubic-bezier(.2,1.1,.3,1);transition-delay:var(--rd,0s)}
+.reveal.in{opacity:1;transform:none}
+
+/* ───────── logbook ───────── */
+.deck{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(310px,.82fr);gap:30px;align-items:start}
+.globe-card{position:relative}
+.globe-box{position:relative;width:min(100%,660px);margin:0 auto}
+.globe-box canvas{display:block;width:100%;aspect-ratio:1;cursor:grab;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+.globe-box canvas.dragging{cursor:grabbing}
+.ghud{position:absolute;pointer-events:none;z-index:2}
+.ghud.tl{left:0;top:2%}
+.ghud.tr{right:0;top:2%;text-align:right}
+.gyear{display:block;font:400 clamp(54px,7vw,96px)/.85 var(--disp);color:var(--cream);text-shadow:.04em .05em 0 var(--ink);font-variant-numeric:tabular-nums}
+.ghud .mono{color:var(--peach)}
+.gunlock{display:block;font:400 clamp(38px,4.6vw,62px)/.9 var(--disp);color:var(--white)}
+.gunlock small{font:400 .42em/1 var(--disp);color:var(--peri)}
+.gunlock.pop{animation:bump .6s cubic-bezier(.2,1.6,.4,1)}
+.legcard{display:grid;grid-template-columns:1fr auto;gap:6px 18px;align-items:end;margin:-6% auto 0;width:min(100%,600px);padding:16px 22px 18px;border-radius:22px;background:rgba(22,39,92,.86);box-shadow:-3px -3px 0 var(--peach),0 22px 40px -22px rgba(5,9,30,.9);position:relative;z-index:3}
+.lc-k{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:500 10.5px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--peri2)}
+.tag{display:inline-block;padding:4px 8px 3px;border-radius:999px;background:var(--red);color:var(--white);font:500 9.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.tag.soft{background:rgba(138,169,236,.22);color:var(--peri2)}
+.tag.now{background:var(--cream);color:var(--ink)}
+.lc-place{font:400 clamp(30px,4vw,46px)/1 var(--disp);color:var(--white)}
+.lc-dates{font:400 15.5px/1.3 var(--serif);font-style:italic;color:var(--peach)}
+.lc-route{grid-column:1/-1;font:400 11.5px/1.5 var(--mono);letter-spacing:.06em;color:var(--peri2)}
+.lc-km{font:400 22px/1 var(--disp);color:var(--cream);text-align:right}
+.lc-km small{display:block;font:400 10px/1.6 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--peri2)}
+.gctl{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px 0 14px}
+.scrub{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 11px;width:min(100%,640px);margin:0 auto}
+.sg{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:22px}
+.sg .dots{display:flex;gap:6px}
+.sg span{font:400 9.5px/1 var(--mono);letter-spacing:.06em;color:rgba(185,203,246,.75)}
+.sd{position:relative;width:12px;height:12px;padding:0;border:0;border-radius:50%;background:rgba(138,169,236,.3);cursor:pointer;transition:transform .2s,background .2s}
+.sd::before{content:"";position:absolute;inset:-6px}
+.sd.new{box-shadow:0 0 0 2px var(--ink),0 0 0 3.2px rgba(245,211,174,.75)}
+.sd.done{background:var(--peri)}
+.sd.new.done{background:var(--cream)}
+.sd:hover{transform:scale(1.35)}
+.sd.on{background:var(--red)!important;transform:scale(1.5)}
+.logcard{padding:0;display:flex;flex-direction:column;max-height:min(760px,88vh)}
+.logcard::after{display:none}
+.log-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:20px 22px 12px}
+.log-head h3{margin:0;font:400 26px/1 var(--disp);letter-spacing:0;text-transform:none;color:var(--cream);display:block}
+.log{overflow-y:auto;overscroll-behavior:contain;padding:0 10px 14px;scrollbar-width:thin;scrollbar-color:var(--b2) transparent;position:relative}
+.log li.yr{position:sticky;top:0;z-index:2;padding:9px 12px 6px;font:400 19px/1 var(--disp);color:var(--peach);background:linear-gradient(180deg,#1a2f6c 72%,rgba(26,47,108,0))}
+.row{display:grid;grid-template-columns:28px 1fr auto;gap:2px 10px;align-items:baseline;width:100%;padding:9px 12px;border:0;border-radius:14px;background:none;text-align:left;cursor:pointer;transition:background .18s,transform .18s}
+.row:hover{background:rgba(138,169,236,.13)}
+.row.on{background:var(--cream);color:var(--ink);transform:translateX(3px)}
+.row .no{font:400 10.5px/1 var(--mono);color:var(--peri)}
+.row.on .no{color:var(--b2)}
+.row .pl{font:500 17px/1.2 var(--serif)}
+.row .pl .tag{margin-left:6px;vertical-align:2px}
+.row .dt{font:400 11px/1.2 var(--mono);letter-spacing:.04em;color:var(--peri2);text-align:right;white-space:nowrap}
+.row.on .dt{color:var(--b1)}
+.row .nt{grid-column:2/-1;font:400 10.5px/1.3 var(--mono);letter-spacing:.06em;color:rgba(185,203,246,.72)}
+.row.on .nt{color:#4d5f97}
+
+/* ───────── instruments ───────── */
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:22px}
+.c-goal{grid-column:span 5}.c-climb{grid-column:span 7}.tile{grid-column:span 3}
+.c-most{grid-column:span 5}.c-months{grid-column:span 4}.c-rec{grid-column:span 3}
+.c-years{grid-column:span 12}.c-pass{grid-column:span 12}
+.gauge{width:min(100%,300px);margin:-4px auto 0}
+.gauge text{font-family:var(--mono);fill:rgba(185,203,246,.8);font-size:9px}
+.gauge .big{font-family:var(--disp);font-size:66px;fill:var(--white)}
+.gauge .of{font-size:10px;letter-spacing:.12em;fill:var(--peach)}
+.g-needle{transform-origin:130px 128px;transform:rotate(var(--a0,-135deg));transition:transform 1.8s cubic-bezier(.3,1.4,.4,1) .2s}
+.in .g-needle{transform:rotate(var(--a,0deg))}
+.g-val{stroke-dasharray:var(--len) 999;stroke-dashoffset:var(--len);transition:stroke-dashoffset 1.6s cubic-bezier(.3,.9,.3,1) .2s}
+.in .g-val{stroke-dashoffset:0}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}
+.trio div{padding:11px 10px 10px;border-radius:16px;background:rgba(138,169,236,.12);text-align:center}
+.trio b{display:block;font:400 27px/1 var(--disp);color:var(--white)}
+.trio span{display:block;margin-top:5px;font:400 9.5px/1.35 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--peri2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font:400 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--peri2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2.5px solid var(--cream)}
+.legend i.dash{border-top:2.5px dashed var(--peri)}
+.legend i.dot{border-top:2px dotted rgba(185,203,246,.7)}
+.legend i.pt{width:10px;height:10px;border:0;border-radius:50%;background:var(--cream)}
+.legend i.pt.rep{background:var(--b4)}
+.paper .legend{color:#5a4a63}
+.chart{width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--mono);font-size:10px;fill:rgba(185,203,246,.82)}
+.chart .gl{stroke:rgba(138,169,236,.17);stroke-width:1}
+.chart .lab{fill:var(--cream);font-size:10.5px}
+.chart .hot{cursor:pointer}
+.tile{display:flex;flex-direction:column;justify-content:space-between;min-height:172px}
+.tile .num{font:400 clamp(44px,4.6vw,64px)/.95 var(--disp);color:var(--white);letter-spacing:-.01em}
+.tile .num small{font:400 .38em/1 var(--disp);color:var(--peri);margin-left:4px}
+.tile p{font:400 14.5px/1.4 var(--serif);color:var(--peri2);margin-top:8px}
+.tile p b{font-weight:600;color:var(--cream)}
+.most{display:grid;gap:7px}
+.mrow{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;font:400 13.5px/1.1 var(--serif);border-radius:6px}
+.mrow .bar{display:flex;gap:2px;height:14px;align-items:center}
+.mrow .bar i{width:clamp(16px,2.4vw,30px);height:100%;background:var(--cream);transform-origin:left;transform:scaleX(0);transition:transform .5s cubic-bezier(.2,1.2,.3,1);transition-delay:calc(var(--i)*60ms + var(--r)*40ms)}
+.mrow .bar i:last-of-type{border-radius:0 4px 4px 0}
+.in .mrow .bar i{transform:none}
+.mrow b{font:500 11.5px/1 var(--mono);color:var(--cream);margin-left:8px}
+.rec{display:grid;gap:13px}
+.rec li{display:grid;gap:3px}
+.rec span{font:400 9.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--peach)}
+.rec b{font:400 19px/1.1 var(--disp);color:var(--white)}
+.rec em{font:italic 400 13px/1.3 var(--serif);color:var(--peri2)}
+.pp-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 20px;align-items:baseline;margin-bottom:14px}
+.pp-head h3{margin:0}
+.stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:12px 10px}
+.st{position:relative;aspect-ratio:1;display:grid;place-items:center;padding:0;border:0;background:none;cursor:pointer;transition:transform .25s cubic-bezier(.2,1.5,.4,1)}
+.st svg{width:100%;height:100%}
+.st:hover{transform:scale(1.08) rotate(-3deg)}
+.st.pencil{opacity:.85}
+.st.open{opacity:.75;cursor:default}
+.st.found::after{content:"★";position:absolute;right:6%;top:2%;font-size:15px;color:var(--red)}
+.st.thump{animation:thump .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes thump{0%{transform:scale(1.9) rotate(8deg);opacity:0}60%{transform:scale(.94)}}
+
+/* ───────── flight plan ───────── */
+.plan{display:grid;grid-template-columns:minmax(300px,.86fr) minmax(0,1.14fr);gap:36px;align-items:start}
+.plan-globe{position:sticky;top:84px}
+.plan-read{margin:-5% auto 0;width:min(100%,430px);position:relative;z-index:3;padding:14px 18px 15px;border-radius:20px;background:var(--navy);color:var(--cream);box-shadow:5px 6px 0 var(--b3);text-align:center;min-height:86px;display:grid;align-content:center;gap:4px}
+.plan-read b{font:400 25px/1 var(--disp);color:var(--white)}
+.plan-read span{font:400 11px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--peri2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chip{padding:8px 12px 7px;border-radius:999px;background:rgba(22,39,92,.1);font:500 10.5px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
+.chip b{color:var(--red2);font-weight:500}
+.grp{display:flex;align-items:baseline;gap:12px;margin:26px 0 12px;font:400 25px/1 var(--disp);color:var(--navy)}
+.grp:first-child{margin-top:0}
+.grp small{font:500 10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--red2)}
+.grp::after{content:"";flex:1;border-top:2px dashed rgba(22,39,92,.3);transform:translateY(-4px)}
+.passes{display:grid;gap:14px}
+.pw{filter:drop-shadow(5px 6px 0 var(--b3));transition:transform .28s cubic-bezier(.2,1.4,.4,1),filter .28s}
+.pw:hover,.pw.hot,.pw:focus-within{transform:translate(-3px,-4px) rotate(-.6deg);filter:drop-shadow(8px 10px 0 var(--red))}
+.pass{--cut:118px;position:relative;display:grid;grid-template-columns:1fr var(--cut);min-height:112px;border-radius:18px;background:linear-gradient(150deg,#20397f,#16275c 70%);color:var(--cream);cursor:pointer;
+  -webkit-mask:radial-gradient(circle 9px at calc(100% - var(--cut)) 0,#0000 97%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at calc(100% - var(--cut)) 100%,#0000 97%,#000) bottom/100% 51% no-repeat;
+  mask:radial-gradient(circle 9px at calc(100% - var(--cut)) 0,#0000 97%,#000) top/100% 51% no-repeat,radial-gradient(circle 9px at calc(100% - var(--cut)) 100%,#0000 97%,#000) bottom/100% 51% no-repeat}
+.p-main{padding:15px 18px 14px 20px;display:grid;gap:5px;align-content:center;min-width:0}
+.p-route{display:flex;align-items:center;gap:10px;font:500 11.5px/1 var(--mono);letter-spacing:.16em;color:var(--peri2)}
+.p-route i{flex:1;max-width:120px;height:0;border-top:1.5px dashed rgba(185,203,246,.55);position:relative}
+.p-route svg{width:26px;height:17px;color:var(--white);flex:none;transition:transform .5s cubic-bezier(.2,1.2,.3,1)}
+.pw:hover .p-route svg,.pw.hot .p-route svg{transform:translateX(10px) rotate(-8deg)}
+.p-name{font:400 clamp(26px,3vw,34px)/1 var(--disp);color:var(--white)}
+.p-meta{display:flex;flex-wrap:wrap;gap:3px 14px;font:400 11px/1.3 var(--mono);letter-spacing:.06em;color:var(--peri2)}
+.p-meta b{font-weight:500;color:var(--cream)}
+.p-stub{border-left:2px dashed rgba(185,203,246,.4);padding:13px 12px;display:grid;justify-items:center;align-content:center;gap:7px;text-align:center}
+.p-no{font:400 25px/1 var(--disp);color:var(--peach)}
+.p-no small{display:block;font:400 9px/1.5 var(--mono);letter-spacing:.16em;color:var(--peri2)}
+.p-tent{padding:4px 7px 3px;border:1.5px solid var(--red);border-radius:6px;color:#ff8f7c;font:500 8.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;transform:rotate(-5deg)}
+.p-tent.newc{border-color:var(--peach);color:var(--peach)}
+.barcode{width:72px;height:16px;background:repeating-linear-gradient(90deg,var(--cream) 0 2px,transparent 2px 3px,var(--cream) 3px 4px,transparent 4px 7px,var(--cream) 7px 10px,transparent 10px 12px);opacity:.55}
+.wild{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.wc{position:relative;min-height:128px;padding:14px 16px;border-radius:18px;border:2px dashed rgba(22,39,92,.5);background:rgba(255,250,240,.35);display:grid;gap:4px;align-content:space-between;justify-items:start;color:var(--navy);transition:background .3s,transform .3s}
+.wc.set{background:var(--white);border-style:solid;border-color:var(--navy);box-shadow:5px 6px 0 var(--b3)}
+.wc .q{font:400 34px/1 var(--disp);color:var(--navy)}
+.wc.set .q{font-size:25px}
+.wc small{font:500 9.5px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#5d5f8f}
+.wc .btn{padding:9px 12px;font-size:10px}
+
+/* ───────── landing ───────── */
+#landing{position:relative;padding:clamp(180px,26vh,280px) 0 0;background:linear-gradient(180deg,#f9e6cd 0,#f5d3ae 22%,#8aa9ec 46%,#3a5fb8 66%,#16275c 100%);color:var(--cream);isolation:isolate}
+.land{position:relative;z-index:6;text-align:center;padding:0 20px clamp(250px,36vh,380px)}
+.land h2{font-size:clamp(60px,12vw,170px)}
+.land p{font:400 clamp(17px,1.8vw,22px)/1.5 var(--serif);max-width:44ch;margin:0 auto;color:var(--white);text-shadow:0 1px 0 rgba(16,27,69,.5)}
+.land .tb{width:min(640px,100%);margin:26px auto 0;padding:16px 20px;border-radius:24px;background:rgba(16,27,69,.82);box-shadow:-3px -3px 0 var(--peach)}
+.floor{position:absolute;left:0;right:0;bottom:0;height:360px;z-index:3;pointer-events:none;overflow:hidden}
+.floor .cloud{left:50%!important;width:max(100%,1050px)!important;margin-left:calc(max(100%,1050px)/-2)}
+.credit{position:absolute;left:0;right:0;bottom:14px;z-index:7;text-align:center;font:400 10.5px/1.6 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--peri2);padding:0 16px}
+.credit b{font-weight:500;color:var(--cream)}
+
+/* ───────── collectible stamps ───────── */
+.token{position:absolute;z-index:6;width:62px;height:62px;margin:-31px 0 0 -31px;padding:0;border:0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fffaf0,#f9e6cd 60%,#eab98d);color:var(--red2);cursor:pointer;box-shadow:-2px -2px 0 var(--white),3px 4px 0 var(--ink),0 0 0 7px rgba(249,230,205,.16),0 0 34px 6px rgba(249,230,205,.3);animation:bob 3.6s ease-in-out infinite;animation-delay:var(--bd,0s);-webkit-tap-highlight-color:transparent}
+.token svg{width:100%;height:100%}
+.hero .token{z-index:77}
+.token:nth-of-type(odd){color:var(--b1)}
+.token:hover{animation-play-state:paused;filter:brightness(1.06)}
+.token.got{animation:gotIt .6s cubic-bezier(.3,1.4,.4,1) forwards;pointer-events:none}
+@keyframes bob{0%,100%{transform:translateY(-7px) rotate(-7deg)}50%{transform:translateY(7px) rotate(6deg)}}
+@keyframes gotIt{40%{transform:scale(1.5) rotate(18deg);opacity:1}100%{transform:scale(.2) rotate(120deg);opacity:0}}
+
+/* ───────── responsive ───────── */
+@media (max-width:1060px){
+  .c-goal,.c-climb,.c-most{grid-column:span 12}.tile{grid-column:span 6}.c-months{grid-column:span 7}.c-rec{grid-column:span 5}
+  .deck{grid-template-columns:1fr}.logcard{max-height:520px}
+}
+@media (max-width:820px){
+  .plan{grid-template-columns:1fr}.plan-globe{position:relative;top:0;width:min(100%,440px);margin:0 auto}
+  .c-months,.c-rec{grid-column:span 12}
+  #pilot .desk{display:none}#pilot .touch{display:block}#pilot .keys{display:none}#pilot{padding:9px 14px}#pilot.mini{display:none}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  #hud{top:8px;gap:2px;padding:4px}.brand{display:none}.tabs a{padding:9px 9px;font-size:9.5px;letter-spacing:.08em}
+  .stampmeter{padding:6px 9px 6px 6px;font-size:10px}.stampmeter svg{width:18px;height:18px}
+  .wrap{width:calc(100% - 28px)}.card{padding:18px 18px 20px;border-radius:22px}
+  .tile{min-height:150px}.mrow{grid-template-columns:104px 1fr}
+  .pass{--cut:92px}.barcode{width:56px}.wild{grid-template-columns:1fr}
+  .hero-title{top:43%}.hero-plate{padding:13px 14px}.tb-segs{gap:2px}
+  .legcard{grid-template-columns:1fr}.lc-km{text-align:left}
+  #pilot{left:10px;bottom:10px;font-size:9.5px}
+}
+@media (hover:none){#pilot .desk{display:none}#pilot .touch{display:block}#pilot .keys{display:none}#pilot.mini{display:none}}
+.xscroll{overflow-x:auto;overscroll-behavior-x:contain;margin:0 -6px;padding:0 6px;scrollbar-width:thin;scrollbar-color:var(--b2) transparent}
+@media (prefers-reduced-motion:reduce){
+  .cloud canvas,.token,.descend svg{animation:none}
+  .reveal{transition:none;opacity:1;transform:none}
+  .title .n,.title .w,.hero-plate,.tb-line,.tb-plane{animation:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ic-plane" viewBox="0 0 48 30">
+    <path d="M9 16 5 4h7l8 11z" fill="#e2513f"/>
+    <path d="M4 17c0-3 9-5 24-5 9 0 16 2.4 16 5s-7 4.6-16 4.6C13 21.600 4 20 4 17z" fill="currentColor"/>
+    <path d="M22 17.500 14 28h8l11-10.500z" fill="currentColor" stroke="#101b45" stroke-width="1" stroke-linejoin="round"/>
+    <path d="M10 17.300h27" stroke="#e2513f" stroke-width="1.800"/>
+    <path d="M33 13.200h5l2 2.300h-7z" fill="#22397d"/>
+    <path d="M45.500 10v14" stroke="currentColor" stroke-width="1.600" stroke-linecap="round" opacity=".7"/>
+  </symbol>
+  <symbol id="ic-play" viewBox="0 0 12 12"><path d="M2.500 1.200v9.600L10.500 6z" fill="currentColor"/></symbol>
+  <symbol id="ic-pause" viewBox="0 0 12 12"><path d="M2.500 1.500h2.600v9H2.500zM6.900 1.500h2.600v9H6.900z" fill="currentColor"/></symbol>
+  <symbol id="ic-down" viewBox="0 0 18 18"><path d="M3 6.500 9 12.500l6-6" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-stamp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="6.500" fill="none" stroke="currentColor" stroke-width="1.200" stroke-dasharray="1.500 2"/><circle cx="12" cy="12" r="2.200" fill="currentColor"/></symbol>
+</svg>
+
+<div id="grain" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="planeHit" aria-hidden="true"></div>
+<div id="tip" role="tooltip"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<header id="hud">
+  <a class="brand" href="#sky" aria-label="30 before 30, back to top"><b>30</b><i>by</i><b>30</b></a>
+  <nav class="tabs" aria-label="Zones">
+    <a href="#sky" data-tab="sky" class="on">Sky</a>
+    <a href="#logbook" data-tab="logbook">Logbook</a>
+    <a href="#instruments" data-tab="instruments">Instruments</a>
+    <a href="#plan" data-tab="plan">Flight plan</a>
+  </nav>
+  <button class="stampmeter" id="stampMeter" type="button" aria-label="Stamps found"><svg><use href="#ic-stamp"/></svg><span><b id="stampCount">0</b>/<span id="stampTotal">13</span></span></button>
+</header>
+
+<aside id="pilot" aria-hidden="true">
+  <div class="keys"><kbd data-k="KeyW">W</kbd><kbd data-k="KeyA">A</kbd><kbd data-k="KeyS">S</kbd><kbd data-k="KeyD">D</kbd></div>
+  <p class="desk">fly the plane &nbsp;·&nbsp; <kbd data-k="KeyQ">Q</kbd><kbd data-k="KeyE">E</kbd> far / near<br><kbd data-k="Space">space</kbd> roll &nbsp;·&nbsp; <kbd data-k="ShiftLeft">shift</kbd> boost &nbsp;·&nbsp; drag &amp; throw it</p>
+  <p class="touch">drag the plane &amp; fling it · tap a stamp to fetch it</p>
+</aside>
+
+<main>
+<!-- ═════════ ZONE 0 · the painting ═════════ -->
+<section id="sky" class="hero">
+  <div class="stage" id="stage" aria-hidden="true">
+    <div class="skyglow"></div>
+    <canvas class="stars" data-stars="170" data-seed="7"></canvas>
+    <div class="beam"></div>
+  </div>
+  <div class="hero-title">
+    <p class="kicker"><span>Flight log</span><span id="kSince">since 2005</span><span id="kWhere">in the air</span></p>
+    <h1 class="title" aria-label="30 before 30"><span class="n">30</span><span class="w">before</span><span class="n">30</span></h1>
+  </div>
+  <div class="hero-plate">
+    <p class="lede" id="lede">Thirty countries before I turn thirty.</p>
+    <div class="tb" id="heroBar"></div>
+    <a class="descend" href="#logbook" aria-label="Descend to the logbook"><svg><use href="#ic-down"/></svg></a>
+  </div>
+</section>
+
+<!-- ═════════ ZONE 1 · logbook ═════════ -->
+<section id="logbook" class="zone night">
+  <canvas class="stars" data-stars="230" data-seed="21"></canvas>
+  <div class="bank" data-bank="a"></div>
+  <div class="wrap">
+    <header class="zhead reveal">
+      <p class="eyebrow">Zone 01 · where I've been</p>
+      <h2>The logbook</h2>
+      <p class="sub">Every trip so far, replayed leg by leg. <em>Drag the globe</em>, tap any trip, or press play and watch the map fill in.</p>
+    </header>
+    <div class="deck">
+      <div class="globe-card reveal">
+        <div class="globe-box">
+          <div class="ghud tl"><span class="gyear" id="gYear">—</span><span class="mono" id="gTrip">&nbsp;</span></div>
+          <div class="ghud tr"><span class="gunlock" id="gUnlock"><b id="gUnlocked">0</b><small> /<span id="gTarget">30</span></small></span><span class="mono">countries unlocked</span></div>
+          <canvas id="globe" role="img" aria-label="Globe showing every flight in the logbook"></canvas>
+        </div>
+        <div class="legcard" id="legCard"></div>
+        <div class="gctl">
+          <button class="btn red" id="gPlay" type="button"><svg><use href="#ic-play"/></svg><span>Replay it all</span></button>
+          <button class="btn ghost" id="gSpeed" type="button">Speed 1×</button>
+          <button class="btn ghost" id="gAll" type="button">All routes</button>
+        </div>
+        <div class="scrub" id="scrub" aria-label="Jump to a trip"></div>
+      </div>
+      <aside class="card logcard reveal" style="--rd:.12s">
+        <div class="log-head"><h3>Trips</h3><span class="mono" id="logMeta"></span></div>
+        <ol class="log" id="logList"></ol>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ ZONE 2 · instruments ═════════ -->
+<section id="instruments" class="zone day">
+  <div class="bank" data-bank="b"></div>
+  <div class="wrap">
+    <header class="zhead reveal">
+      <p class="eyebrow">Zone 02 · the numbers</p>
+      <h2>Instruments</h2>
+      <p class="sub" id="instSub">Altitude, airspeed and how hard the throttle needs to go.</p>
+    </header>
+    <div class="bento" id="bento"></div>
+  </div>
+</section>
+
+<!-- ═════════ ZONE 3 · flight plan ═════════ -->
+<section id="plan" class="zone dawn">
+  <div class="bank" data-bank="c"></div>
+  <div class="wrap">
+    <header class="zhead reveal">
+      <p class="eyebrow">Zone 03 · where next</p>
+      <h2>Flight plan</h2>
+      <p class="sub" id="planSub">Pencilled in, not booked.</p>
+    </header>
+    <div class="plan">
+      <div class="plan-globe reveal">
+        <div class="globe-box"><canvas id="planGlobe" role="img" aria-label="Globe showing the countries on the flight plan"></canvas></div>
+        <div class="plan-read" id="planRead"></div>
+        <div class="chips" id="planChips"></div>
+      </div>
+      <div class="plan-list" id="planList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ landing ═════════ -->
+<footer id="landing">
+  <div class="bank" data-bank="d"></div>
+  <div class="land reveal">
+    <p class="eyebrow" style="color:var(--red2)">Final approach</p>
+    <h2 id="landH">17 to go.</h2>
+    <p id="landP">Wheels up.</p>
+    <div class="tb" id="landBar"></div>
+  </div>
+  <div class="floor" id="floor"></div>
+  <p class="credit">Reads <b>travel.json</b> <span id="srcNote"></span> · painted in HTML, CSS &amp; canvas</p>
+</footer>
+</main>
+
+<!-- world outlines: Natural Earth 110m, packed -->
+<script type="application/json" id="world-data">[{"n":"Fiji","r":["|IinBCEDEJ@@LAHI@EG@G","`InoBACH@@@Bs_FBLG@CI?EEK?~_F"]},{"n":"Tanzania","r":["ReT@Cf@gAJAR[VHJADKDAJDDAH@JERIBEJNFT?JDD?L@DEV@LYDIFEBCPEJAJCFEHWHKJKBIAQB?IGEIGCEG@CBG?AEK?KFAG?U?g@"]},{"n":"W. Sahara","r":["iPlD@?B?\\??`Ap@A@RHB\\C?lADDGAAk@GCGG[EU[WIAEOEAQ@E?ICE?KK??A"]},{"n":"Canada","r":["s]vkA?BSd@GLGb@QJKCIXOBMVI?IIK?M`@URMLIPGJIJDRJRMNGLER?RqB?iA?Be@H_@@SGQEW@]G]E_@FMCMIE@MP_@M[NACWEG@WF_@Fm@B[ASHYHZBc@Au@CQJSIUGRGK?WAQBOJSAUHa@C_@?]KBCQF_@P?OK?OSIKTGVUAMW@YHST[HPBe@R?OYLWLDLSMSQMUA@[@]HYHAJNHMH@Ld@@ZETHDPPFDLV@ZFNJ@BTNXTRNFV@@]RGLIC[Fe@FSHMDWFU@_@@UN@RETMR]EOUI]HKLG_@MUMKM@QLMVUWQH]DEMDa@@SCQDQJWFE?c@P?VEBQJMK]USGKPOVYVULFHYJQD_@DMNGBMDGVADLFLD`@PV@`@Cj@?\\@RLNFXZ\\PTCOY_@Oi@A]HQJPTENEHYCa@USL?FMJVJl@FPNVALQ@Oc@?^BTKL[?EFBLCDLNNDFFBF?DD@?b@?^BFLT@@FD?P?R@HBCDA@?HXBTHT?DADC@A?ECKIKEOBQDIRCAA@?DCBC?@B?DAAADE@ENGNEPGRDP?DEVBNGRARALADKB?FF??f@?dA?bA?x@?|@?x@?z@?R?z@?v@","af@ns@GO?YB?HV?LEB","ol@zp@ITGAAG@m@Jc@D?AR?TBTAD","ye@dq@EG?GBCJFAFEDAA","{m@ny@FJAZCVIIC[DQDG","mo@ry@?HAd@CB?g@BM@@","gp@n{@FWDBD\\ENGHG?@Y?I","om@`v@A`@Er@KFI@GRAh@GTGG@g@DU?g@DQFDDWBK?[@[C_@Ag@@a@FSFEBLDZCXBx@?f@","{o@pdAB[DDDd@EZGOA[","gp@jdABYBV?^C?ES@I","a_@va@JHPLEMBKDDDQEGFSLDCMHALGNH@FCLOCCBPV?JIMCR?R?f@E@GKCFKO_@SKMEO?IDB","ug@ls@DUDWH?AOFMDPE\\GJHRHZIF@XIOOCQE?MHCCIDK","gl@fp@GSJk@F[HAEe@LSFo@FQPQHb@Jm@D_@P]?]LDV`@GVS^@XJ@JSH[BGRKLDCXOp@N[JUFAGt@Kh@IVEEI\\IZD?Bx@GPMM?e@Cg@EDIGSWGBGFI\\Eh@CMMT?PGNDHBb@EfAEj@A^GNGS?ZSDQOGSEs@JNLOOQIs@Ta@JBEg@","im@`z@?i@Be@P\\BVNTATOJI?IICS","qn@xkAOa@Ki@?]A[L@FN?PFd@B^CZ","w`@|qAASTFNQ?FGJIFEHI@E?BI","qp@|`A@g@Fu@HMFGA^E^Al@ESCVG@","i]dlA@HG`@GDENEBCTIDE?BUBK@QFGFIFSJG","om@|jAB[?q@DSFUDXLn@LXF?Hr@GHKl@GGMMMQKRAcA","kn@jbACQ?SHCHJ@bAHp@?\\EBIi@BxACZS[EQFw@Jc@?a@QZGQ@SHGFG","ul@paAFURKLEHa@Hc@F@@^FKDDAb@Eb@@TDd@Bp@@b@IJEX@POVAKA_@?[CYCd@@j@?ZGHGm@?^E`@MOGMKu@BSFHEm@HYIWFQPOGISLAQ@S","ml@v}@MTGUBWCc@DEHRF_@PBF`@APELOp@E?@i@","_m@raA?YBOJPM\\AE","}n@p|@FOJ?LH@^CTI??^M@?UE]?[AA","kq@~z@EMASCFAm@JYBa@B_@JOFWDZLb@@b@Ah@ITEAEO?d@ETIJGM","er@fx@C]?WCe@G]@WDUKOAYAc@A{@@KAy@?i@@k@@u@@i@Dc@B?Hn@Bp@BP?k@Jl@D`@N`@Bf@BL@z@@[BLHODPD^FHDZBC?a@B?Jt@Er@Bx@A\\Ad@I@Cc@MHAMHs@MXC`@GOCc@EEGZKF@u@@OG_@Al@@dAGb@GNEVEB","ci@~m@DL?TIBIGCQDOF?B@","mj@d{@FMDLEX@NGZEQGMBSBKBE","e^hg@AEDYFUB??HEXIP","k\\~f@HE@O?QFH?FGVEDEG"]},{"n":"United States of America","r":["s]vkA?w@?{@?S?{@?y@?}@?y@?cA?eA?g@G??GJC@E@M@SFSCODW?EEQFSDQFODODA@E@@?EACB?BC?E@AB@HSPENCJDJHDB@?BA@E?EIUCUIYA?E@CBAI?S?QGEAAMUCG?_@?c@EA?ECGGGOEMOBECMDGZ?JMDAHRDTDRJHBBJ?HE?GE@BED@@J?HBN?F@JDNC]BEDZ?LC?DD@ELBNLE@?BEDHCBCF?FDNHA@KEGHOBF@JCALDMP?@EDARCNLDRJL?HFHD@LTHJJFLBLCNELIH?TGL?F?JD@DAHG@EFOHOHGBMCIBONCFHRABIHCJ@TAP@N@FDCF?BC@BAFBF?LKL@PCL@JBPNPFRHHFDL?HADC@FELENGDMBKJKFMHGL?NNJENEJIBIDIJEHGF?`@H??N?f@Ml@I\\CA@X@TIBKJAHE@AJCDARCBK@SR[NC?EHQLOBIHOCQ?ODQGQAQA[BODIDCAF]PIEEOBOD","qKb`B@C@AFEDF@DBBCBC?GBAACAC?A?@A@G","_Ln`BB@?DCBA@AA@E@E","gL~`B@??HA??I","qLvaB?AFC?@?DCBA?AE","{LrbBBA@BCD?AAA?C","wd@`gB@OFA@JAJELCS","gc@v~A@KDIHPFREHIBEQCK","qj@bwAhA?pB??SDSFMLOKSESHKFKHQLMTSLa@J?HHGJEPQBOXQJAP?^EVSh@CPGb@@ZId@GVBTLC@JBTDPBTIBSIEUEDJXJLLZHMNPFTDRFDH\\HDFV?LBPFRDPD`@C@GUEQKUAWGIK[CCGOMAKKDVCDFJIJDDIFFR?JK@ECGJBXIPCJK@GLKGIOIEAO@MGO?OEMGBCHGM?JBTDDELB\\EZGFKXG[Ik@?OH@?i@KNGVILGRGZIK?c@IWIEGSASIe@@QK]D]FOCG@a@B@B_@ASDi@@e@@OCYD]BU","{f@hjBBKAKDO@S@@BLCNCF@PABGA"]},{"n":"Kazakhstan","r":["w]su@LN?NR@HHEf@b@LBJFd@`@QDLHAALGHAZ?`@@FGZBJJ@E`@@JFBBJLXLH?DGDAXOB?HSAMV@`@@VQPGPM\\ABJr@hAA?HMLELBVDFC@GEGBEVQFEJE?@SM?CQ@OQCMB@RCNFVBPCHIAKJ?NMNOICBUOJSMAUi@?]Lk@FWGUA_@JWEE?[IEM^GQEBESMLEGGkACIGq@GQBc@TEESFYH@?SSq@DFNYp@k@IKJYE]BIJIBMFGAYJK"]},{"n":"Uzbekistan","r":["yX_b@iA@Ks@@CL]FQPQAWAa@LWR@?INC@YFE?EMIMYCK@ELPFOEMHWNXAN?FE@ICDZJDJHANHDBOLCTJEL?JK?GXIRILMTSHCF@RCFO@KZJNFPHC?T"]},{"n":"Papua New Guinea","r":["r@cwALa@Je@HMHIJCJ_@HE@PLCJQTK?KF?BMBDFUD@@LEBAPCRKNKHOJIXDNDJNADNAHAT_A?aA?","hAk~ADGHADDKBGBEFIJELCCDKBEBGHG","rBq}ADHBJ?HENEJEABQAIIC?AHA?KGEEIK@AKBCJ?JD@HBB","hBw_BDEJGDID@@DGFKHOBACDA"]},{"n":"Indonesia","r":["r@cwA`A?~@?OPCRDB?XOGEMUDOHQd@?NS\\HD@FGBG?INEU?ME@?\\KFCPIFC[EIF_@FA^EJUUOKU?QFQDMBU","pDcmABAD?LLDNC@EAKGGS","hC{rAO@ECGCDCH?LH","qAuhAPJPMH@PU@VLDP?LPR@\\FE@FTKFALEHFVIF?LANY@EHOHQ@QAMKLAHMCM@KIKAIDQCO[IGGUG?UBQ","v@{oADUNEIN?N?J?LKC?Y","jAinACLGBASFCDD","k@}nAJA@KFAN@AHL@HG@DKFYDOCGE","QykA?WMSBARNBLCR?^BPLBPQGKGc@H?CHJFFPXSDBVQJ?DJEFOIFREBGAKLSADLVAZ?BJEFQESB?FMDMGMA_@IGCMQDO@W","lEejAMXCQDIDGB@@F","hDyjA?MGQJ@B\\AZG?CODK","fD}hAAKFCBT@L?JIGAIEEDG","~BybAFA@e@GEFc@LGB]JWFTIT@PATCPGVALBFGb@IB?PSM@WDO@G","Tg`ALAHG@MLIVB^@?TQNOXKFONMH[NQNODOFMPOHKNURI@@KB_@PQLMFKTQ?ULONKHMNFFK?G"]},{"n":"Argentina","r":["z_@zi@HELILYB[HF?REH?J?Rm@?","zQ~b@NDRBR?DDJ?H@PYLBFMH@XPH\\Bf@ATJCNBHCDJBTGPDFRADMGIJEDPJNR@HD?PJNLDLSBSPFJVVJFPFFTEJKAFCPAn@KFM??LEDU@GOMEI@OIYEK@CIG@CHGEGFUDCIYBSCQEEKSDQ?MMO?SKQ?CDa@FUKQ@QESMKMGDECa@?IUSEE@QODYLKOG?WBA`@e@@ONWFSFC\\RDS@UAOOQQCCIJIN?JPFLRTXX"]},{"n":"Chile","r":["z_@zi@l@??S?KFDDN?HAJENARKXIRWZBQL[FYIIMEGS@M","~Inj@LILAFKRFTKZGCMDARDHT`@?DBFEJLRLPDPATJ`@GBEP?RJN?LLP?REDJPDRBXCBHTEFGFDBIFABHJAXDNHHALDFNTADE?ML?JG@o@BQ?PBFFPPB@FGVMTIVMFKEKHa@@SGOUE\\OQa@EFWi@IELXDCJ[Ee@EKISDU@AG_@K_@M]I]DOEW@YKe@Ci@Ek@E_@@]BCIIE"]},{"n":"Dem. Rep. Congo","r":["xAiQPCH@JCJKVIAFBX@DLDFEVBR@BCFMCETAANIFGDCNIBDJANIFAJ@HE?AF?F@L?F@BW?GDK@KAGBK??VGA?HB@@JHBDBCHBF@JKFEBKDMD?x@@F?D@FE@ACIACACG@EGE?IDABGMKGKGCO?SGIIIKEAEAGAK?OAMCIEKAM?IGEKDOFK@OBMKEAA@IIUBG?EECAG@M@KAGNK@GCE@ICIFELOV?@GFDBFHFHBN@FBL?DDJ?@BH@HEV?"]},{"n":"Somalia","r":["`@_YOJiA?UQECAMMQ?Y{@w@OMMGI?S?G??GCGAKEG?GD?H@J?DBTBTHXJ\\PTPXTPRP\\NRVTHBDB"]},{"n":"Kenya","r":["|AoWSZK@g@fAABU?GEMIMEWFI@MHIKMMBIH?FG?MNW?E?E@C@MGEIQFG?MTPhA?NKFLFD@DLBFDJBFF"]},{"n":"Sudan","r":["cDkNINEDE@GCG?KJG@E?EFK?EB?FGAGEG@EECBKEOG@QoA@G??Wg@??oA?mA?oAREBBRAVGBGFIJH@LDDL@\\HFAN@RFHJNHF@DFRDP?O??BI?E@GHM@OA?HB??JDCJAJHLH@JKNBFD@BHB??RCB?L@DADIHEB@LHDPDBD@DFM"]},{"n":"Chad","r":["gK{MnAAAPNFJDBCDDFAFDF@?GDCJ?DGD?@LFHTLHPAR@DFADHFFFXCBABDB@NEAMDG@CHIHIC@GAE?KQJMAK@MFGAAJK?GHYIQWYAi@GGCEFE?EF_@BISd@mAd@oA"]},{"n":"Haiti","r":["iKxk@HAF@BBDCD?CL@FALBFEJGABS@MEGGHG?AJEC?KBQ"]},{"n":"Dominican Rep.","r":["gJxk@E?EBCCGAI@CA?ODK?CDC?KD@?IFIFFCH?F?FB@?FCB@DLFCDC?"]},{"n":"Russia","r":["sq@sy@Ei@Jg@Pm@PD@h@Cv@G`@MNCXMs@","qp@g_AJs@FDFpBYe@AO?M","qn@wuA?u@HgANN?hAB^Mf@KICY","an@s{ABq@FTA^Gd@EEBc@","{l@mvAGQAYF[DA?\\Ah@A@","kq@_[Cg@?]DCEKAQB]BF@X@P@@BVCTGK?l@","}`@eM?b@AVICE[BS@IDBDA","cm@m`@Oo@IDIm@MaAAaAGa@Ag@FMDLHfAFz@R|@R\\P^PCNe@@JC~@GDEb@I@CSK@Og@CP","q`@ixARGP@TG`@UE\\ZJTQL?KNLJOBSAU@MC[AQJ[AIQGFCILC","kYwpACBI??IWCQDEQBWSMUEGGQID^FP?\\QFMVG`@QFMFGDSLGNE\\@Z@VHNDIH?FHRPH?JZGV@VEHAJL\\@XDPCX?PIJIRAR@XBPGZOBCVAPGTRTJGLPE\\?RIL?REPH\\Nd@BR@FKJ@XGFCLKHCHD\\KXHJq@j@OXEGRp@?RIAGXDRUDCb@FPFp@BHFjADFLMDRDCFPL_@HD?ZDDKV@^FTGVMj@?\\Th@L@KRTNBCNHLO?OJKH@BIJHBPRRPQL@VUFJBB?FKLADCJGDCR@JA@IZC\\CNB@QXGVINCMOOGHG[E?BPGAEIAQECKBIGE?E\\?JIJBNGVC?GFANE@CEIJ@TADBB?FKDGBAC@OEGCDCLCACFKJECI@CR@HCBERKDG@EHEGQDKMC@IUIRYi@KQIGM\\KGMPQMUTOQM^MCAOGa@ESJa@Bu@VkAFOL?HTD^OxABLL_@HAR?DYBOGAIJEMJo@EOMJSm@@QDSMIKNKIKLFw@HI@VJ?DMC_@KCIi@QeA@OJR@WEMAe@G]JUKWKTGKFy@D[TgAIMIRE@AVGGOJE?Qc@QMCMBu@JCNRDMLEZBJULHZd@@UEGEUIEIQIJMGATIBSOOXMc@MBAIJIRF@UMHGa@?i@Jc@QPS@Ea@@q@Ai@KNKW?UIg@Cs@CEAu@BOIk@?e@ICGSGo@Da@DZ@m@HCCS?y@Hk@FOHBDTHr@DNBWB]CQLIEIC_@B_AHC@sAMA@i@?_@J_@JIFJNWF_@SSF_@Ea@Fe@EM@a@QNG[JsDJQNs@CoA@g@FON@DWC[Ac@Bc@Ae@Pc@EWMNGID}@Ai@Hy@Fb_FNq@Rs@J@DMODBu@Pg@HR@^P@BF?PENEXIBAR@VEHGCBVHIFJ?_`FHXAXHQNKDIFADDCb@Lv@@PN^JZFFMZNr@GHHPCZLDRVFABUZ@@RNFFGJ`@TFB\\TDPZMF]Fk@J[IKQG?E_@Wa@Sc@Oc@]O@VPJTr@YNFr@^p@LOBj@@\\M?C\\HXAz@D`Ad@~@n@lA@_@JIBSIK@UT[PARNV@^FZ\\LFVXTZJJJZ?JIJLZF@","uk@noBAA?QD[B@BR@X?i_FEBGd_F","w[{SCEBM?EBC@ADIASFBBTHXCJGCERCAGSAB"]},{"n":"Bahamas","r":["wOjp@AI@MB?BTG@","{Oro@FOLBABIAGHA?","wNzo@?EPGH?@DKBEFKC"]},{"n":"Falkland Is.","r":["j_@fe@IWBOGMFOFDDZGFHPIH"]},{"n":"Norway","r":["yp@mHEGA]FYL_AFp@NHBPNH?VKh@EQE\\Qf@ONEw@DI?[","oj@mRF`@@NMGGXF\\LHHRER@XKVDJ?JL@Cd@JD?PLLTRZ\\FEFDARRLXAHKVDLNHHKJVf@BZIXUFm@DKQQu@Se@[e@e@o@O_@Ww@Ik@@_@O]?e@Cc@L}@DXJU","aq@cPJ\\@x@Cx@CBAZGTE}@B[ESDq@Dg@","uo@mNHj@Eb@CMGJCi@FGB["]},{"n":"Greenland","r":["sr@f\\KcA?eAEYAeA@_DN}BFd@?jA@jBBIAeAD}@Ee@FOHTEs@G_BB{@FKLpADH@~@@m@LVJNV?JW@\\D`@He@PC?TPY@j@FWDFBZ?ZLYF?Gf@DHB[JYNEB`@GNIVJEJV?u@@[Nt@Nt@Fz@?TFRRZLj@@JBZBZLPL?JHN^NGNHRH@ZQ\\?f@IPSLW`@MHQBQZMGGLWSE]GGOCDTBJ@PEVM@IG?SBg@K`@EP@RENQUGJMNSVGXG?Kt@Ah@@t@?n@EVK`@Es@Ag@CrAGl@GAIkAIiAGGEt@GQMcAA]IFCm@C}@?}@DUIs@Do@@[Di@In@GA"]},{"n":"Fr. S. Antarctic Lands","r":["j]aj@DMBQBAFD@^K?GCC?"]},{"n":"Timor-Leste","r":["pDcmACAEO?MAG@EDDFTDNE?C@"]},{"n":"South Africa","r":["zPeIIIDGFC@G@M?IIQiA?@ERKJ@DCAMGIEIICCI@GDI?OCMEAIAAKGEKEOQM[?GBIAG@IZILCT@D?AH?DD?FDD?JKAKIC?MNBN@HDHL@BHFHDLHTVJLFLFT@HB@AJBHCT@J?FFT@NFJ?HEFADGH@?CBKAMFCEM?SJOHYN"]},{"n":"Lesotho","r":["bQcQDEFDFB@HDB@DMNMIEKEGFI"]},{"n":"Mexico","r":["iSdhAAUAYB@H]Lm@?g@?OI??a@FGDIHKHEHCDKDOOK?OFMLIJGJKLCFEDODMAGPFLBZ@H@HCHENCLMJCHGBUHGEQAMCOCKGKKEO?ECEMCU?O?KBEH?HJLB@CHBLBCD?B?BJDAB?@B??R?PH??HFGBGBA@CD@?VNHBAD@D?UVEHEN@JDN@HCLCLIPANITGPEBAJERGFKTKHIBAEE@ECE?IDG@IDSPMRMHGPC@KAEHIJMB?JKJIFE@MHOFGAGN@DEJF@HALAFGLMDC?AFC?AJCDEDEHKREFEHEH??IHGFGB?FH?@KDKJINCHO?I@EHILB@EBCLKJAA@GGGI?MLEJKFKFOFQF"]},{"n":"Uruguay","r":["zQ~b@AKNS?GJSHOLKHFJCJFJTCN@HIP@LKJK?EES?SCOE"]},{"n":"Brazil","r":["bTj`@KBIGMJINKR?FOR@JYYSUGMKQO?KHBHICKAK?CFBD?FG@Q@EBELBFCR[?IDCEK@GEOCKBEJG@KC?f@WD?CI?CBK?EJ?JEFCLGFATQTMAG@MA@XFJFNDD?H?L@JAF]?JN?PKF?JICKJQFCEG?EKI@GCGAMWCOAA?Qu@II?KBEFM?CI@CGAAJK??e@EGDCJCCCJKAOEACOCGGAEMC?APK@M?EF?C@MBOCECMEUGGE@?IBCF@BEFEFDNBJEFAHK?ICA?ECGCG?I?E@ICACBEA@GAIBKBGEE@CBC?IGEMGSI?GJC`@KBILANNDE@c@R?KODWLa@HIJBEWHe@?]N]TYDM?QFGVEJC`@FJHZZVLNL@DLDd@A\\DL@FDXBXRR@HPJB?TF\\FNDTNTRPL@JARBHBHLb@TNPFLRFJL"]},{"n":"Bolivia","r":["zElj@?M?IEEGOGKAYL@FAL@PU@UFGBMDG?KDKJ?BCH??BVE?g@JBFADKJCNBFDJABDE?IPAPDb@PHJ?TFC@?VNFMJEXPNBL[FUJSGGJM@MHUKOFGCE@IGQ?M?EC_@N"]},{"n":"Peru","r":["tAtj@?P@@BNLVF@FBHADJF?BDPGJKHB?KJG?QKO\\?@GAK^ODBL?P?HFDAFBNGTJHDBHIRG@Sd@Ub@MNOFEAYNc@Rg@PIFMFMLGNGGSHMEKOFADDDAAGBGHGIKKAQMGWSUMEMBAEFMHEDGRK@OCI@G?KFORL@EHI"]},{"n":"Colombia","r":["Yxh@BBKBEBDF?d@J?@KF@ABBHL?DGJCH?t@HIHADSMGN?JAFBHANSJEFIDGL@DEFEH@DANGD?BKRE@AGI@EEAIKGIGEFKCQBCCQBIFIA@GECKDCA@KMMAGG?OCIK?KCA@OIOEGGG?GDEDBBLHBDFDDN@HD@IHABEF?F@BA@CDCAY@KPMAG?MAKBGHBFBL@LCDEB?HHBGFCPE"]},{"n":"Panama","r":["mDjo@B@JEDBAFH@EDKBCCABEBEH@HDBDF?BB@JI@D@@@HKBB@ADGBAFAD?FB?ABCACAC@ACCBG?AGFEB??G?ABEAICGCKEE?K@@@KBGDGBE"]},{"n":"Costa Rica","r":["_Epr@@FF?BC@BBAB@B@CHEBAAE?CDCFADE@CDDABBCBAFC@E?GAABCCAABMAC@EBC@ECCHEFGFI"]},{"n":"Nicaragua","r":["yEhs@BBADCBAD@BCL@@EFGFEBGHGHCABCAA?EEA?CI@?E?CCCBECAACEECACC?A@C@CAC?CCGAA?G@@B@FADBF@H@BAH?@@F@D?BBDABA"]},{"n":"Honduras","r":["kH|r@?F@@BF?B@BABAB?@BBB@DD@BB@CDBB?B?DHA?BD@?DEBADGAABABBFC?ADCDADEEC@C?CIGI?ACC?E@A?A?I?IAEAA?E@E?CAC@I@ABEBE@GDE"]},{"n":"El Salvador","r":["_Hzv@@EBE@EB?CG@C@CF@D@AJADCH?HCDC?CGACC@?C"]},{"n":"Guatemala","r":["aHrx@E?EAC@OI?WEAABC@CFGF?II??Q?SN?T@?EBECABEFHBHB?BADD?BBA@BBFB?CH?JCHGH"]},{"n":"Belize","r":["cJtv@C??A@CKE?C@?@CB?HB@AF@@AHBBB@@DB?DUAO?"]},{"n":"Venezuela","r":["gB|d@DAFFDTBLBDCNAL?BDGL?JA@QB?DLF@BFBND@@NKJQDGBCFIIC?EDMBMAGCICCF@J?L@FQLAJ@XEBABC@GAG?CDI@AHIEOAEEEGICCMD@@HFEJ?HHNG?GOEEFO?GWG@GGLE@MHMD?@QAUFI@OEKC?AW?WDNHE?OHONA?IBGJNF?FE@BBLHABDNM"]},{"n":"Guyana","r":["e@hb@?D?HBFBF?DB@?HIJG@KDOCGEGDCDGACB?HOLCEI@CMACGDG?KOFMLKH??GHKDGPBDJB?H@NG?EHCPK"]},{"n":"Suriname","r":["m@`a@CJ@HAFD@BCB@AHQJIB?DOFIAC?EKQCBWCA?OBSPHLAJGFBH@FB"]},{"n":"France","r":["sAh_@RHLFFD?HCBABDDCFGCIAGCKFM@QIBGBMNUFA","}]{BDIB[LHL@BDAHBAJNF?AIFED?FEDFLEBKFBJPEd@D\\J@BVITBFGb@GFKIg@CURING\\M@CYDa@WDHQOm@OECQDC?GFIHMAIHQ@CAE","sYmDGMNCNFCFMDEC"]},{"n":"Ecuador","r":["Bbn@LCLDRTFVPLJ@HJIFCF@FE@EEG@MIIBHFIJCCQ@CEKCMGG@CKGKJS?CFE@OAEDIDG"]},{"n":"Puerto Rico","r":["qJlh@@IBCBB?N@JI?AA?O"]},{"n":"Jamaica","r":["qJno@@MBIDC?LBDCJEHEA?G?C"]},{"n":"Cuba","r":["oMlr@@Q?ODQFGASBEJQHK?EBKD@?OFMB@BL?JAL@\\IMEF?JEFKB?JCPCDCXCFCGARHL?FDB@FAHEKGCCGCIAOAC"]},{"n":"Zimbabwe","r":["|LoRAH@FCH?FIJANKDG?AFUTKDCDOD@UBEAEKKOQAEGAGKAOF??QBGBE@GDIX?L@L@DCJ@@BLDVR"]},{"n":"Botswana","r":["xLkQLZNPJDFD@JH@D@BL?NEHAFBHHBDHFH@LEBKASJAD{@??SeA?AOE]FGGK?ECK?CNEBEJETU@GF?JE@OHK"]},{"n":"Namibia","r":["nNmKhA?HP?HALAFGBEFHHOLMFSBMD]DW?K@GFOHWJMBQNO@CICK@MFK?AAqAHM@o@Gc@CO@MBG@?BJ?DFJGFD\\@NdA??Rz@?"]},{"n":"Senegal","r":["oGlIOFEHCGMIICGG@ICI?IDIDMLKLKJAJCDEDAF??BAH@@@BEL?H?b@@D?D@JO@@QCC?CCGBG?GCIEBBF?DEF?DDB?T"]},{"n":"Mali","r":["wFdFG?E@EDKBK@CGKA?GDKCK?GCC?oAMCABuAHwAH?_@j@cAj@aAHEBKBGJAAUl@?LJJ@BP@XDF@J?LCB@JFPFBFND@BFCHDDL@NND?FDJABF@BGB@D?BD@?NCD@@EDE?A@@BE?ECGFE@CB?B@D@DDDAFED?@@D?BE?"]},{"n":"Mauritania","r":["cLtIEE?mA]BICASq@@?aA]?n@kA?^vAItAI@CLB?nABB?FBJEJ?FJ@BFMJMJELEH?HBHAHFFK@IEQCSBI@IAIBGJ"]},{"n":"Benin","r":["}Bu@BNMDm@ACBI@GDEDIAAEGCAIEEEE?EHOF?JCFBBALHDDJBJ?^?"]},{"n":"Niger","r":["iMiH^CDGD?DGFBh@FX@PVXHFIJ?@KF@@DD??BUL?BJNENAHBDAJFJ@HIVBH?HGFGRBRBDH@FDP@IN?DDDM?EVG?MJG@IAAKEGAYCQKAMKm@?G[g@y@e@cAH_@HIGO"]},{"n":"Nigeria","r":["}Bu@_@?K?KCEEMIC@GCKBG?QAGEIACECSFSFG?ICIHWAIGK@KCE@IDOKO?CTM?CFGB@D@NNJDJ@BBLBFJH@FDF@FJIJ@FHJ@DPFLDFRAFDFANKHMFML?L?P"]},{"n":"Cameroon","r":["aGaHLGJAL@PK?J@DAFHBHIBIFALED@RHBDL?HAD@HID?JGDIF?DAJ@ENCNAV?@@JAJ?H?`@OCKFCHIBABE?MEQGAEIKAGHKGKGAGEIAGKMCCCKAKEOOEACAGFE?AE"]},{"n":"Togo","r":["{EQH@DEFEHABCl@@LEBNGDKBI@QCGBO@M?IFE??Q"]},{"n":"Ghana","r":["{E?D?HGL?NAFCPBHAJCFEJ^DJDPEPGAQFUCOG[BOBKA?a@@GCG@G"]},{"n":"Côte d'Ivoire","r":["kE~CAABE?OEA?CAEFCACCGBGFCBIEE?IDMZCNFTBPGF@?FCL?JBVDLFRABOAAAG@GFADEDGCI@EA?AGAC@CAAGODGBEAAC"]},{"n":"Guinea","r":["{FpG?IDMACAA@I?CD??CAE?ADE@GEEAEAE?CBCDAFGDBD?AC@AD?DE@BD@FCNE@FB@BAF@?@?DFB?DCBGAKH@B?B@DG?EBEAGBED?N@D@BBBD@FHKHGFABCDI@C@ADIG?ECE?CACE@AAG?"]},{"n":"Guinea-Bissau","r":["wFlIAK?EAE?c@F?@@DA@B?BBD?DHFIJ?FEBC?CDC@"]},{"n":"Liberia","r":["yCfDD@HAFBDE@EFGFA@@N@?DGROPIPMJECEAIGII?CACJIF@BC?EGC?E"]},{"n":"Sierra Leone","r":["qDfGGIEACCACAE?ODEFCD@DCF?AEHHHFD@DBADGLIHGBM@"]},{"n":"Burkina Faso","r":["oEjBK@GEE?OOMAEEBICGEAGOGCGQAKBC?MH@FALKF?DWL?DD@HFB@D?PAFBFAF?`@J@NCEL?HDDCHGBCF"]},{"n":"Central African Rep.","r":["gBcP@FAJAL@FDB?DCFHTAH@@JDCLANGJENDJHFL?ALALHJPHE@G?EHKFE?IHEAI@M?CESIAOEC@CBCGYGGEIG@AE@SIQUMGIAMFAJKF?FBDADEHOFID?HMHGJEDMFC"]},{"n":"Congo","r":["eAqJJ@HDLBN@J?F@D@D@HJHHRFN?FBFJLJCFE@?HFDADGFBDFFSNKOKFEEAMIAHI@QIEMAM@KHWICD@LIDIA@WBODOKAQIIK@M@M"]},{"n":"Gabon","r":["m@aF?I@KAK?AH@HEAMBEVHJILAL@HDAPIHH@@LDDJGJNSRQLSJE?ECOEMCAE?]W?"]},{"n":"Eq. Guinea","r":["m@_E?a@V??\\@DCBUE"]},{"n":"Zambia","r":["dDeRDIBG@KDKHGNEDBNBNCFDPDDINz@LA@NFJF@@DNPJJ@DCDAT?BA?CFALBNKJOL_A??i@E@GCIBIAE@@GD?AI@KHG@OEKHCBOFEHG@OU@BDGLCBSAWCGDMEAECY@G"]},{"n":"Malawi","r":["vDoSBQDCHGXENDXE?EDGLGXABHLDKJM@ICG?CF@DIJEHQEGEOBOCECODIF"]},{"n":"Mozambique","r":["dFsTAMDWAE?MEE?KGUKOHCR@NC^?HCLDLFJJFRHTTT@FNLBFL@NIHCD??CR@F@BCF@FHDNJVDFFA@CH@?LG@IBE?UAMB[HWSMEACKAEBMAMAY?EHAFCDCF?PG?M@O{@HKAEBGF?HBLAJKMECIY@MFEF?DYDOE"]},{"n":"eSwatini","r":["tOaSHB@JKJE?GEE??E@IHCFA"]},{"n":"Angola","r":["~AcGBFB@H@@BODGGCEFG","xBuFAG?EAG?y@LEJEDCJGAKCGBIECICAKCA?IF@?WJ?FCJ@JAFEV?AC?GAM?GDAH@HCFBDA?h@~@?NMJKFb@An@IL@pA?@GJALBJBHK@QCQEIAQEGCKKIEMAK?EDKDKBC?GESDMBKHCA"]},{"n":"Burundi","r":["n@aRF?BCFABDHFFD?HW?ID@KKE@K"]},{"n":"Israel","r":["mSiUDBADJB@CBBB@AIF?^HE@[HEEA@IEMCEA?GCA?CF?B@"]},{"n":"Lebanon","r":["ySkU?BB@?FOGMI?GFCFHHD"]},{"n":"Madagascar","r":["xF}]FELEVAFEH@DBKDDBNCF@BDP@TFZHd@JZFTFDNFPEJENIBQ@OFM?OAAIG?MIMAGDMBQ?IEMA?ICKCG?GKKKOIEG@@GMIKAIEHE"]},{"n":"Palestine","r":["uRcU@HCACCABKC@EJ?D@"]},{"n":"Gambia","r":["oGlI?UEC?EDG?ECGDCBH?FCFBF?BBBAPGA"]},{"n":"Tunisia","r":["}Q}Dc@FGLC?KNO@KKOEQBICIUBMH?GOBAHHH?BEP@HJHA?KHCBGL@DHDDFLFCH@BH"]},{"n":"Algeria","r":["cPlDC?A?U?O_@ASEQIEGWMAAIGICYGCCDSDK@MFISCUGKESCa@A_@BIGS?SBG?MHBPCNDJJNAJOB?FMb@GPEFAPBFAJBJAFFLKH?HGCIHOJGd@bAf@x@FZ@TK@CFCJIDk@`Ak@bAo@jA"]},{"n":"Jordan","r":["gSeUECFUUg@VGBBHf@RSBDDB@NFBDFCTA@_@IG?EAK?"]},{"n":"United Arab Emirates","r":["cNg_@ACD?CO?O@KMMKMMMFCNA?HJ@BCBHF?FDF?BBIz@SFC?"]},{"n":"Qatar","r":["oNw^M@IEAEDEJ?JB?DCD"]},{"n":"Kuwait","r":["wQ_]HCB@LE@LIBAPSM@M"]},{"n":"Iraq","r":["cSoWWFSk@WGO@CIKICI@UDGCIVKDMJAFHLDRMHWNIL@?EH?JKAJALRLAd@g@v@M\\EV"]},{"n":"Oman","r":["eMoa@G?GEG?CICBKA?ILGDKBM@KJIDCBGB?JFD@DFLFAHDBH@JAB@?HDJH@BB?JDFF?DHAJDJ?HKDa@NS{@g@MMH","aOeb@GBEE@AF@B@"]},{"n":"Vanuatu","r":["|HogBJK@DGDE?","xHggBE@O@DINCAD@B"]},{"n":"Cambodia","r":["sFc_AWDOMCY@QFOMIFQLCV@L`@JG@RFPANKFSH"]},{"n":"Thailand","r":["}Gw`AAPBXNLVEGP?POC?PT@\\HNDN??MPGPCHIBKHIFD@JI@GN@BEFIBKHIHJBIBMCQEUGQKQFI?I@OLIBCEQGKFOJOHCGUIAMGICKDGJA?MTDPAKSBEAKEC@ONMRANOP@FD"]},{"n":"Laos","r":["{GcbAGPLHGNGEQAONS@OLANDB@JCDJRQ@UE?LK@EFGCKQBA?IU@CINKPG?WPGDJDDJWVOPMLMLERB"]},{"n":"Myanmar","r":["wKq}@BJFH@LTHBFNINKJGPFBDHCNMHAH?PGPJTFO@MEKFUAIFWDYBOFHLLTAJCJYEQBWNECCJOLO@BGM?EIG@ECU?BOOII?OKK@MYBMK?CEG@?KJEBIN?N?NRV@CURCBKNDFO@GCMFAJPFB"]},{"n":"Vietnam","r":["qEe`AGQASKFMa@WAMBSCMDMLQLWNKVEEEKQF?VQFOJCI?OASKOFIBQJ@FGBSPXPNLBTMXSJQNKd@G`@@LNJVPNPVKFMEKN"]},{"n":"North Korea","r":["oYspABCAFFFDDL?BHBBDFBJBHH?@@@GHKBB@F?LHF?H@?CH@@@DC@?BCDGECCA@KEC@AJCFMOIUMMDG?QI@G]KGJK"]},{"n":"South Korea","r":["qV{mAA??IIG?MAGCCVOJEV?HFBPFN@PI@OCSHCOOL"]},{"n":"Mongolia","r":["y]{u@CSOe@I]DQ?SHM?SD]MQKFSUFU@QBWNCF[CQAY@SHSHK?QBYEQAYM]@KDIAWNHRLFCCKBSGOFOLQD@AN@\\DLLLF\\HRCTAHJJFGFADLHLFV?\\F^HTEH?VK\\CRBXCf@?VKHQHCJKVAZCVGDWGOLGZIPMB"]},{"n":"India","r":["uPy{@FABDJ?CLLXJANJH?NHCNT?DBFADH_@J?BJBIHKE?GQIAJ?PCRM@?FGNJFJMDJFBDKJBLGNAF@?LBVN?HHLZVVJLLRF?DHDP@HNDXCNAPF`@?@JNFDEDPJFDFQP[HSFIDQHYDKB[Pe@FYDW?SBJZALWXGGEDQTMK?k@OBIHO@GLUU@WUSSKSSM?KQINKFQFGIB_@CUOQVUN@HGH?ALTCJSL[HJPFFSHQHYB[HK@MBW?QGAKBIACKNAB?FQCM@O?OMAEFAOMQMWDOIMLIFF@U"]},{"n":"Bangladesh","r":["wL}x@L?CFNAIDI@IBKF?PFAJDCH@@ADAFO@MFKCEJGCEKKLKGFO?GLABS?Q@KPH?FJDHIKC?C^K"]},{"n":"Bhutan","r":["kPix@DGL@?NANBLGPC?MMEIBM@KBG"]},{"n":"Nepal","r":["mPav@H@JCF@?PCVALIJCZIXIPGRQGIKCGDOJSBKHEBOFOBW@U"]},{"n":"Pakistan","r":["eUso@NPBTC^FHPGJGHOJPL?RRRJTRAVTTFMNAHINC?j@LJCNODMLBd@?^@ZUGK[G@CFQ@GPKFIHH_@CSBKEC@MGYOAKI?OEAAO@EEGK?KGEKKF?SEEG@III@GBGICUAWCIAKFMNEF_@"]},{"n":"Afghanistan","r":["kVqh@?KDM@EEO@EGE?KACGAGGBID@@EN@FGCGAGIM@M?SDC@JBH@VBTFHFCHAHHFADD?RJGDJJFJ?DFAD@ND@?NJHN@FXALDBCJBRI^QQM@ANM?OFIICHMEWGDSAOICAOEIOCCQGADI?E"]},{"n":"Tajikistan","r":["eVki@UKMBCNIE@OKIKEE[HBDA?GDFCRJ@ASDYAe@PCAGBKF@JC?RALHL@FBFGFOAADEACHFFF@@B?JFDADDNAD"]},{"n":"Kyrgyzstan","r":["mYkk@GCAKDa@KACKF[AG?a@@[FI@MDBH^FD@XLFCRBLHRBCDD@d@EX@RKABSEG@OOYIVDLGNMQAD"]},{"n":"Turkmenistan","r":["cYy_@EGCWDMLM?I?UIBGQKOJ[NABGASBGRILUHMHSFYJ??DEHF@BPNBDH@NHB@NERQ@?LQVANITALBFALJLBPMBUCENME?LQCDSGOKLIDBNN@MD"]},{"n":"Iran","r":["uQk]KJI??DMAOHIVSLMEGIK@ELWJOJECUDEMFCFIBKAGMWAGDEHFHK?ELEBQHMB]E]CACQKM@MCG@MHU@OPW?MPAVFLDBIHHNGL?@OLAPPHIJGFQPABGFAJZTFEd@CTATYFAH@NHREVORERQJYN@HELFD"]},{"n":"Syria","r":["mSiUCAG?IEGIGB?FO@GCCEEEI?BGEUBI?OGW?IAUJHBHNAVFRj@Tf@GT"]},{"n":"Armenia","r":["gWa\\@FKFC??FCD?BEFELGAGBA[BCBGBBFIDDDG@IL?"]},{"n":"Sweden","r":["yc@{EIIMOWEIJY@SM@SGEGD[]USMM?QKEBe@MA?KH[L]\\AFED`@LRJCN^Pf@ZLLMHSTPDT`@FPHAVNJ?VQDUN]N"]},{"n":"Belarus","r":["cb@sPDSBCAIBSHADBJKBGB@BMBEDFAN@BFCJE@PBDH?AF?PCDBFCF?LCVAR?LDJ?HG?IDCKG?GDG??QGUIEGOG@CKGU"]},{"n":"Ukraine","r":["q_@{R?GCC@EAUHKBDDA@OFGB?FWCOHK?KD]D?HFJCDB@PDHF@@NDJ@RDNJ?A@CB?DCLBDA@C^G?@RJDLNCFBHCHAEECGCA?AC@A@KACABCACDGBCDE?EFAFEN@JBD?FBD@LBDEH?JALBFE@CHGCEE@CIDOQAIEAQH?IEK?M@SBW?MBGCGBE?Q@GI?CEAQ"]},{"n":"Poland","r":["u`@uMF?FEF?BJHEF?PID@@HNPHEABGRBLAHBJGHBFA?IH?NG?ALDBCHE?ALEHKFGAIDGDCEKDEMG_@GWBSDA?S@W?c@@IDE"]},{"n":"Austria","r":["a]sIF@?JBCJDBB?PDHANEZEBBR@@AL?HCFCAC?AEDIEA@QCM?IBEAAM@AEIGDMGK?GDMAIBI@@FA"]},{"n":"Hungary","r":["g]yLBIDABJLHLJBNAJDN@DCPGLADEBABKECB?KGABI@GAOCA?GCI@AAGEE?EDUAC"]},{"n":"Moldova","r":["c]sOCEAKDO@GDGD?BEFCBEB@@C@BAJA@@B@?FBDB@DG@IAG@KHGFEDAD"]},{"n":"Romania","r":["m[sPBICIBGD?BHADVBAJGNDTBH?\\CN@FGBCBCCABBFEHG@CJE@GJCOMKMICKCG@M?KDICEAMCE?G@EDEFGJIFAH@FA"]},{"n":"Lithuania","r":["wa@qOFAFNHDFT?PEDAHE@ECAHCROBEU?a@ASBA@IHS"]},{"n":"Latvia","r":["}b@aPDIFAJEFTBJIRAHC@@R?`@DTO?KIGQNO?OOCCQBGDQ?O"]},{"n":"Estonia","r":["ed@oPBAJLPEDF?NEPCFBPKA@DELK@EYAYBSAU"]},{"n":"Germany","r":["s`@yGJEBDFEHEF@JG@FADBBBNBDBNDCHABIFKHF@DLA@@CD?HBLAPD@EH@DETBB?NMAMICZEHG?CBMCUB?KECQEGBCC?OBCIMGBK@BOCKF?BSF?CUEIFUDI"]},{"n":"Bulgaria","r":["sZeMFCAGBO?]CIEUFO@KFJLDJEAPDRH?@PGLDN?LM@EHCAA@ECEGGHG@CE"]},{"n":"Greece","r":["aUmOD@@\\C?CVGCDI?O?OB@AK","yXkM?MEOFMAQI?BILD@BAL?HBVJM@H?JIHBBJEHIBFHIDIH?CPHE@JPG?LGNOFMBIFIHE?IGEACEC?AMEG@ICC?C"]},{"n":"Turkey","r":["gV_[BHEFATBH@T?HFV?NCHDTCFH?DDBDIDGG@JCPJL@\\INATFBBLKR?TSJILOIIJQUA]MG@e@KWEW?a@La@F[CW@QIWASHSFCF@DMDGDLTEDBNK","cYiOES@QFADQBB@VDFHNGFCAACMECH"]},{"n":"Albania","r":["oXcLB?BDD@HFABC?GJG@MAEAC@E@IGBAAEDC@CDAF@FADG"]},{"n":"Croatia","r":["a\\kI@EFMBQAEFEDEDFCF?LAP?HBBCDFDFIFEDGDGFGFQ@BEPGJEPMNACGHG?AJFDEDG??MAC@E?GC?AGGAEO"]},{"n":"Switzerland","r":["u\\_EB?B@BG?IF?BHALFB?HCBFH?HCHGD@HG?KOC@@ICE?OCCDU"]},{"n":"Luxembourg","r":["i^wBBCF?@DABKA?C"]},{"n":"Belgium","r":["w^{BLB?BJ@IP@HILGH?FEBCO?MCSHKBK"]},{"n":"Netherlands","r":["m`@iCFCPDDB?JTCCJIJBR?LEI]QG[?O"]},{"n":"Portugal","r":["eYrDCECGHE?KAA?KHEDHN?@@H@@FJGJDDGDBFDD?DFCH@HOCK@AHEBMAGGG?KCG?EBG?"]},{"n":"Spain","r":["eVtCE?GEECEFKEKFAGIAAAO?EIID?J@@?JIDBFBDM?GFM[@W?[BUAO@_@FGFc@CGHUCWJ?LPBXD@JJNFJGFJLBBLLL?X?RFJFFAHGDIDCR"]},{"n":"Ireland","r":["u`@zBLCPNJb@AZUOSHO[GMHCHB?KBO"]},{"n":"New Caledonia","r":["dLsfBJOHIBFEHGLKLMJEB?IFIDIDE"]},{"n":"Solomon Is.","r":["pEidBDE?LKFBK@C","~DadBBBQLKB?ENGHG","dEqcB?FAJCDGABMBEDC","~CwbBDEB?GNEHGFACDGFO","jCeaBDG@BCFGFC?FK"]},{"n":"New Zealand","r":["`XqmBHFLHFNE@AFOIKDGTGAEMOAK?MFC?GHQLMH?GHKDMPERMMADGNCDO@KGK@IPBJDANDDHAB@","fZaiBKOIKMIEGIAIMFCFCGOFCH?FDNLFHHG?NDNLDRJHNBH?PEJATEBOISYCKEO"]},{"n":"Australia","r":["nXi{A@KVADFN@EDLL?BALOJM@OJI?@MDSAICO","bSymAHRDPHBFD?P@JCP@L@LHJ?DBHFHAL?LKRCJK?AICCG?MAK@SHKBI?MFE?GFOBOHGBFIQFDIFEI?OHE@EBKACCIAK@MGLAMGEQGGGOAI@CEOAKEC?E?IEUIIIEIIGAI?QMPGCIIFIEBIMAIIGECIE?@GC?AICIHMJK?K@KKBOICGE@KGEK@ICQI?ENCKDKFKBOAEDKCK?GACHIHDFF?DFAHDHFDAJODODIJM?EDIDCDQEMKCGCKAOEG@E?K@OCCAE@ICKCE?EGHEJA@CFAHEJAF?LEEMFEFIF@PCHA@EPEH@LEHUHMFKB@LKRGCGHGCCTCJMFINONCHAL@NIP@HBPBH?LBRHFLNFHDPDHFLBLBDAFJ?TFPFHFJGNCJIABHLPEPAHAJERKJOBIBGHARIEMBLHBPKKKAIGM@PNDJNFGNK?MJGHCCKX?LIR@b@DXFTAR"]},{"n":"Sri Lanka","r":["uCcr@RBDFBPOF[B_@GHMLITI"]},{"n":"China","r":["kJmcAENQ@GIEU?KFCFFJDHN","oYeq@I@EMa@PGe@CKc@MDg@IISA?OMOAGLCHQF[NMVFFEBW@[JWBKPIJI?WBg@CYBSJ]?WDIIUG_@?]GWIMEMG@GFKK@IBUISG]MMEMA]@OEAMPGNFNCRBJGBSMOIFWK[I?SQGII?EHIOAWA[D]FORMFELGPGFa@LWPG?]GQE_@PHFFTDRLCVDPPEVB?HH?KJJFF\\HA?PEFLLHTLNDZFNDRIIGBKOIJDNLVJJ@RHHJKBOH?BOMUFQ?MJABZJHHPLHHSRGPKNMN?BJJCDKNBNB@JRLZNVPPZNZ@THJEFFJHZBRTF?HMDGEEZ@HCRGFKACPGHJN@R?NBHBHTA?HC@G@BLAFGNOECJSBBTWAOSO?O?CHKD?JATGGMHHLENLVLP@NCFAJCLDHLLO@BJATCVGNCNIDCJKRENBFMZKRUB@MI?IFOAWTG^ODGLEBKBGACJ@FQBEECBISCMBSMGAYGEI_@EC"]},{"n":"Taiwan","r":["gNckA^JNHOHO@QKOODIJB"]},{"n":"Italy","r":["i\\oE@MAACSDCD[H@FCANDNHAD@HEHQNINU?ODEBDDQDMHQBAFBIJANJFFMH@@HNH@FE?KCCCIFIDCFGDCJGHALGNMPILSDAHGNBHFJ@FGCCJMDEGGDE?BI?IGIBC?IGC@MCIG?","yVgHAMNDDAHBGNAHIZIC@UAU","qXmDEILKX@?HDFEFW?KB@I"]},{"n":"Denmark","r":["ka@eEBJCNIFS?ECECAQCGEOH@DBDA@IFBADLNHE","ab@wFHENJKTG@E]"]},{"n":"United Kingdom","r":["u`@zBCN?JICIBAQJSLH","k`@|@KCKLCVEDGGEDHJS?IJSGOO?O?WRTAS?UNBPP@S@AVQ@MVKFEBWJ@DJHGHP?XD`@CHHJAPDLCJS]CQC^GDEUIJMC@]"]},{"n":"Iceland","r":["qh@`HLBLULXLx@BPAXGv@GSIj@Cc@E?Ch@MKA_@L]K]DYI_@?a@"]},{"n":"Azerbaijan","r":["eY_\\@EJM?GCCGKHILI@IBE@NNBFBBDH??DIJIGED@FLVM?AHEFEEGHCCCFCBCCDO?IAAIHCE","eWy[CJGHGB?CBE?GB?JG"]},{"n":"Georgia","r":["cZ_XCABOB]H[@AAKBSFEBKBDHI@@?HENBB@ZIR@RIAKBGJAJED"]},{"n":"Philippines","r":["}FojAOH@QDEPBIH","gEskAECKA?KJBQOP@FFJDDDMJEC","gD_nAJAJ?PDSFHFNEFDKVMDIEGJFDAHJLEBOGEKGKHEEOIC?MO@HOHAFA","yDaiAPXMIKMMKSINCJLLH","kJmkAF@LENBFJNBNC@KAGHYJ@BEH@INKFFBKLBPEHGACEEDF@KHGBS?FG_@AQE?KDKEEDA","cFgkAI@DK?KF?HHDJI?I?","sFmmAVEEND?JEDHM?ADKB@KG?OJ@QDE"]},{"n":"Malaysia","r":["aCq}@ACFOHAAKGE@EJKJGL?H@DAJADGPED?@LOPOVI@KJQ@IFMAIB","qAuhACP?TTFFFZHBNEP@HHJAJBLILM@DMCOOCCGCWOMKIHIEC?GMAGAMMOI?GHIFADKDQF@?LHCFL"]},{"n":"Brunei","r":["kBegAF@L@?FDBIHGGIQ"]},{"n":"Slovenia","r":["a\\sG@OEI?QCC@CDCDNF@@FB??FAD@B?LACGBIA"]},{"n":"Finland","r":["ej@{PLBL_@NPTUPLLQJFL]HFJPXh@@b@Db@D^KJERSCQFKGKQUm@CMG@IZGD]@M\\IZEKJWAYDSISMIG]FYLF"]},{"n":"Slovakia","r":["u]cMDDFB@BET?DDD@FA@BH?FB@@NAFCHG@AACA?GAGA??CEA?CCC?E@?CGFICK@ICMFS"]},{"n":"Czechia","r":["}^kHDI@MD?BIEC@MF??OHI?DBB?BD@?B@?@F?FB@CH@HEL?FFJELGJCHI@EBCOCECOCC@EAG"]},{"n":"Eritrea","r":["_HwUG@]IMAEEAMKIVKPEHIP[JIJKDEDIBD?FGFKFEFEDGP?LCBBJIJNDCV"]},{"n":"Japan","r":["oWuwARPT?NFHCLHFX@b@TZELO?Bb@HT?VNS^LHJGHQCEJMFESKIKSKMEg@BUc@SHMS]GIWMWBKGCUZIN?","oZkyAGMTCDZRPM^TH?TSBMIAU[EOETUDOBM","}SwqAKIBKIGDMDCJJEFBHJDEJI?"]},{"n":"Paraguay","r":["rKjc@HEZ?BSCGDMDCPAFA?GCEBGJ?J@HBPBNP@NATER]SGBGROVANa@d@UGK?QIEc@@QHQD?"]},{"n":"Yemen","r":["{Jo_@`@OJEDLHBD?FRH^LP@HADFHBL@N?DDB?DD@?H@D?LKDKAEBMBGDACG@CAG?GGG@IEDGAE?U@C@SAEFECIUMGQGy@"]},{"n":"Saudi Arabia","r":["kQ{TBUEGGCAOECCESRIg@CCDWL]f@w@@e@@QHCAMPGBIFCFMF?F@DADEDCBABE?EFCB?RGH{@CCLIf@LRz@Fx@FPTLBHGD@DARAB?T@DEFHDFAFFIBEDG?EHQJODMLAFSLM@KAUJGHCHKDC?IDCDODOLMH?HICG?GC"]},{"n":"Antarctica","r":["vo@l]?IC]B]HYJGFAHAD^D^Bd@Bh@?n@GXGCEi@EQGKGIEKIK","dq@lh@?m@@i@GOGIFSHDHDAh@?j@EVA?CJ","pk@dm@AM?UIEGAO?IIAQFKDCHGFGHCFCFBFD@VBT?XGI@VBTENG?GU","|k@|~@CKBY?[BUAUHKAN@VAV@ZCRGH","`m@rkAGCBWBYCWDJDPAZER","|l@pnAEMDSF_@AJAXCZ","bp@heBGKBe@DSDMHE@d@EXGJ?@EJ","|s@noB?AKOFc@ACES?C?AF[GY?CCy@BS@IF]Bw@Dm@DkAEy@BuADo@Es@Ew@GCAlAC`AGNCt@ICGGEEIBC^GNE\\@o@Cm@D]Ea@Ea@GOGFCXEZAh@Ab@Ad@GLEXGNUD@IDQAa@A_@FOA_@CYEYEUA]G?GFEECYDKC]CW?[AYE[CUCW@O?MA[B[?YC[@Y@]?[?[?]?[ESCWBYAWGUDKFGDKESFW@[DUA]CW@]@[B[GIGLEHAVGJEBOFBO?Y?Y@WDSFG?[AYCYAYBSAYMQFOBUAYFO?Y@WDWGOGGFSA[BSFMAYCSEUAWC[AYCQEKIEGBGDEDGDGDG?GAEGIGECIBG@GGEKGKEMEOGGEKEK?SEKCMAOEMEKAOBKFFDRBFCN@NBLDLDHF@F?DIBL@PDJDJHJFBFGDIBODOFGFCFEDIFEPAFEFAFEH@FJDJBXDFFLD\\BXBVBZFN@^Ab@@^?^FEB]DUDKDTA`@DZF@F?DWFCFW@k@Dc@D[Dc@Bq@Bo@Da@Fe@FSFIEWE_@Ec@Ei@Ea@?q@@q@Dg@GKE[As@Ce@Ce@Ai@Ck@E]ELGFE??d@Bh@?d@GDOACIC[Ca@EWEWGQC[AYAMA_@A[CYCWEUE[EQEQGECTGGGMASEUESGOIICM?WFI?WG?GI@UFE@WCYAW?UFIEUCSAUAUEUAUEOEKBOASHODICWGGCS?YFGGOAU?W?U@U@UDGDMCU?U?W?UCSAUEOASASEOKIEKBSDGBQ?SDMDMEUGECQEUAQCWCOEOCO@QEQEM?QCQGAEQAOCSAQ@Q@SBOHADODK@WDMDO?SCOGQBQ@SBQ?S?STOB?H@BRFNFA?WFBDHHHDO@WCUGKGEEKEKECIKAKAUASASGIGEGMCSCOGKAKCM@SAQAS?UCMMIDGHG@Q@QAS@S?QAM@OBOCQ?UAQ@SEMEIEMMW@MDMDMJY@S?QCUASEQEK?WCMBODIDM?UBMDW@WAUEOEKAQ@Q@UAQ?Q@Q@QCQCU?S?UASAQICGADKFCFEFGBQAU?YAQ?Y?S?Y@UDMFBDKBUDUBY@[BS?UEMBQDMDQ@W@WFIBUFO@U?U@U?W?WBUBUBSDMF@DHHHDDHH@XFJBXFHDJFNFFDBH@F?FKDCFG@e@HG@b@B\\@d@HPHBFFDHFYFIFQDWD[D]Dm@HIBy@@CDMCw@Dm@Ba@?~_F"]},{"n":"N. Cyprus","r":["}TmS?AEA?OEQHL@A?@@B?BA?A@?B@D?B"]},{"n":"Cyprus","r":["}TmS?CAE?C@A@??CAC?A@?FRAHGB?G"]},{"n":"Morocco","r":["_Uj@LGJAREBEFBBXFH@HL@FVHDDP@RN^T??@J??JBD?HAD@PND@DVHTZZDFFFB@j@I?EGIEE?MEMKAEKEI?MGEKSMA?EIAQMOEIOOYBOGKAKKISGOSMME?MHKASBS?G"]},{"n":"Egypt","r":["wLaV?nA?lA?nAiA?eA?ODMEGBIG?YDSDQ@IEOEGAQBMHEGCDO?OCIZIDAFDNBHBBDGDGH]L@@TGRK^OHGJETQ@BL?PWBC"]},{"n":"Libya","r":["wLsNf@??VF?e@nAe@lAHRFNIHI^KFINBHIFI?MJGGK@KCG@QCG@QDCIIAGBGMEEEIMADWAGBOFYPIBQF[HUCIIIODGEIOAKB[FE?GBE@SDEHFFCLDNEdA?hA?"]},{"n":"Ethiopia","r":["_D{\\z@v@?XLP@LDB?LGFHPFDALAB?D?DOV?LGFI?CHUJCHG@IHAJKE?IECQ?SEEGGAOIIKSGOABWOEHKCKBC?MFQDEDGJGFGFFHDB?DA@IAEBCDBJEHGDGV_A?Q"]},{"n":"Djibouti","r":["yFoY?GCEDCF?DJBGJDCB@DAHE@C?IEGG"]},{"n":"Somaliland","r":["cFq]F?R?H?LFNL?PW~@EFIFKDECKEBGFCHG?IESASEQAICG?I"]},{"n":"Uganda","r":["ReT?f@?T@FDJABM?GCOAICIGCGGEAFW?EGBMCO?MIKLIHAVGLDLHFDT?"]},{"n":"Rwanda","r":["T_RJGJ?@DAJJDAJIAACK?EE@CEK"]},{"n":"Bosnia and Herz.","r":["sYsJGPGFEFEFGDGHGEBECC?I@Q?MBG?GHDFIF@@D@BBDJ@"]},{"n":"Macedonia","r":["mY_MDILA?BBBAHDF@LEFG@GA@AEAAK?CAE?I"]},{"n":"Serbia","r":["u[wJEO@KFKDABKFADICG@CBBBCBDFAFIDFDB@AB@?H@DA@ACEA?BCB?@CB?@CB@BD@@BA?CDAFC@ADAEGAGHIE?FEGEDGD"]},{"n":"Montenegro","r":["sYqK@DC@HFDAABEDCHACKACEAC@EBA@GBE@?BB"]},{"n":"Kosovo","r":["eY{KE@ABEBCCACEAACBC?ABC?ABC?CD@@B@A?B@JD@A@"]},{"n":"Trinidad and Tobago","r":["wEpe@AK?CN?@PABEEG?"]},{"n":"S. Sudan","r":["eAgRMNGDBHAHBDAFOJGBELKDIFILE?GHGLAECEQEIEAMDCHI@EAE?MBC?SC?CIEACGJOAKMIKIK@EB?KC??IN@LAFIDAH??CN?DB?HJD@KHIFABITKLLHJHJ?LBNCLDF"]}]</script>
+<!-- copy of travel.json, used only when the live file cannot be fetched (e.g. opened from disk) -->
+<script type="application/json" id="travel-fallback">{"home":{"name":"India","city":"New Delhi","lat":28.61,"lon":77.21},"goal":{"countries":30,"byAge":30,"deadline":"2034-11"},"trips":[{"place":"Malaysia","start":"2005-12-23","end":"2005-12-28"},{"place":"Thailand","start":"2007-06-20","end":"2007-06-25"},{"place":"US","start":"2008-02-01","end":"2008-02-28"},{"place":"US","start":"2008-09-11","end":"2008-10-01"},{"place":"Singapore","start":"2009-05-06","end":"2009-05-16"},{"place":"Hong Kong","start":"2010-05-28","end":"2010-06-03"},{"place":"Macau","start":"2010-06-03","end":"2010-06-07"},{"place":"US","start":"2010-11-07","end":"2010-11-23"},{"place":"Malaysia","start":"2011-05-15","end":"2011-05-23"},{"place":"US","start":"2012-06-05","end":"2012-06-23"},{"place":"China","start":"2013-06-08","end":"2013-06-16"},{"place":"UAE","start":"2014-06-07","end":"2014-06-15"},{"place":"Thailand","start":"2015-05-16","end":"2015-05-26"},{"place":"Malaysia","start":"2017-05-25","end":"2017-06-01"},{"place":"Indonesia","start":"2018-05-11","end":"2018-05-22"},{"place":"Vietnam","start":"2019-05-16","end":"2019-05-28"},{"place":"Thailand","start":"2023-07-06","end":"2023-07-15"},{"place":"UAE","start":"2024-01-07","end":"2024-01-14"},{"place":"Singapore","start":"2024-06-20","end":"2024-07-28"},{"place":"Malaysia","start":"2024-07-16","end":"2024-07-17"},{"place":"Indonesia","start":"2024-07-19","end":"2024-07-21"},{"place":"Spain","start":"2024-12-21","end":"2024-12-24"},{"place":"Sweden","start":"2024-12-25","end":"2024-12-27"},{"place":"Denmark","start":"2024-12-28","end":"2024-12-29"},{"place":"Singapore","start":"2025-03-13","end":"2025-03-18"},{"place":"Indonesia","start":"2025-06-05","end":"2025-06-07"},{"place":"Singapore","start":"2025-12-17","end":"2025-12-20"},{"place":"Malaysia","start":"2025-12-21","end":"2025-12-27"},{"place":"Hong Kong","start":"2026-08-17","end":null},{"place":"Vietnam","start":"2026-11-06","end":"2026-11-07"}],"wishlist":["Japan","South Korea","Taiwan","Sri Lanka","Nepal","Cambodia","Philippines","Australia","France","Portugal","Norway","Greece","Italy"]}</script>
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   30 before 30 · everything below is plain JS, no libraries.
+   Data comes from travel.json (an embedded copy is the fallback
+   so the page still works when opened straight from disk).
+   ════════════════════════════════════════════════════════════ */
+
+/* ───────── tiny helpers ───────── */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const TAU = Math.PI * 2, RAD = Math.PI / 180, DEG = 180 / Math.PI, KM = 6371;
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const wrap180 = d => ((d % 360) + 540) % 360 - 180;
+const rng = seed => { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+const hex2rgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const mix = (a, b, t) => { const A = hex2rgb(a), B = hex2rgb(b); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], t))).join(',')})`; };
+const rgba = (h, a) => { const [r, g, b] = hex2rgb(h); return `rgba(${r},${g},${b},${a})`; };
+const el = (tag, attrs = {}, html) => { const e = document.createElement(tag); for (const k in attrs) { if (k === 'class') e.className = attrs[k]; else if (k === 'style') e.style.cssText = attrs[k]; else e.setAttribute(k, attrs[k]); } if (html != null) e.innerHTML = html; return e; };
+const esc = s => String(s).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const pad2 = n => String(n).padStart(2, '0');
+const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const V = {
+  add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  mul: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+  cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+  len: a => Math.hypot(a[0], a[1], a[2]),
+  norm: a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; },
+  // rotate v around unit axis k (right-hand rule)
+  rot(v, k, a) { const c = Math.cos(a), s = Math.sin(a), d = V.dot(k, v) * (1 - c), x = V.cross(k, v); return [v[0] * c + x[0] * s + k[0] * d, v[1] * c + x[1] * s + k[1] * d, v[2] * c + x[2] * s + k[2] * d]; },
+};
+
+/* ───────── dates (everything in UTC days) ───────── */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const dUTC = s => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, (m || 1) - 1, d || 1); };
+const TODAY = (() => { const n = new Date(); return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const dayDiff = (a, b) => Math.round((b - a) / 864e5);
+const yearOf = ms => new Date(ms).getUTCFullYear();
+const monOf = ms => new Date(ms).getUTCMonth();
+const fmtDay = ms => { const d = new Date(ms); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`; };
+const fmtMonYr = ms => `${MONTHS[monOf(ms)]} ${yearOf(ms)}`;
+const yearFrac = ms => { const y = yearOf(ms); return y + (ms - Date.UTC(y, 0, 1)) / (Date.UTC(y + 1, 0, 1) - Date.UTC(y, 0, 1)); };
+function fmtRange(t) {
+  if (t.ongoing) return `${fmtDay(t.s)} ${yearOf(t.s)} → now`;
+  const a = new Date(t.s), b = new Date(t.e);
+  return a.getUTCMonth() === b.getUTCMonth() ? `${a.getUTCDate()}–${b.getUTCDate()} ${MONTHS[b.getUTCMonth()]} ${yearOf(t.s)}` : `${fmtDay(t.s)} – ${fmtDay(t.e)} ${yearOf(t.e)}`;
+}
+
+/* ───────── gazetteer: where the pin goes for each place ─────────
+   Pins sit on each country's main gateway city. Add a row here (or put lat/lon
+   on a trip in travel.json) when a new place shows up. */
+const GEO = {
+  'Malaysia': { code: 'MY', city: 'Kuala Lumpur', iata: 'KUL', lat: 3.139, lon: 101.687, cont: 'Asia' },
+  'Thailand': { code: 'TH', city: 'Bangkok', iata: 'BKK', lat: 13.756, lon: 100.502, cont: 'Asia' },
+  'US': { code: 'US', name: 'United States', atlas: 'United States of America', city: 'New York', iata: 'JFK', lat: 40.713, lon: -74.006, cont: 'North America' },
+  'Singapore': { code: 'SG', city: 'Singapore', iata: 'SIN', lat: 1.352, lon: 103.82, cont: 'Asia' },
+  'Hong Kong': { code: 'HK', city: 'Hong Kong', iata: 'HKG', lat: 22.319, lon: 114.169, cont: 'Asia' },
+  'Macau': { code: 'MO', city: 'Macau', iata: 'MFM', lat: 22.199, lon: 113.544, cont: 'Asia' },
+  'China': { code: 'CN', city: 'Beijing', iata: 'PEK', lat: 39.904, lon: 116.407, cont: 'Asia' },
+  'UAE': { code: 'AE', name: 'United Arab Emirates', atlas: 'United Arab Emirates', city: 'Dubai', iata: 'DXB', lat: 25.205, lon: 55.271, cont: 'Asia' },
+  'Indonesia': { code: 'ID', city: 'Jakarta', iata: 'CGK', lat: -6.209, lon: 106.846, cont: 'Asia' },
+  'Vietnam': { code: 'VN', city: 'Hanoi', iata: 'HAN', lat: 21.028, lon: 105.834, cont: 'Asia' },
+  'Spain': { code: 'ES', city: 'Madrid', iata: 'MAD', lat: 40.417, lon: -3.704, cont: 'Europe' },
+  'Sweden': { code: 'SE', city: 'Stockholm', iata: 'ARN', lat: 59.329, lon: 18.069, cont: 'Europe' },
+  'Denmark': { code: 'DK', city: 'Copenhagen', iata: 'CPH', lat: 55.676, lon: 12.568, cont: 'Europe' },
+  'India': { code: 'IN', city: 'New Delhi', iata: 'DEL', lat: 28.61, lon: 77.21, cont: 'Asia' },
+  // flight plan
+  'Japan': { code: 'JP', city: 'Tokyo', iata: 'NRT', lat: 35.676, lon: 139.65, cont: 'Asia', region: 'East Asia' },
+  'South Korea': { code: 'KR', city: 'Seoul', iata: 'ICN', lat: 37.567, lon: 126.978, cont: 'Asia', region: 'East Asia' },
+  'Taiwan': { code: 'TW', city: 'Taipei', iata: 'TPE', lat: 25.033, lon: 121.565, cont: 'Asia', region: 'East Asia' },
+  'Sri Lanka': { code: 'LK', city: 'Colombo', iata: 'CMB', lat: 6.927, lon: 79.861, cont: 'Asia', region: 'South Asia' },
+  'Nepal': { code: 'NP', city: 'Kathmandu', iata: 'KTM', lat: 27.717, lon: 85.324, cont: 'Asia', region: 'South Asia' },
+  'Cambodia': { code: 'KH', city: 'Phnom Penh', iata: 'PNH', lat: 11.556, lon: 104.928, cont: 'Asia', region: 'Southeast Asia' },
+  'Philippines': { code: 'PH', city: 'Manila', iata: 'MNL', lat: 14.6, lon: 120.984, cont: 'Asia', region: 'Southeast Asia' },
+  'Australia': { code: 'AU', city: 'Sydney', iata: 'SYD', lat: -33.869, lon: 151.209, cont: 'Oceania', region: 'Oceania' },
+  'France': { code: 'FR', city: 'Paris', iata: 'CDG', lat: 48.857, lon: 2.352, cont: 'Europe', region: 'Europe' },
+  'Portugal': { code: 'PT', city: 'Lisbon', iata: 'LIS', lat: 38.722, lon: -9.139, cont: 'Europe', region: 'Europe' },
+  'Norway': { code: 'NO', city: 'Oslo', iata: 'OSL', lat: 59.914, lon: 10.752, cont: 'Europe', region: 'Europe' },
+  'Greece': { code: 'GR', city: 'Athens', iata: 'ATH', lat: 37.984, lon: 23.728, cont: 'Europe', region: 'Europe' },
+  'Italy': { code: 'IT', city: 'Rome', iata: 'FCO', lat: 41.903, lon: 12.496, cont: 'Europe', region: 'Europe' },
+};
+const WILD_POOL = ['New Zealand', 'Iceland', 'Morocco', 'Egypt', 'Turkey', 'Peru', 'Brazil', 'Argentina', 'Mexico', 'Canada', 'United Kingdom', 'Germany', 'Netherlands', 'Switzerland', 'Austria', 'Czechia', 'Croatia', 'Ireland', 'Finland', 'Kenya', 'Tanzania', 'South Africa', 'Jordan', 'Oman', 'Bhutan', 'Laos', 'Mongolia', 'Uzbekistan', 'Georgia', 'Chile', 'Colombia', 'Cuba', 'Fiji', 'Madagascar', 'Namibia', 'Tunisia', 'Hungary', 'Poland', 'Belgium', 'Bangladesh'];
+
+/* ───────── world outlines (110m Natural Earth, polyline-packed) ───────── */
+const ll2v = (lon, lat) => { const l = lon * RAD, p = lat * RAD, c = Math.cos(p); return [c * Math.sin(l), Math.sin(p), c * Math.cos(l)]; };
+function decRing(s) {
+  const out = []; let i = 0, lat = 0, lon = 0;
+  while (i < s.length) {
+    for (let k = 0; k < 2; k++) { let r = 0, sh = 0, b; do { b = s.charCodeAt(i++) - 63; r |= (b & 31) << sh; sh += 5; } while (b >= 32); const d = (r & 1) ? ~(r >> 1) : (r >> 1); if (k === 0) lat += d; else lon += d; }
+    out.push(lon / 10, lat / 10);
+  }
+  return new Float32Array(out);
+}
+const WORLD = JSON.parse($('#world-data').textContent).map(c => {
+  const ll = c.r.map(decRing);
+  const xyz = ll.map(r => { const n = r.length / 2, o = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const v = ll2v(r[i * 2], r[i * 2 + 1]); o[i * 3] = v[0]; o[i * 3 + 1] = v[1]; o[i * 3 + 2] = v[2]; } return o; });
+  const bbox = [999, 999, -999, -999]; let big = ll[0];
+  for (const r of ll) { if (r.length > big.length) big = r; for (let i = 0; i < r.length; i += 2) { if (r[i] < bbox[0]) bbox[0] = r[i]; if (r[i] > bbox[2]) bbox[2] = r[i]; if (r[i + 1] < bbox[1]) bbox[1] = r[i + 1]; if (r[i + 1] > bbox[3]) bbox[3] = r[i + 1]; } }
+  let cx = 0, cy = 0; for (let i = 0; i < big.length; i += 2) { cx += big[i]; cy += big[i + 1]; } const n = big.length / 2;
+  return { name: c.n, ll, xyz, bbox, cen: [cx / n, cy / n] };
+});
+const WORLD_BY = new Map(WORLD.map(c => [c.name, c]));
+const MAX_RING = Math.max(...WORLD.flatMap(c => c.xyz.map(r => r.length / 3)));
+function pip(r, x, y) { let inside = false; for (let i = 0, j = r.length - 2; i < r.length; j = i, i += 2) { const xi = r[i], yi = r[i + 1], xj = r[j], yj = r[j + 1]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside; } return inside; }
+
+function geoFor(name, extra = {}) {
+  const g = GEO[name] || {}, atlas = g.atlas || name, w = WORLD_BY.get(atlas);
+  let lat = extra.lat ?? g.lat, lon = extra.lon ?? g.lon;
+  if (lat == null && w) { lon = w.cen[0]; lat = w.cen[1]; }
+  if (lat == null) return null;
+  return { key: name, name: g.name || name, code: g.code || name.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase(), city: extra.city || g.city || '', iata: g.iata || '', lat, lon, cont: g.cont || 'Elsewhere', region: g.region || g.cont || 'Elsewhere', atlas: w ? atlas : null };
+}
+function gcAngle(a, b) { const p1 = a.lat * RAD, p2 = b.lat * RAD, dl = (b.lon - a.lon) * RAD; const h = Math.sin((p2 - p1) / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2; return 2 * Math.asin(Math.min(1, Math.sqrt(h))); }
+const flightTime = km => { const h = km / 830 + .6; const H = Math.floor(h), m = Math.round((h - H) * 12) * 5; return m === 60 ? `${H + 1} h` : `${H} h ${pad2(m)}`; };
+
+/* ───────── the model: trips → legs, countries, stats ───────── */
+function buildModel(raw) {
+  const h = raw.home || {};
+  const hg = GEO[h.name] || {};
+  const home = { key: '@home', name: h.name || 'Home', code: hg.code || 'HOME', city: h.city || hg.city || '', iata: hg.iata || '', lat: h.lat ?? hg.lat ?? 0, lon: h.lon ?? hg.lon ?? 0, isHome: true, atlas: WORLD_BY.has(h.name) ? h.name : null, cont: hg.cont || '' };
+  const trips = [];
+  for (const t of raw.trips || []) {
+    const g = t.place && geoFor(t.place, t);
+    if (!g || !t.start) { console.warn('[30×30] skipping a trip I cannot place on the map:', t); continue; }
+    const e = t.end ? dUTC(t.end) : null;
+    trips.push({ place: t.place, geo: g, s: dUTC(t.start), e, ongoing: e == null });
+  }
+  trips.sort((a, b) => a.s - b.s);
+  const endOf = t => t.e ?? TODAY, seen = new Map();
+  trips.forEach((t, i) => {
+    t.i = i; t.no = i + 1; t.nights = Math.max(0, dayDiff(t.s, endOf(t)));
+    const c = seen.get(t.place); t.first = !c; t.visit = (c || 0) + 1; seen.set(t.place, t.visit); t.unlocked = seen.size;
+    // where did this trip start from? inside a longer stay → side trip; right after another → onward hop; else home
+    let cont = null, chain = null;
+    for (let j = 0; j < i; j++) { const p = trips[j]; if (p.s < t.s && endOf(p) > t.s && (p.ongoing || endOf(p) >= endOf(t))) cont = p; }
+    for (let j = 0; j < i; j++) { const p = trips[j]; if (p !== cont && p.e != null && !p.next) { const gap = dayDiff(p.e, t.s); if (gap >= 0 && gap <= 1) chain = p; } }
+    if (chain) { t.kind = 'chain'; t.from = chain.geo; chain.next = t; t.container = chain.container || cont; }
+    else if (cont) { t.kind = 'side'; t.from = cont.geo; t.container = cont; }
+    else { t.kind = 'home'; t.from = home; }
+  });
+  const legs = [];
+  for (const t of trips) {
+    legs.push({ kind: 'out', trip: t, a: t.from, b: t.geo, time: t.s });
+    if (!t.ongoing && !t.next) legs.push({ kind: 'ret', trip: t, a: t.geo, b: t.container ? t.container.geo : home, time: t.e });
+  }
+  legs.sort((p, q) => p.time - q.time || (p.kind === 'ret' ? 0 : 1) - (q.kind === 'ret' ? 0 : 1));
+  let km = 0;
+  legs.forEach((l, i) => { l.i = i; l.ang = gcAngle(l.a, l.b); l.km = l.ang * KM; km += l.km; if (l.kind === 'out') l.trip.leg = l; });
+
+  const countries = [], byPlace = new Map(), byAtlas = new Map();
+  for (const t of trips) {
+    let c = byPlace.get(t.place);
+    if (!c) { c = { key: t.place, geo: t.geo, first: t, trips: [], nights: 0 }; byPlace.set(t.place, c); countries.push(c); if (t.geo.atlas) byAtlas.set(t.geo.atlas, c); }
+    c.trips.push(t); c.nights += t.nights;
+  }
+  // days abroad: union of stays so side trips are not counted twice
+  const iv = trips.map(t => [t.s, endOf(t)]).sort((a, b) => a[0] - b[0]); let days = 0, cur = null;
+  for (const [s, e] of iv) { if (!cur || s > cur[1]) { if (cur) days += dayDiff(cur[0], cur[1]) + 1; cur = [s, e]; } else cur[1] = Math.max(cur[1], e); }
+  if (cur) days += dayDiff(cur[0], cur[1]) + 1;
+
+  const goal = raw.goal || {}, target = goal.countries || 30;
+  const [dy, dm] = String(goal.deadline || '2034-11').split('-').map(Number);
+  const now = new Date();
+  const monthsLeft = Math.max(1, (dy - now.getFullYear()) * 12 + ((dm || 12) - (now.getMonth() + 1)));
+  const need = Math.max(0, target - countries.length);
+  const current = trips.filter(t => t.ongoing && !t.container).pop() || null;
+  const base = current ? current.geo : home;
+  const wishlist = (raw.wishlist || []).filter(n => !byPlace.has(n)).map(n => geoFor(n)).filter(Boolean)
+    .map(g => ({ ...g, ang: gcAngle(base, g), km: gcAngle(base, g) * KM }));
+  const perYear = new Map(), perMonth = new Array(12).fill(0);
+  for (const t of trips) { const y = yearOf(t.s); (perYear.get(y) || perYear.set(y, []).get(y)).push(t); perMonth[monOf(t.s)]++; }
+  const done = trips.filter(t => !t.ongoing);
+  const by = (arr, f) => arr.reduce((a, b) => (a == null || f(b) > f(a) ? b : a), null);
+  const firstMs = trips.length ? trips[0].s : TODAY, spanYears = Math.max(.5, (TODAY - firstMs) / (365.25 * 864e5));
+  return {
+    src: raw._src || 'travel.json', home, trips, legs, countries, byPlace, byAtlas, wishlist, base, current,
+    target, need, monthsLeft, yearsLeft: monthsLeft / 12, deadline: Date.UTC(dy, (dm || 12) - 1, 1), byAge: goal.byAge || 30,
+    stats: {
+      km, days, perYear, perMonth, spanYears,
+      conts: [...new Set(countries.map(c => c.geo.cont))],
+      longest: by(done, t => t.nights), shortest: by(done, t => -t.nights),
+      farthest: by(countries, c => gcAngle(home, c.geo)),
+      busiest: by([...perYear.entries()], e => e[1].length),
+      lifePace: countries.length / spanYears, needPace: need / (monthsLeft / 12),
+    },
+  };
+}
+
+async function loadData() {
+  const fallback = JSON.parse($('#travel-fallback').textContent);
+  try {
+    const r = await fetch('travel.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json(); j._src = 'live'; return j;
+  } catch (e) { fallback._src = 'embedded'; return fallback; }
+}
+
+/* ───────── tooltip + toasts ───────── */
+const Tip = (() => {
+  const t = $('#tip'); let on = false;
+  function move(x, y) { const w = t.offsetWidth, h = t.offsetHeight; let px = x + 16, py = y + 18; if (px + w > innerWidth - 8) px = x - w - 14; if (py + h > innerHeight - 8) py = y - h - 14; t.style.transform = `translate3d(${Math.max(6, px)}px,${Math.max(6, py)}px,0)`; }
+  function show(html, x, y) { if (t._h !== html) { t.innerHTML = html; t._h = html; } on = true; t.classList.add('on'); move(x, y); }
+  function hide() { if (!on) return; on = false; t.classList.remove('on'); }
+  function bind(node, html) {
+    const h = () => typeof html === 'function' ? html() : html;
+    node.addEventListener('pointerenter', e => show(h(), e.clientX, e.clientY));
+    node.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') show(h(), e.clientX, e.clientY); });
+    node.addEventListener('pointerleave', hide);
+    node.addEventListener('focus', () => { const b = node.getBoundingClientRect(); show(h(), b.left + b.width / 2, b.top + b.height / 2); });
+    node.addEventListener('blur', hide);
+  }
+  addEventListener('scroll', hide, { passive: true });
+  return { show, hide, bind };
+})();
+function toast(html, ms = 3800) {
+  const box = $('#toasts'), t = el('div', { class: 'toast' }, html);
+  box.appendChild(t); while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 380); }, ms);
+}
+
+/* ───────── passport stamp artwork ───────── */
+let STAMP_ID = 0;
+function stampSVG(code, top, bottom, o = {}) {
+  const id = 'sp' + (++STAMP_ID), rot = o.rot ?? 0, dash = o.pencil ? 'stroke-dasharray="3 3.5"' : '';
+  const big = code.length > 2 ? 21 : 30;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(${rot} 50 50)" fill="none" stroke="currentColor">
+    <circle cx="50" cy="50" r="45" stroke-width="${o.pencil ? 1.6 : 3}" ${dash}/>
+    ${o.pencil ? '' : '<circle cx="50" cy="50" r="39.500" stroke-width="1" stroke-dasharray="1.500 3"/>'}
+    <path id="${id}" d="M19 50a31 31 0 0 1 62 0" stroke="none"/>
+    <text font-family="DM Mono,monospace" font-size="8.600" letter-spacing="1.300" fill="currentColor" stroke="none" text-anchor="middle"><textPath href="#${id}" startOffset="50%">${esc(top.toUpperCase())}</textPath></text>
+    <text x="50" y="${code.length > 2 ? 60 : 63}" font-family="Caprasimo,Georgia,serif" font-size="${big}" fill="currentColor" stroke="none" text-anchor="middle">${esc(code)}</text>
+    <path d="M30 71h40" stroke-width="1"/>
+    <text x="50" y="82" font-family="DM Mono,monospace" font-size="8" letter-spacing="1" fill="currentColor" stroke="none" text-anchor="middle">${esc(bottom)}</text>
+  </g></svg>`;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   CLOUDS · the painting, rebuilt.
+   A cloud is a pile of circles. Painting the pile again and again,
+   each pass a little smaller (stroke everything, then fill everything),
+   leaves only the outer contour of each pass: the dry-brush rings.
+   An offset copy underneath gives the peach rim light.
+   ════════════════════════════════════════════════════════════ */
+const PAL = {
+  ink:    { edge: '#1c3070', core: '#132257', line: '#3f5fb4', dark: '#0e1840', la: [.16, .58], darkP: .25 },
+  ink2:   { edge: '#17285e', core: '#101c49', line: '#34509f', dark: '#0b1437', la: [.16, .55], darkP: .25 },
+  deep:   { edge: '#3257ab', core: '#27448f', line: '#7d9fe6', dark: '#1b3274', la: [.16, .55], darkP: .35 },
+  mid:    { edge: '#4d78d1', core: '#3b61ba', line: '#93b2f1', dark: '#2c4c9f', la: [.18, .6], darkP: .4 },
+  bright: { edge: '#648de2', core: '#4870c9', line: '#b4caf8', dark: '#3558b0', la: [.18, .56], darkP: .35 },
+  peach:  { edge: '#f9e2c6', core: '#f3cca4', line: '#d9a374', dark: '#c98f61', la: [.2, .62], darkP: .5 },
+  cream:  { edge: '#fcedd8', core: '#f7dcbd', line: '#e0b184', dark: '#d19c6c', la: [.18, .56], darkP: .5 },
+};
+const RIM = { peach: '#f8dcbc', peri: '#9db8f2', white: '#fffaf0', blue: '#4a74cc' };
+
+let _noise = null;
+function noiseTile() {
+  if (_noise) return _noise;
+  const s = 192, cv = document.createElement('canvas'); cv.width = cv.height = s;
+  const c = cv.getContext('2d'), im = c.createImageData(s, s), d = im.data, R = rng(4242);
+  for (let i = 0; i < d.length; i += 4) {
+    const r = R(), light = R() < .46, a = r * r * (light ? 62 : 86) + (R() < .012 ? 70 : 0);
+    if (light) { d[i] = 255; d[i + 1] = 250; d[i + 2] = 240; } else { d[i] = 12; d[i + 1] = 20; d[i + 2] = 56; }
+    d[i + 3] = a;
+  }
+  c.putImageData(im, 0, 0); return (_noise = cv);
+}
+
+function cloudLumps(spec) {
+  const R = rng(spec.seed * 7919 + 17), keys = spec.lumps.map(([x, y, r]) => ({ x, y, r }));
+  let cx = 0, cy = 0, w = 0; for (const k of keys) { cx += k.x * k.r; cy += k.y * k.r; w += k.r; } cx /= w; cy /= w;
+  const out = [], step = spec.step || 9, frill = spec.frill ?? 2;
+  const push = (x, y, r) => out.push({ x, y, r, sq: .86 + R() * .34, dx: (R() - .5) * step * .7, dy: (R() - .5) * step * .7 });
+  for (const k of keys) {
+    push(k.x, k.y, k.r);
+    const base = Math.atan2(k.y - cy, k.x - cx);
+    for (let i = 0; i < frill; i++) { const a = base + (R() - .5) * Math.PI * 1.25, rr = k.r * (.36 + R() * .3), d = k.r * (.6 + R() * .22); push(k.x + Math.cos(a) * d, k.y + Math.sin(a) * d, rr); }
+  }
+  return out;
+}
+
+function paintCloud(cv, spec) {
+  const cssW = cv.clientWidth; if (!cssW) return;
+  const dpr = Math.min(devicePixelRatio || 1, cssW > 900 ? 1.25 : 1.6), [bx, by, bw, bh] = spec.box;
+  const k = cssW * dpr / bw;
+  cv.width = Math.max(2, Math.round(bw * k)); cv.height = Math.max(2, Math.round(bh * k)); cv._w = cssW;
+  const c = cv.getContext('2d'), P = spec.pal, R = rng(spec.seed * 977 + 5), L = spec._lumps, step = spec.step || 9;
+  c.setTransform(k, 0, 0, k, -bx * k, -by * k); c.lineCap = 'round';
+  const disc = (x, y, r) => { c.moveTo(x + r, y); c.arc(x, y, r, 0, TAU); };
+  if (spec.rim) {
+    const [dx, dy] = spec.rimOff || [-3.2, -4.2];
+    c.fillStyle = spec.rim; c.beginPath(); for (const l of L) disc(l.x + dx, l.y + dy, l.r + .5); c.fill();
+  }
+  const maxR = Math.max(...L.map(l => l.r)), levels = Math.ceil(maxR / (step * .86)), band = spec.band || 5;
+  for (let lv = 0; lv < levels; lv++) {
+    if (lv > 0) {
+      for (const l of L) {
+        const r = l.r - lv * step * l.sq; if (r < 2.5) continue;
+        if (R() < .1) continue;                                    // a skipped ring: the brush ran dry
+        const dark = R() < P.darkP;
+        c.strokeStyle = rgba(dark ? P.dark : P.line, lerp(P.la[0], P.la[1], R()) * (dark ? .85 : 1));
+        c.lineWidth = lerp(1.3, 3.4, R() * R());
+        const d1 = 12 + R() * 110, d2 = 2 + R() * 18;
+        c.setLineDash([d1, d2, d1 * .35, d2 * 1.7]); c.lineDashOffset = R() * 300;
+        c.beginPath(); c.arc(l.x + l.dx * lv, l.y + l.dy * lv, r, 0, TAU); c.stroke();
+      }
+      c.setLineDash([]);
+    }
+    c.fillStyle = mix(P.edge, P.core, clamp(lv / band, 0, 1));
+    c.beginPath(); let any = false;
+    for (const l of L) { const r = l.r - lv * step * l.sq; if (r < 2.5) continue; disc(l.x + l.dx * lv, l.y + l.dy * lv, r); any = true; }
+    if (!any) break; c.fill();
+  }
+  // riso grain, only where there is paint
+  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-atop'; c.globalAlpha = spec.grain ?? .62;
+  c.fillStyle = c.createPattern(noiseTile(), 'repeat'); c.fillRect(0, 0, cv.width, cv.height);
+  c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+}
+
+const Clouds = (() => {
+  const items = [];
+  function mount(parent, spec, space, clip) {
+    spec.pal = typeof spec.pal === 'string' ? PAL[spec.pal] : spec.pal;
+    if (typeof spec.rim === 'string' && RIM[spec.rim]) spec.rim = RIM[spec.rim];
+    spec._lumps = cloudLumps(spec);
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const l of spec._lumps) { x0 = Math.min(x0, l.x - l.r); y0 = Math.min(y0, l.y - l.r); x1 = Math.max(x1, l.x + l.r); y1 = Math.max(y1, l.y + l.r); }
+    x0 -= 8; y0 -= 8; x1 += 4; y1 += 4;
+    if (clip) { x0 = Math.max(x0, clip[0]); y0 = Math.max(y0, clip[1]); x1 = Math.min(x1, clip[2]); y1 = Math.min(y1, clip[3]); }
+    spec.box = [x0, y0, x1 - x0, y1 - y0];
+    const R = rng(spec.seed + 99);
+    const wrap = el('div', { class: 'cloud', style: `left:${x0 / space[0] * 100}%;top:${y0 / space[1] * 100}%;width:${(x1 - x0) / space[0] * 100}%;aspect-ratio:${x1 - x0}/${y1 - y0};z-index:${spec.z || 1};--d:${(22 + R() * 22).toFixed(1)}s;--a:${(4 + (spec.depth || .2) * 22).toFixed(1)}px` });
+    const cv = el('canvas'); wrap.appendChild(cv); parent.appendChild(wrap);
+    const it = { wrap, cv, spec, depth: spec.depth || 0, host: spec.host || null, mode: spec.mode || 'hero', docY: 0 };
+    items.push(it); return it;
+  }
+  let queue = [];
+  function paintAll(force) {
+    queue = items.filter(it => force || !it.cv._w || Math.abs(it.cv.clientWidth - it.cv._w) / it.cv._w > .12);
+    pump();
+  }
+  function pump() {                       // a few clouds per frame so first paint never stalls
+    const t0 = performance.now();
+    while (queue.length && performance.now() - t0 < 10) { const it = queue.shift(); paintCloud(it.cv, it.spec); }
+    if (queue.length) requestAnimationFrame(pump);
+  }
+  function measure() { for (const it of items) if (it.mode === 'bank') { const b = it.wrap.parentElement.getBoundingClientRect(); it.docY = b.top + scrollY + b.height / 2; } }
+  let mx = 0, my = 0, tmx = 0, tmy = 0, lastSY = -1;
+  addEventListener('pointermove', e => { if (e.pointerType === 'touch') return; tmx = e.clientX / innerWidth - .5; tmy = e.clientY / innerHeight - .5; }, { passive: true });
+  function parallax() {
+    if (REDUCED) return;
+    const sy = scrollY, vh = innerHeight;
+    const moved = Math.abs(tmx - mx) + Math.abs(tmy - my) > .0015;
+    if (!moved && sy === lastSY) return;
+    mx = lerp(mx, tmx, .07); my = lerp(my, tmy, .07); lastSY = moved ? -1 : sy;
+    for (const it of items) {
+      if (it.mode === 'hero') { if (sy > vh * 1.2) continue; it.wrap.style.transform = `translate3d(${(-mx * it.depth * 70).toFixed(1)}px,${(sy * it.depth * .42 - my * it.depth * 44).toFixed(1)}px,0)`; }
+      else { const rel = it.docY - (sy + vh / 2); if (Math.abs(rel) > vh * 1.3) continue; it.wrap.style.transform = `translate3d(${(-mx * it.depth * 50).toFixed(1)}px,${(-rel * it.depth * .32).toFixed(1)}px,0)`; }
+    }
+  }
+  return { mount, paintAll, parallax, measure, items };
+})();
+
+/* the composition of the painting, in a 1000 × 600 frame */
+const HERO_CLOUDS = [
+  { id: 'B',  z: 10, depth: .08, pal: 'ink',    seed: 3,  step: 12, band: 7, lumps: [[400, 70, 190], [530, 10, 120], [280, 20, 140], [445, 240, 115], [385, 330, 100], [245, 150, 110], [325, 255, 95], [600, -20, 90]] },
+  { id: 'A2', z: 12, depth: .10, pal: 'ink2',   seed: 5,  step: 12, band: 6, lumps: [[30, 215, 150], [185, 240, 110], [-40, 90, 130], [105, 310, 95], [260, 300, 60]] },
+  { id: 'D',  z: 30, depth: .16, pal: 'ink',    seed: 9,  step: 11, band: 6, lumps: [[820, 345, 165], [690, 405, 115], [950, 300, 130], [590, 460, 78], [740, 272, 98], [900, 470, 110]] },
+  { id: 'A',  z: 32, depth: .18, pal: 'deep',   seed: 11, step: 10, rim: 'blue', rimOff: [2.5, 3.5], lumps: [[25, 10, 125], [150, -20, 105], [78, 118, 66], [-25, 128, 80], [222, 22, 58]] },
+  { id: 'C',  z: 40, depth: .24, pal: 'bright', seed: 13, step: 10, band: 4, rim: 'peach', rimOff: [-4.5, 1.5], lumps: [[905, 35, 175], [775, 5, 112], [1005, 190, 150], [852, 162, 100], [704, 86, 68], [668, 170, 46], [762, 232, 60]] },
+  { id: 'C2', z: 42, depth: .27, pal: 'deep',   seed: 15, step: 10, rim: 'peri', rimOff: [-2.5, 2], lumps: [[945, 105, 112], [1015, 40, 95], [872, 52, 70], [1000, 215, 85]] },
+  { id: 'P1', z: 46, depth: .31, pal: 'peach',  seed: 17, step: 9,  rim: 'white', rimOff: [-2, -3], lumps: [[965, 402, 78], [892, 440, 54], [1022, 335, 70], [940, 470, 60]] },
+  { id: 'E',  z: 52, depth: .40, pal: 'peach',  seed: 19, step: 9,  band: 4, rim: 'white', rimOff: [-2, -3.5], lumps: [[430, 575, 92], [532, 615, 110], [632, 580, 76], [338, 622, 82], [482, 508, 48], [578, 524, 42], [705, 624, 82]] },
+  { id: 'E2', z: 60, depth: .48, pal: 'mid',    seed: 23, step: 10, rim: 'peach', rimOff: [-2.5, -4.5], lumps: [[722, 566, 88], [642, 628, 80], [806, 612, 92]] },
+  { id: 'F',  z: 70, depth: .58, pal: 'mid',    seed: 29, step: 11, frill: 3, band: 5, rim: 'peach', rimOff: [2, -5], lumps: [[55, 435, 172], [205, 492, 140], [-35, 575, 165], [305, 590, 105], [128, 332, 78], [245, 410, 62], [14, 322, 72]] },
+  { id: 'G',  z: 72, depth: .62, pal: 'bright', seed: 31, step: 11, frill: 3, rim: 'peach', rimOff: [-3, -4.5], lumps: [[905, 578, 138], [1012, 488, 112], [802, 628, 100]] },
+];
+const bankLumps = (seed, n, y, r0, r1, wob = 30) => { const R = rng(seed); return Array.from({ length: n }, (_, i) => { const t = i / (n - 1), r = lerp(r0, r1, R() * R() * 1.4 > 1 ? 1 : R()); return [lerp(-40, 1040, t) + (R() - .5) * 70, y + Math.sin(t * 6.2 + seed) * wob + (R() - .5) * 40 - (r - r0) * .35, r]; }); };
+const BANKS = {
+  a: [{ pal: 'deep', seed: 41, depth: .10, y: 150, rim: 'blue', rimOff: [2, 3] }, { pal: 'mid', seed: 43, depth: .30, y: 208, rim: 'peach', rimOff: [-2, -5] }],
+  b: [{ pal: 'ink', seed: 51, depth: .10, y: 140 }, { pal: 'bright', seed: 53, depth: .2, y: 178, rim: 'peri', rimOff: [-2, -4] }, { pal: 'peach', seed: 55, depth: .36, y: 226, n: 7, r0: 34, r1: 72, rim: 'white', rimOff: [-2, -3.5] }],
+  c: [{ pal: 'bright', seed: 61, depth: .10, y: 148, rim: 'peri', rimOff: [-2, -4] }, { pal: 'cream', seed: 63, depth: .30, y: 210, rim: 'white', rimOff: [-2, -4] }],
+  d: [{ pal: 'peach', seed: 71, depth: .10, y: 150, rim: 'white', rimOff: [-2, -4] }, { pal: 'bright', seed: 73, depth: .28, y: 212, rim: 'white', rimOff: [-2.5, -4.5] }],
+};
+
+function mountAllClouds() {
+  const stage = $('#stage');
+  for (const s of HERO_CLOUDS) Clouds.mount(stage, s, [1000, 600], [-70, -70, 1070, 690]);
+  const title = $('.title');
+  Clouds.mount(title, { pal: 'peach', seed: 91, depth: .5, z: 3, step: 8, rim: 'white', rimOff: [-2, -3.5], lumps: [[40, 300, 62], [125, 322, 50], [-30, 318, 56]] }, [1000, 270]);
+  Clouds.mount(title, { pal: 'mid', seed: 93, depth: .56, z: 3, step: 8, rim: 'peach', rimOff: [-2.5, -4], lumps: [[930, 302, 66], [1020, 316, 60], [850, 326, 46]] }, [1000, 270]);
+  for (const b of $$('.bank')) {
+    BANKS[b.dataset.bank].forEach((o, i) => Clouds.mount(b, { ...o, mode: 'bank', z: i + 1, step: 10, frill: 3, lumps: bankLumps(o.seed, o.n || 8, o.y, o.r0 || 46, o.r1 || 100) }, [1000, 300]));
+  }
+  // the cloud floor you land on
+  const floor = $('#floor');
+  [{ pal: 'deep', seed: 81, depth: .08, y: 150, r0: 70, r1: 120, rim: 'peri', rimOff: [-2, -4] }, { pal: 'ink', seed: 83, depth: .2, y: 250, r0: 80, r1: 130, rim: 'blue', rimOff: [-2, -4] }, { pal: 'ink2', seed: 85, depth: .3, y: 345, r0: 90, r1: 130 }]
+    .forEach((o, i) => Clouds.mount(floor, { ...o, mode: 'bank', z: i + 1, step: 11, frill: 3, lumps: bankLumps(o.seed, 9, o.y, o.r0, o.r1, 18) }, [1000, 360], [-80, 0, 1080, 360]));
+}
+
+function paintStars() {
+  for (const cv of $$('canvas.stars')) {
+    const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) continue;
+    const dpr = Math.min(devicePixelRatio || 1, 2); cv.width = w * dpr; cv.height = h * dpr;
+    const c = cv.getContext('2d'), R = rng(+cv.dataset.seed || 1), n = Math.round((+cv.dataset.stars || 120) * clamp(w * h / 9e5, .4, 2.2));
+    c.scale(dpr, dpr);
+    for (let i = 0; i < n; i++) {
+      const x = R() * w, y = R() * h, r = .5 + R() * R() * 1.5;
+      c.fillStyle = `rgba(255,${240 + R() * 15 | 0},${215 + R() * 30 | 0},${(.2 + R() * .7).toFixed(2)})`;
+      c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+      if (R() < .05) { c.strokeStyle = 'rgba(255,250,240,.5)'; c.lineWidth = .7; c.beginPath(); c.moveTo(x - 4, y); c.lineTo(x + 4, y); c.moveTo(x, y - 4); c.lineTo(x, y + 4); c.stroke(); }
+    }
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   THE PLANE · a tiny flat-shaded 3D model drawn on 2D canvas,
+   so it can bank, loop and fly at you while still looking painted.
+   Model axes: +X nose, +Y up, +Z right wing.
+   ════════════════════════════════════════════════════════════ */
+const PLANE = (() => {
+  const P = [];
+  const cen = pts => { let x = 0, y = 0, z = 0; for (const p of pts) { x += p[0]; y += p[1]; z += p[2]; } const n = pts.length; return [x / n, y / n, z / n]; };
+  const newell = v => { let x = 0, y = 0, z = 0; for (let i = 0; i < v.length; i++) { const a = v[i], b = v[(i + 1) % v.length]; x += (a[1] - b[1]) * (a[2] + b[2]); y += (a[2] - b[2]) * (a[0] + b[0]); z += (a[0] - b[0]) * (a[1] + b[1]); } return V.norm([x, y, z]); };
+  function face(v, col, inside, o = {}) {
+    let n = newell(v); const c = cen(v);
+    if (inside && V.dot(n, V.sub(c, inside)) < 0) { v = v.slice().reverse(); n = V.mul(n, -1); }
+    P.push({ v, n, c, col, two: !!o.two, alpha: o.alpha ?? 1, bare: !!o.bare });
+  }
+  function loft(rings, col, o = {}) {
+    const m = rings[0].length, S = rings.length - 1;
+    for (let s = 0; s < S; s++) { const inside = cen(rings[s].concat(rings[s + 1])); for (let j = 0; j < m; j++) face([rings[s][j], rings[s][(j + 1) % m], rings[s + 1][(j + 1) % m], rings[s + 1][j]], col(s, j), inside, o); }
+    if (o.cap0) face(rings[0].slice(), o.cap0, cen(rings[0].concat(rings[1])), o);
+    if (o.cap1) face(rings[S].slice(), o.cap1, cen(rings[S].concat(rings[S - 1])), o);
+  }
+  // fuselage: ten-sided tube, red cowl, red cheat line down each side
+  const N = 10, ST = [[1.0, 0, .13, .13], [.86, 0, .2, .2], [.55, .01, .235, .22], [.1, .02, .235, .21], [-.4, .04, .17, .15], [-.8, .06, .1, .08], [-1.08, .08, .045, .035]];
+  loft(ST.map(([x, cy, ry, rz]) => Array.from({ length: N }, (_, j) => { const a = j / N * TAU; return [x, cy + ry * Math.cos(a), rz * Math.sin(a)]; })),
+    (s, j) => s === 0 ? 'red' : ((j === 2 || j === 7) && s <= 4 ? 'red' : 'body'), { cap0: 'dark', cap1: 'body' });
+  // spinner
+  loft([Array.from({ length: 6 }, (_, j) => [1.0, .075 * Math.cos(j / 6 * TAU), .075 * Math.sin(j / 6 * TAU)]), Array.from({ length: 6 }, () => [1.16, 0, 0])], () => 'body');
+  // wings, tailplane (lofted slabs along z), fin (along y)
+  const slabZ = (secs, s) => secs.map(([z, le, te, y, th]) => [[le, y + th / 2, z * s], [te, y + th / 2, z * s], [te, y - th / 2, z * s], [le, y - th / 2, z * s]]);
+  const WING = [[.14, .44, -.16, -.10, .05], [.62, .40, -.11, -.065, .045], [1.0, .355, -.055, -.035, .04], [1.25, .31, -.01, -.012, .034], [1.4, .21, .07, 0, .02]];
+  const TAILP = [[.04, -.70, -1.05, .085, .03], [.3, -.75, -1.04, .09, .028], [.5, -.84, -.99, .095, .02]];
+  for (const s of [1, -1]) {
+    loft(slabZ(WING, s), i => i === 2 ? 'red' : 'body', { cap1: 'body' });
+    loft(slabZ(TAILP, s), i => i === 1 ? 'red' : 'body', { cap1: 'red' });
+  }
+  loft([[.1, -.56, -1.09], [.36, -.78, -1.11], [.58, -.93, -1.07]].map(([y, le, te]) => [[le, y, .02], [te, y, .02], [te, y, -.02], [le, y, -.02]]), i => i === 1 ? 'red' : 'body', { cap1: 'red' });
+  // canopy
+  loft([[[.4, .2, .11], [-.14, .2, .11], [-.14, .2, -.11], [.4, .2, -.11]], [[.2, .41, .075], [-.05, .41, .075], [-.05, .41, -.075], [.2, .41, -.075]]], () => 'glass', { cap1: 'glass' });
+  // fixed gear
+  for (const s of [1, -1]) {
+    const wx = .32, wy = -.45, wz = s * .4, r = .108;
+    face([[.38, -.1, s * .36], [.27, -.1, s * .36], [.29, -.42, s * .39], [.36, -.42, s * .39]], 'strut', null, { two: true });
+    face(Array.from({ length: 8 }, (_, j) => [wx + r * Math.cos(j / 8 * TAU), wy + r * Math.sin(j / 8 * TAU), wz]), 'dark', null, { two: true });
+    face(Array.from({ length: 6 }, (_, j) => [wx + .042 * Math.cos(j / 6 * TAU), wy + .042 * Math.sin(j / 6 * TAU), wz + s * .012]), 'red', null, { two: true, bare: true });
+  }
+  // propeller blur disc
+  face(Array.from({ length: 16 }, (_, j) => [1.045, .47 * Math.cos(j / 16 * TAU), .47 * Math.sin(j / 16 * TAU)]), 'prop', null, { two: true, alpha: .2, bare: true });
+  return P;
+})();
+const PLANE_SHADE = {
+  body: ['#fffaf0', '#e4e8f7', '#bfcaed'], red: ['#ef5f49', '#d24739', '#a83431'],
+  glass: ['#3f66bd', '#22397d', '#16275c'], dark: ['#22397d', '#16275c', '#101b45'],
+  strut: ['#e4e8f7', '#bfcaed', '#9fb0e0'], prop: ['#fffaf0', '#fffaf0', '#fffaf0'],
+};
+const PLANE_LIGHT = V.norm([-.5, .8, .45]);
+
+/* draw the model at (px,py), `sc` px per unit, oriented by view-space basis f (nose), u (up), r (right).
+   View space: x right, y up, z toward the viewer. */
+function drawPlane(c, px, py, sc, f, u, r, time, o = {}) {
+  const persp = o.persp ?? .1, items = [], L = PLANE_LIGHT;
+  const tx = p => { const z = f[2] * p[0] + u[2] * p[1] + r[2] * p[2], k = sc / (1 - z * persp); return [px + (f[0] * p[0] + u[0] * p[1] + r[0] * p[2]) * k, py - (f[1] * p[0] + u[1] * p[1] + r[1] * p[2]) * k]; };
+  const add = (poly, v, n, cz) => {
+    let nx = f[0] * n[0] + u[0] * n[1] + r[0] * n[2], ny = f[1] * n[0] + u[1] * n[1] + r[1] * n[2], nz = f[2] * n[0] + u[2] * n[1] + r[2] * n[2];
+    if (nz < -.04) { if (!poly.two) return; nx = -nx; ny = -ny; nz = -nz; }
+    const nl = nx * L[0] + ny * L[1] + nz * L[2];
+    items.push({ pts: v.map(tx), z: cz, col: PLANE_SHADE[poly.col][nl > .3 ? 0 : nl > -.22 ? 1 : 2], alpha: poly.alpha, bare: poly.bare });
+  };
+  for (const p of PLANE) add(p, p.v, p.n, f[2] * p.c[0] + u[2] * p.c[1] + r[2] * p.c[2]);
+  // two prop blades, spinning
+  const ph = time * 17;
+  for (let b = 0; b < 2; b++) {
+    const a = ph + b * Math.PI, d = [0, Math.cos(a), Math.sin(a)], q = [0, -Math.sin(a), Math.cos(a)];
+    const pt = (l, w) => [1.05, d[1] * l + q[1] * w, d[2] * l + q[2] * w], v = [pt(.06, .035), pt(.47, .055), pt(.47, -.055), pt(.06, -.035)];
+    add({ col: 'prop', two: true, alpha: .7, bare: true }, v, [1, 0, 0], f[2] * 1.05 + (u[2] * d[1] + r[2] * d[2]) * .26 + .001);
+  }
+  items.sort((a, b) => a.z - b.z);
+  const path = it => { const p = it.pts; c.moveTo(p[0][0], p[0][1]); for (let i = 1; i < p.length; i++) c.lineTo(p[i][0], p[i][1]); c.closePath(); };
+  c.lineJoin = 'round';
+  if (o.outline !== false) { c.strokeStyle = o.ink || '#101b45'; c.lineWidth = o.ow || Math.max(2, sc * .075); c.beginPath(); for (const it of items) if (!it.bare) path(it); c.stroke(); }
+  for (const it of items) {
+    c.globalAlpha = it.alpha * (o.alpha ?? 1); c.fillStyle = it.col; c.beginPath(); path(it); c.fill();
+    if (it.alpha === 1) { c.strokeStyle = it.col; c.lineWidth = .8; c.stroke(); }
+  }
+  c.globalAlpha = 1;
+}
+
+/* ════════════════════════════════════════════════════════════
+   THE FLYER · the plane you can play with.
+   It lives in page coordinates (so scrolling leaves it behind and
+   it has to dive after you), flies where its nose points, banks into
+   turns, wanders on autopilot, obeys WASD, and tumbles when thrown.
+   ════════════════════════════════════════════════════════════ */
+const Flyer = (() => {
+  const cv = $('#fx'), c = cv.getContext('2d'), hit = $('#planeHit');
+  let W = innerWidth, H = innerHeight, dpr = 1;
+  const S = { x: -160, y: 240, z: 0, f: [1, 0, 0], u: [0, 1, 0], speed: 0, push: [0, 0], mode: 'pose', t: 0, bank: 0, roll: 0, loop: 0, w: [0, 0, 0], tumbleT: 0, target: { x: 0, vy: 0, yDoc: 0, z: 0 }, nextT: 0, lastKey: -9, poseX: 300, poseY: 240, poseHold: 0, fetch: null, calm: 0 };
+  const keys = new Set(), trail = [], parts = [], LIFE = 2.9;
+  let sy0 = scrollY, scrollV = 0, drag = null, poseLine = null, lightFn = () => false, hitFn = null, used = false;
+  const unit = () => clamp(Math.min(W, H) / 19, 30, 50);
+  const zScale = z => 900 / (900 - z);
+  const cut = () => { if (trail.length) trail[trail.length - 1].cut = true; };
+
+  function resize() { W = innerWidth; H = innerHeight; dpr = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  function initPose() {
+    const b = $('#stage').getBoundingClientRect();
+    S.poseX = clamp(b.left + b.width * .385, W * .3, W * .62); S.poseY = scrollY + clamp(b.top + b.height * .375, 110, H * .42);
+    if (scrollY > 60 || REDUCED) { S.mode = 'auto'; S.x = W * .3; S.y = scrollY + H * .35; S.speed = 60; pickTarget(); if (REDUCED) S.calm = 1; }
+    else { S.x = -160; S.y = S.poseY; }
+  }
+  function leavePose() { if (S.mode !== 'pose') return; poseLine = { x: S.x - unit() * 1.05, y: S.poseY, t: S.t }; S.mode = 'auto'; S.speed = 50; pickTarget(); S.target.x = W * .72; S.target.vy = H * .3; S.target.z = 120; }
+  function pickTarget() {
+    S.target.x = lerp(80, W - 80, Math.random()); S.target.vy = lerp(100, H - 90, Math.random()); S.target.z = lerp(-360, 270, Math.random());
+    S.nextT = S.t + 2.4 + Math.random() * 3.8;
+    if (S.mode === 'auto' && !S.calm && S.loop <= 0 && S.roll <= 0) { const r = Math.random(); if (r < .13) S.loop = TAU; else if (r < .26) S.roll = TAU * (Math.random() < .5 ? 1 : -1); }
+  }
+  function puff(x, y, n = 7, kind = 'puff') {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * TAU, sp = kind === 'puff' ? 30 + Math.random() * 70 : 90 + Math.random() * 260;
+      parts.push({ kind, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (kind === 'confetti' ? 220 : 0), r: kind === 'puff' ? 5 + Math.random() * 9 : 2 + Math.random() * 3.5, t: 0, life: kind === 'confetti' ? 1.6 + Math.random() * 1.2 : .5 + Math.random() * .5, col: ['#fffaf0', '#f5d3ae', '#8aa9ec', '#e2513f', '#b9cbf6'][kind === 'puff' ? (Math.random() * 3 | 0) : (Math.random() * 5 | 0)], sp: (Math.random() - .5) * 14 });
+    }
+  }
+  function levelRoll(yaw, dt, rate) {
+    const f = S.f, w = 1 - smooth(.86, .985, Math.abs(f[1])); if (w <= 0) return;
+    let rl = V.cross(f, [0, 1, 0]); const l = V.len(rl); if (l < 1e-4) return; rl = V.mul(rl, 1 / l);
+    const ul = V.cross(rl, f);
+    S.bank = lerp(S.bank, clamp(-yaw * .52, -1.25, 1.25), Math.min(1, dt * 5));
+    const ud = V.add(V.mul(ul, Math.cos(S.bank)), V.mul(rl, Math.sin(S.bank)));
+    const ang = Math.atan2(V.dot(V.cross(S.u, ud), f), V.dot(S.u, ud));
+    S.u = V.rot(S.u, f, clamp(ang, -rate * dt, rate * dt) * w);
+  }
+  function turnToward(d, maxAng) {
+    const ang = Math.acos(clamp(V.dot(S.f, d), -1, 1)); if (ang < 1e-4) return 0;
+    let ax = V.cross(S.f, d); const al = V.len(ax); ax = al < 1e-4 ? S.u : V.mul(ax, 1 / al);
+    const st = Math.min(ang, maxAng); S.f = V.rot(S.f, ax, st); S.u = V.rot(S.u, ax, st); return ax[1] * st;
+  }
+
+  function update(dt) {
+    S.t += dt;
+    const sy = scrollY; scrollV = lerp(scrollV, (sy - sy0) / Math.max(dt, .004), .22); sy0 = sy;
+    const CR = 3.6 * unit();
+    let d = null, maxTurn = 2.3, speedT = CR, yaw = 0;
+
+    if (S.mode === 'pose') {
+      if (S.x < S.poseX - 1) S.x = Math.min(S.poseX, S.x + Math.max(60, (S.poseX - S.x) * 2.3) * dt);
+      else { S.poseHold += dt; S.x += 7 * dt; }
+      S.y = S.poseY + Math.sin(S.t * 1.25) * 2.5; S.z = 0;
+      S.f = [1, 0, 0]; S.u = V.norm([0, 1, Math.sin(S.t * .9) * .07]);
+      if (S.poseHold > 6.5 || Math.abs(sy) > 40) leavePose();
+    } else if (S.mode === 'auto' || S.mode === 'fetch') {
+      if (S.mode === 'fetch') {
+        const q = S.fetch; S.target.x = q.x; S.target.yDoc = q.y; S.target.z = 0; speedT = CR * 3.2; maxTurn = 8;
+        if (S.t > q.until) { S.mode = 'auto'; S.fetch = null; pickTarget(); }
+      } else {
+        const scrolling = Math.abs(scrollV) > 70;
+        if (S.t > S.nextT || ((S.target.x - S.x) ** 2 + (S.target.vy + sy - S.y) ** 2 < 70 * 70)) pickTarget();
+        if (scrolling) { S.target.vy = H * (.5 + .22 * Math.sign(scrollV)); speedT += Math.min(Math.abs(scrollV) * .95, 2800); maxTurn = 8; S.loop = 0; }
+        S.target.yDoc = sy + S.target.vy;
+        if (S.calm) { speedT *= .55; maxTurn = 1.4; }
+      }
+      d = V.norm([S.target.x - S.x, -(S.target.yDoc - S.y), S.target.z - S.z]);
+    } else if (S.mode === 'manual') {
+      const kx = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0), ky = (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0); let kz = (keys.has('KeyE') ? 1 : 0) - (keys.has('KeyQ') ? 1 : 0);
+      if ((S.z > 280 && kz > 0) || (S.z < -380 && kz < 0)) kz = 0;
+      if (kx || ky || kz) { d = V.norm([kx, ky, kz * .9]); S.lastKey = S.t; speedT = CR * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3.6 : 2.1); maxTurn = 5.4; }
+      else {
+        d = V.norm([S.f[0], S.f[1] * .55, S.f[2] * .35]); if (Math.abs(d[0]) + Math.abs(d[1]) < .2) d = V.norm([S.f[0] || 1, .3, S.f[2] * .3]);
+        speedT = CR * 1.3; maxTurn = 1.8; if (S.t - S.lastKey > 2.8) { S.mode = 'auto'; pickTarget(); }
+      }
+    } else if (S.mode === 'drag') {
+      const px = drag.x, py = drag.y + sy, k = Math.min(1, dt * 24), nx = lerp(S.x, px, k), ny = lerp(S.y, py, k);
+      drag.vx = lerp(drag.vx, (nx - S.x) / dt, .35); drag.vy = lerp(drag.vy, (ny - S.y) / dt, .35); S.x = nx; S.y = ny; S.speed = 0;
+      const sp = Math.hypot(drag.vx, drag.vy);
+      if (sp > 90) yaw = turnToward(V.norm([drag.vx, -drag.vy, 0]), 13 * dt) / dt;
+      else turnToward(V.norm([S.f[0], S.f[1] * .2 + .25, S.f[2] * .3]), 1.6 * dt);          // dangling: nose drifts up
+      levelRoll(yaw * .4 + Math.sin(S.t * 5) * .5, dt, 6);
+    } else if (S.mode === 'tumble') {
+      S.tumbleT += dt; S.speed = 0;
+      const wl = V.len(S.w); if (wl > 1e-3) { const k = V.mul(S.w, 1 / wl); S.f = V.rot(S.f, k, wl * dt); S.u = V.rot(S.u, k, wl * dt); }
+      S.w = V.mul(S.w, Math.exp(-1.25 * dt)); S.push[1] += 560 * dt;
+      const vy = S.y - sy, m = 26;
+      if (S.x < m && S.push[0] < 0) { S.x = m; S.push[0] *= -.62; puff(S.x, S.y, 8); }
+      if (S.x > W - m && S.push[0] > 0) { S.x = W - m; S.push[0] *= -.62; puff(S.x, S.y, 8); }
+      if (vy < m && S.push[1] < 0) { S.y = sy + m; S.push[1] *= -.6; puff(S.x, S.y, 8); }
+      if (vy > H - m && S.push[1] > 0) { S.y = sy + H - m; S.push[1] *= -.58; S.push[0] *= .82; puff(S.x, S.y, 8); }
+      if (S.tumbleT > .5 && (Math.hypot(S.push[0], S.push[1]) < 230 || S.tumbleT > 2.6)) { S.mode = 'auto'; pickTarget(); S.loop = S.roll = 0; }
+    }
+
+    if (d) {
+      if (S.loop > 0) { const st = Math.min(S.loop, 3.3 * dt), r = V.cross(S.f, S.u); S.f = V.rot(S.f, r, st); S.u = V.rot(S.u, r, st); S.loop -= st; speedT = Math.max(speedT, CR * 1.9); }
+      else yaw = turnToward(d, maxTurn * dt) / dt;
+      if (S.roll) { const st = Math.sign(S.roll) * Math.min(Math.abs(S.roll), 7.5 * dt); S.u = V.rot(S.u, S.f, st); S.roll -= st; if (Math.abs(S.roll) < 1e-3) S.roll = 0; }
+      else if (S.loop <= 0) levelRoll(yaw, dt, 4.6);
+    }
+    S.f = V.norm(S.f); S.u = V.norm(V.sub(S.u, V.mul(S.f, V.dot(S.u, S.f))));
+
+    if (S.mode !== 'drag' && S.mode !== 'pose') {
+      if (S.mode !== 'tumble') S.speed += (speedT - S.speed) * Math.min(1, dt * 2.6);
+      S.x += (S.f[0] * S.speed + S.push[0]) * dt; S.y += (-S.f[1] * S.speed + S.push[1]) * dt; S.z = clamp(S.z + S.f[2] * S.speed * dt, -430, 330);
+      const k = Math.exp(-(S.mode === 'tumble' ? .75 : 2.4) * dt); S.push[0] *= k; S.push[1] *= k;
+    }
+    // staying on screen
+    if (S.mode === 'manual') {
+      if (S.x < -70) { cut(); S.x = W + 60; } else if (S.x > W + 70) { cut(); S.x = -60; }
+      const vy = S.y - sy, hi = H * .68, lo = H * .32, ds = vy > hi ? vy - hi : vy < lo ? vy - lo : 0;
+      if (ds && S.t - S.lastKey < .4) { const to = clamp(sy + ds * Math.min(1, dt * 7), 0, document.documentElement.scrollHeight - H); if (Math.abs(to - sy) > .5) scrollTo(0, to); }
+      const v2 = S.y - scrollY; if (v2 < 28) S.y = scrollY + 28; else if (v2 > H - 28) S.y = scrollY + H - 28;
+    } else if (S.mode === 'auto' || S.mode === 'fetch') {
+      const vy = S.y - sy; if (vy < -80) S.y = sy - 80; else if (vy > H + 80) S.y = sy + H + 80;
+      S.x = clamp(S.x, -100, W + 100);
+    }
+    // contrail
+    const sc = unit() * zScale(S.z);
+    if (S.mode !== 'drag' && S.mode !== 'pose') {
+      const tx = S.x - S.f[0] * sc * 1.02, ty = S.y + S.f[1] * sc * 1.02, last = trail[trail.length - 1];
+      if (!last || last.cut || (tx - last.x) ** 2 + (ty - last.y) ** 2 > 10) trail.push({ x: tx, y: ty, t: S.t, w: zScale(S.z), light: lightFn(S.y) });
+    }
+    while (trail.length && S.t - trail[0].t > LIFE) trail.shift();
+    for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.t += dt; if (p.t > p.life) { parts.splice(i, 1); continue; } p.x += p.vx * dt; p.y += p.vy * dt; if (p.kind === 'confetti') { p.vy += 420 * dt; p.vx *= .99; } else { p.vx *= .94; p.vy *= .94; } }
+    if (hitFn && S.mode !== 'pose') hitFn(S.x, S.y, 20 + sc * .7);
+    hit.style.transform = `translate3d(${(S.x - 44).toFixed(1)}px,${(S.y - scrollY - 44).toFixed(1)}px,0)`;
+  }
+
+  function draw() {
+    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    const sy = scrollY, sc = unit() * zScale(S.z); c.lineCap = 'round';
+    // the long straight contrail from the painting
+    const pl = S.mode === 'pose' ? { x: S.x - sc * 1.02, y: S.y, a: 1 } : poseLine && { x: poseLine.x, y: poseLine.y, a: 1 - (S.t - poseLine.t) / 2.4 };
+    if (pl && pl.a > 0) {
+      const g = c.createLinearGradient(0, 0, pl.x, 0); g.addColorStop(0, `rgba(255,250,240,${.5 * pl.a})`); g.addColorStop(1, `rgba(255,250,240,${.96 * pl.a})`);
+      c.strokeStyle = g; c.lineWidth = 2.3; c.beginPath(); c.moveTo(-10, pl.y - sy + .6); c.lineTo(pl.x, pl.y - sy); c.stroke();
+    } else if (poseLine && pl.a <= 0) poseLine = null;
+    for (let i = 1; i < trail.length; i++) {
+      const a = trail[i - 1], b = trail[i]; if (a.cut) continue;
+      const age = (S.t - b.t) / LIFE, al = Math.pow(1 - age, 1.5) * .92; if (al < .012) continue;
+      c.strokeStyle = b.light ? `rgba(32,57,127,${al * .85})` : `rgba(255,250,240,${al})`; c.lineWidth = (1 - age * .5) * 2.5 * b.w;
+      c.beginPath(); c.moveTo(a.x, a.y - sy); c.lineTo(b.x, b.y - sy); c.stroke();
+    }
+    for (const p of parts) {
+      const k = p.t / p.life; c.globalAlpha = (1 - k) * (p.kind === 'puff' ? .75 : 1); c.fillStyle = p.col;
+      if (p.kind === 'puff') { c.beginPath(); c.arc(p.x, p.y - sy, p.r * (1 + k * 1.6), 0, TAU); c.fill(); }
+      else if (p.kind === 'confetti') { c.save(); c.translate(p.x, p.y - sy); c.rotate(p.t * p.sp); c.fillRect(-p.r * 1.4, -p.r * .7, p.r * 2.8, p.r * 1.4); c.restore(); }
+      else { const r = p.r * (1 - k * .5), x = p.x, y = p.y - sy; c.beginPath(); c.moveTo(x, y - r * 2.2); c.quadraticCurveTo(x, y, x + r * 2.2, y); c.quadraticCurveTo(x, y, x, y + r * 2.2); c.quadraticCurveTo(x, y, x - r * 2.2, y); c.quadraticCurveTo(x, y, x, y - r * 2.2); c.fill(); }
+    }
+    c.globalAlpha = 1;
+    drawPlane(c, S.x, S.y - sy, sc, S.f, S.u, V.cross(S.f, S.u), S.t, { persp: .12 });
+  }
+
+  /* ── input ── */
+  function note() { if (!used) { used = true; $('#pilot').classList.add('dim'); } }
+  hit.addEventListener('pointerdown', e => {
+    e.preventDefault(); try { hit.setPointerCapture(e.pointerId); } catch (_) {}
+    if (S.mode === 'pose') leavePose();
+    cut(); S.mode = 'drag'; S.fetch = null; S.loop = S.roll = 0; S.push = [0, 0]; drag = { x: e.clientX, y: e.clientY, vx: 0, vy: 0, hist: [[e.clientX, e.clientY, performance.now()]] }; hit.classList.add('grab'); note();
+  });
+  hit.addEventListener('pointermove', e => { if (!drag) return; drag.x = e.clientX; drag.y = e.clientY; drag.hist.push([e.clientX, e.clientY, performance.now()]); if (drag.hist.length > 7) drag.hist.shift(); });
+  const release = () => {
+    if (!drag) return; const h = drag.hist, now = performance.now(); let vx = 0, vy = 0;
+    if (h.length > 1) { const a = h[0], b = h[h.length - 1]; if (now - b[2] < 110) { const ms = Math.max(16, b[2] - a[2]); vx = (b[0] - a[0]) / ms * 1000; vy = (b[1] - a[1]) / ms * 1000; } }
+    drag = null; hit.classList.remove('grab');
+    const sp = Math.hypot(vx, vy);
+    if (sp < 160) { S.mode = 'auto'; S.speed = 0; pickTarget(); return; }
+    const k = Math.min(1, 3400 / sp); S.push = [vx * k, vy * k]; S.mode = 'tumble'; S.tumbleT = 0;
+    S.w = V.mul(V.norm([S.f[0] + (Math.random() - .5) * .9, S.f[1] + (Math.random() - .5) * .9, (Math.random() - .5) * 1.3]), clamp(sp / 105, 5, 17) * (Math.random() < .5 ? -1 : 1));
+  };
+  hit.addEventListener('pointerup', release); hit.addEventListener('pointercancel', release);
+  const FLY = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE'];
+  const cap = (k, on) => { for (const n of $$(`kbd[data-k="${k}"]`)) n.classList.toggle('on', on); };
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+    const k = e.code;
+    if (FLY.includes(k)) { keys.add(k); cap(k, true); if (S.mode === 'pose') leavePose(); if (S.mode !== 'drag' && S.mode !== 'tumble') { S.mode = 'manual'; S.lastKey = S.t; S.fetch = null; S.loop = 0; } note(); }
+    else if (k === 'ShiftLeft' || k === 'ShiftRight') { keys.add(k); cap('ShiftLeft', true); }
+    else if (k === 'Space') {
+      const a = document.activeElement; if (a && a !== document.body && a.matches(':focus-visible')) return;   // let space press a focused button
+      e.preventDefault(); cap('Space', true); if (S.mode === 'pose') leavePose();
+      if (!e.repeat && !S.roll && S.mode !== 'drag' && S.mode !== 'tumble') { S.roll = TAU * (S.f[0] < 0 ? -1 : 1); puff(S.x, S.y, 5); note(); }
+    }
+  });
+  addEventListener('keyup', e => { keys.delete(e.code); cap(e.code === 'ShiftRight' ? 'ShiftLeft' : e.code, false); });
+  addEventListener('blur', () => { keys.clear(); for (const n of $$('kbd.on')) n.classList.remove('on'); });
+
+  return {
+    update, draw, resize, initPose, puff, state: S,
+    fetch(x, y) { if (S.mode === 'pose') leavePose(); if (S.mode === 'drag' || S.mode === 'tumble') return; S.mode = 'fetch'; S.loop = S.roll = 0; S.fetch = { x, y, until: S.t + 5 }; },
+    release() { if (S.mode === 'fetch') { S.mode = 'auto'; S.fetch = null; pickTarget(); } },
+    celebrate() { for (let i = 0; i < 5; i++) setTimeout(() => puff(lerp(W * .15, W * .85, Math.random()), scrollY + H * (.25 + Math.random() * .3), 26, 'confetti'), i * 180); if (S.mode === 'auto' || S.mode === 'fetch') { S.mode = 'auto'; S.fetch = null; S.loop = TAU * 2; } },
+    onHit(fn) { hitFn = fn; }, setLight(fn) { lightFn = fn; },
+  };
+})();
+
+
+/* ════════════════════════════════════════════════════════════
+   THE GLOBE · orthographic, painted on canvas every frame.
+   Countries are clipped at the horizon properly (cross the limb,
+   run along it, come back), flight arcs lift off the surface, and
+   the same 3D plane model flies them.
+   ════════════════════════════════════════════════════════════ */
+const THEME_LOG = {
+  sea: ['#3a5fb8', '#22397d', '#121f52'], rim: '#f5d3ae', halo: '138,169,236',
+  land: '#4a74cc', landRim: '#86a6ee', visited: '#f9e6cd', visitedRim: '#ffffff', wish: '#4a74cc', wishRim: '#86a6ee',
+  home: '#7f9fe6', homeRim: '#cfdcfa', hot: '#e2513f', border: 'rgba(16,27,69,.34)', grat: 'rgba(185,203,246,.085)',
+};
+const THEME_PLAN = { ...THEME_LOG, rim: '#fffaf0', halo: '32,57,127', visited: '#86a6ee', visitedRim: '#b9cbf6', wish: '#f9e6cd', wishRim: '#ffffff', home: '#4a74cc', homeRim: '#86a6ee' };
+
+function arcPts(a, b, n = 56) {
+  const A = ll2v(a.lon, a.lat), B = ll2v(b.lon, b.lat), w = Math.acos(clamp(V.dot(A, B), -1, 1));
+  const h = clamp(w * .3, .012, .36), out = new Float32Array((n + 1) * 3), sw = Math.sin(w);
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, k1 = sw < 1e-5 ? 1 - t : Math.sin((1 - t) * w) / sw, k2 = sw < 1e-5 ? t : Math.sin(t * w) / sw, e = 1 + h * Math.sin(Math.PI * t);
+    out[i * 3] = (A[0] * k1 + B[0] * k2) * e; out[i * 3 + 1] = (A[1] * k1 + B[1] * k2) * e; out[i * 3 + 2] = (A[2] * k1 + B[2] * k2) * e;
+  }
+  return { pts: out, n, w };
+}
+function arcAt(arc, p) {            // interpolated point on an arc (earth frame)
+  const x = clamp(p, 0, 1) * arc.n, i = Math.min(arc.n - 1, Math.floor(x)), t = x - i, q = arc.pts;
+  return [lerp(q[i * 3], q[i * 3 + 3], t), lerp(q[i * 3 + 1], q[i * 3 + 4], t), lerp(q[i * 3 + 2], q[i * 3 + 5], t)];
+}
+const v2ll = v => { const l = V.len(v) || 1; return { lon: Math.atan2(v[0], v[2]) * DEG, lat: Math.asin(clamp(v[1] / l, -1, 1)) * DEG }; };
+
+class Globe {
+  constructor(cv, o = {}) {
+    this.cv = cv; this.c = cv.getContext('2d'); this.o = o; this.T = o.theme || THEME_LOG;
+    this.lon = o.lon ?? 95; this.lat = o.lat ?? 18; this.vlon = 0; this.vlat = 0; this.spin = o.spin || 0;
+    this.state = new Map(); this.flash = new Map(); this.arcs = []; this.live = null; this.markers = []; this.plane = null; this.labels = [];
+    this.hover = null; this.hot = null; this.anim = null; this.follow = null; this.userUntil = 0; this.visible = false; this.t = 0; this.mouse = null; this.down = null;
+    this.px = new Float32Array(MAX_RING); this.py = new Float32Array(MAX_RING); this.pz = new Float32Array(MAX_RING);
+    new IntersectionObserver(es => { this.visible = es[0].isIntersecting; }, { rootMargin: '160px' }).observe(cv);
+    this.bind(); this.resize();
+  }
+  resize() { const w = this.cv.clientWidth; if (!w) return; this.w = w; this.dpr = Math.min(devicePixelRatio || 1, 2); this.cv.width = this.cv.height = Math.round(w * this.dpr); this.R = w * (this.o.fill || .355); this.cx = w / 2; this.cy = w / 2; }
+  trig() { const l = this.lon * RAD, p = this.lat * RAD; this.cl = Math.cos(l); this.sl = Math.sin(l); this.cp = Math.cos(p); this.sp = Math.sin(p); }
+  tv(v) { const x = v[0] * this.cl - v[2] * this.sl, z1 = v[0] * this.sl + v[2] * this.cl; return [x, v[1] * this.cp - z1 * this.sp, v[1] * this.sp + z1 * this.cp]; }
+  flyTo(lon, lat, ms = 900) { this.anim = { t0: performance.now(), ms, l0: this.lon, dl: wrap180(lon - this.lon), p0: this.lat, dp: clamp(lat, -62, 62) - this.lat }; this.vlon = this.vlat = 0; }
+
+  bind() {
+    const cv = this.cv;
+    cv.addEventListener('pointerdown', e => { this.down = { x: e.clientX, y: e.clientY, moved: 0 }; try { cv.setPointerCapture(e.pointerId); } catch (_) {} this.anim = null; this.vlon = this.vlat = 0; cv.classList.add('dragging'); });
+    cv.addEventListener('pointermove', e => {
+      const b = cv.getBoundingClientRect(); this.mouse = { x: e.clientX - b.left, y: e.clientY - b.top, cx: e.clientX, cy: e.clientY, dirty: true, touch: e.pointerType === 'touch' };
+      const d = this.down; if (!d) return;
+      const dx = e.clientX - d.x, dy = e.clientY - d.y, k = DEG / this.R; d.x = e.clientX; d.y = e.clientY; d.moved += Math.abs(dx) + Math.abs(dy);
+      this.lon -= dx * k; this.lat = clamp(this.lat + dy * k, -75, 75); this.vlon = -dx * k * 55; this.vlat = dy * k * 55; this.userUntil = performance.now() + 2800;
+    });
+    const up = e => {
+      const d = this.down; this.down = null; cv.classList.remove('dragging'); if (!d) return;
+      if (d.moved < 7 && this.o.onPick) { const b = cv.getBoundingClientRect(); this.trig(); this.o.onPick(this.pick(e.clientX - b.left, e.clientY - b.top), e); }
+    };
+    cv.addEventListener('pointerup', up);
+    cv.addEventListener('pointercancel', () => { this.down = null; cv.classList.remove('dragging'); });
+    cv.addEventListener('pointerleave', () => { this.mouse = null; this.setHover(null); });
+  }
+  setHover(h) {
+    const key = h ? (h.type === 'place' ? 'p:' + h.geo.key : 'c:' + h.name) : null; if (key === this._hk && !h) return;
+    this._hk = key; this.hover = h; if (this.o.onHover) this.o.onHover(h, this.mouse);
+  }
+  pick(mx, my) {
+    let best = null, bd = 14 * 14;
+    for (const m of this.markers) { if (!(m.sz > 0)) continue; const d = (m.sx - mx) ** 2 + (m.sy - my) ** 2; if (d < bd) { bd = d; best = m; } }
+    if (best) return { type: 'place', geo: best.geo, marker: best };
+    const x = (mx - this.cx) / this.R, y = -(my - this.cy) / this.R, rr = x * x + y * y; if (rr > 1) return null;
+    const z = Math.sqrt(1 - rr), Y = y * this.cp + z * this.sp, z1 = -y * this.sp + z * this.cp, X = x * this.cl + z1 * this.sl, Z = -x * this.sl + z1 * this.cl;
+    const lat = Math.asin(clamp(Y, -1, 1)) * DEG, lon = Math.atan2(X, Z) * DEG;
+    for (const c of WORLD) { const b = c.bbox; if (lon < b[0] || lon > b[2] || lat < b[1] || lat > b[3]) continue; for (const r of c.ll) if (pip(r, lon, lat)) return { type: 'country', name: c.name, country: c }; }
+    return null;
+  }
+
+  /* one country ring → path, clipped to the visible hemisphere */
+  ring(path, r) {
+    const n = r.length / 3, { px, py, pz, cl, sl, cp, sp, cx, cy, R } = this; let first = -1;
+    for (let i = 0, j = 0; i < n; i++, j += 3) { const X = r[j], Y = r[j + 1], Z = r[j + 2], z1 = X * sl + Z * cl; px[i] = X * cl - Z * sl; py[i] = Y * cp - z1 * sp; pz[i] = Y * sp + z1 * cp; if (first < 0 && pz[i] > 0) first = i; }
+    if (first < 0) return false;
+    path.moveTo(cx + R * px[first], cy - R * py[first]);
+    let prev = first, limb = 0;
+    for (let k = 1; k <= n; k++) {
+      const i = (first + k) % n, vis = pz[i] > 0, pvis = pz[prev] > 0;
+      if (vis !== pvis) {                                   // crossing the horizon: find the exact point on the limb
+        const t = pz[prev] / (pz[prev] - pz[i]); let x = px[prev] + (px[i] - px[prev]) * t, y = py[prev] + (py[i] - py[prev]) * t; const l = Math.hypot(x, y) || 1; x /= l; y /= l;
+        const a = Math.atan2(-y, x);
+        if (vis) { let d = a - limb; while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU; path.arc(cx, cy, R, limb, limb + d, d < 0); }
+        else { path.lineTo(cx + R * x, cy - R * y); limb = a; }
+      }
+      if (vis) path.lineTo(cx + R * px[i], cy - R * py[i]);
+      prev = i;
+    }
+    path.closePath(); return true;
+  }
+
+  frame(dt) {
+    if (!this.w) { this.resize(); if (!this.w) return; }
+    this.t += dt; const now = performance.now(), T = this.T;
+    // camera
+    if (this.anim) { const a = this.anim, k = clamp((now - a.t0) / a.ms, 0, 1), e = easeIO(k); this.lon = a.l0 + a.dl * e; this.lat = a.p0 + a.dp * e; if (k >= 1) this.anim = null; }
+    else if (this.follow && now > this.userUntil && !this.down) { const k = Math.min(1, dt * (this.follow.rate || 2.4)); this.lon += wrap180(this.follow.lon - this.lon) * k; this.lat += (clamp(this.follow.lat, -58, 58) - this.lat) * k; }
+    else if (!this.down) { this.lon += this.vlon * dt; this.lat = clamp(this.lat + this.vlat * dt, -75, 75); const d = Math.exp(-3.2 * dt); this.vlon *= d; this.vlat *= d; if (this.spin && !this.hover && now > this.userUntil && !REDUCED) this.lon += this.spin * dt; }
+    this.trig();
+    const c = this.c, { cx, cy, R } = this;
+    c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); c.clearRect(0, 0, this.w, this.w); c.lineJoin = 'round'; c.lineCap = 'round';
+    // halo, rim light, ocean
+    let g = c.createRadialGradient(cx, cy, R * .9, cx, cy, R * 1.34); g.addColorStop(0, `rgba(${T.halo},.34)`); g.addColorStop(1, `rgba(${T.halo},0)`);
+    c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R * 1.34, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(11,18,52,.5)'; c.beginPath(); c.arc(cx + R * .022, cy + R * .03, R * 1.004, 0, TAU); c.fill();
+    c.fillStyle = T.rim; c.beginPath(); c.arc(cx - R * .016, cy - R * .021, R * 1.004, 0, TAU); c.fill();
+    g = c.createRadialGradient(cx - R * .38, cy - R * .42, R * .08, cx, cy, R * 1.06); g.addColorStop(0, T.sea[0]); g.addColorStop(.55, T.sea[1]); g.addColorStop(1, T.sea[2]);
+    c.fillStyle = g; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fill();
+    c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+    // brushed rings on the water, like the cloud strokes
+    c.lineWidth = 1.1;
+    for (let i = 1; i < 9; i++) { c.strokeStyle = `rgba(185,203,246,${i % 3 ? .05 : .085})`; c.setLineDash([40 + i * 23, 9 + i * 3]); c.lineDashOffset = i * 57; c.beginPath(); c.arc(cx - R * .38, cy - R * .42, R * .21 * i, 0, TAU); c.stroke(); }
+    c.setLineDash([]);
+    // graticule
+    c.strokeStyle = T.grat; c.lineWidth = 1; c.beginPath();
+    for (let lo = -180; lo < 180; lo += 30) this.line(c, 90, i => ll2v(lo, -80 + i * 160 / 90));
+    for (let la = -60; la <= 60; la += 30) this.line(c, 120, i => ll2v(-180 + i * 3, la));
+    c.stroke();
+    // land, grouped by state so it is a handful of fills
+    const groups = { land: new Path2D(), visited: new Path2D(), wish: new Path2D(), home: new Path2D() }, fx = [];
+    const hov = this.hover && this.hover.type === 'country' ? this.hover.name : null;
+    for (const co of WORLD) {
+      const st = this.state.get(co.name) || 'land', special = co.name === hov || co.name === this.hot || this.flash.has(co.name);
+      const p = special ? new Path2D() : groups[st]; let any = false;
+      for (const r of co.xyz) any = this.ring(p, r) || any;
+      if (special && any) fx.push({ p, st, name: co.name });
+    }
+    const off = [-R * .007, -R * .0095];
+    c.save(); c.translate(off[0], off[1]);
+    for (const k of ['land', 'home', 'wish', 'visited']) { c.fillStyle = T[k + 'Rim']; c.fill(groups[k]); }
+    for (const f of fx) { c.fillStyle = T[f.st + 'Rim']; c.fill(f.p); }
+    c.restore();
+    c.strokeStyle = T.border; c.lineWidth = .7;
+    for (const k of ['land', 'home', 'wish', 'visited']) { c.fillStyle = T[k]; c.fill(groups[k]); c.stroke(groups[k]); }
+    if (this.o.hatchWish) { c.save(); c.clip(groups.wish); c.strokeStyle = 'rgba(226,81,63,.5)'; c.lineWidth = 1; c.beginPath(); for (let x = -R * 2; x < R * 2; x += 5) { c.moveTo(cx + x, cy - R); c.lineTo(cx + x + R * 2, cy + R); } c.stroke(); c.restore(); }
+    for (const f of fx) {
+      let col = T[f.st]; const t0 = this.flash.get(f.name);
+      if (t0 != null) { const k = (now - t0) / 1100; if (k >= 1) this.flash.delete(f.name); else col = mix('#ffffff', T[f.st], easeIO(k)); }
+      if (f.name === this.hot) col = T.hot; else if (f.name === hov && t0 == null) col = mix(T[f.st], '#ffffff', f.st === 'visited' ? .5 : .3);
+      c.fillStyle = col; c.fill(f.p); c.stroke(f.p);
+    }
+    // grain + shading toward the dark side
+    c.globalAlpha = .5; c.fillStyle = this.pat || (this.pat = c.createPattern(noiseTile(), 'repeat')); c.fillRect(cx - R, cy - R, R * 2, R * 2); c.globalAlpha = 1;
+    g = c.createRadialGradient(cx - R * .3, cy - R * .34, R * .5, cx, cy, R * 1.02); g.addColorStop(0, 'rgba(10,16,48,0)'); g.addColorStop(1, 'rgba(10,16,48,.42)');
+    c.fillStyle = g; c.fillRect(cx - R, cy - R, R * 2, R * 2);
+    c.restore();
+
+    // arcs
+    for (const a of this.arcs) this.arc(a, a.p ?? 1, a.style);
+    if (this.live) this.arc(this.live, this.live.p, this.live.style || 'live');
+    // markers
+    for (const m of this.markers) {
+      const v = this.tv(m.v || (m.v = ll2v(m.geo.lon, m.geo.lat))); m.sx = cx + R * v[0]; m.sy = cy - R * v[1]; m.sz = v[2];
+      if (v[2] <= .02) continue;
+      const al = smooth(.02, .22, v[2]), x = m.sx, y = m.sy; c.globalAlpha = al;
+      const isHot = this.hover && this.hover.type === 'place' && this.hover.geo.key === m.geo.key;
+      if (m.pulse != null) { const k = (now - m.pulse) / 900; if (k < 1) { c.strokeStyle = `rgba(255,250,240,${1 - k})`; c.lineWidth = 2; c.beginPath(); c.arc(x, y, 4 + k * 26, 0, TAU); c.stroke(); } else m.pulse = null; }
+      if (m.kind === 'now') { const k = (this.t * .7) % 1; c.strokeStyle = `rgba(226,81,63,${1 - k})`; c.lineWidth = 1.8; c.beginPath(); c.arc(x, y, 4 + k * 15, 0, TAU); c.stroke(); }
+      if (m.kind === 'wish') { c.fillStyle = '#16275c'; c.strokeStyle = m.hot ? '#e2513f' : '#fffaf0'; c.lineWidth = m.hot ? 2.4 : 1.6; c.beginPath(); c.arc(x, y, m.hot ? 5.5 : 3.6, 0, TAU); c.fill(); c.stroke(); }
+      else { const r = (m.kind === 'home' || m.kind === 'now' ? 4.4 : 3.3) + (isHot ? 1.6 : 0); c.fillStyle = '#101b45'; c.beginPath(); c.arc(x, y, r + 1.8, 0, TAU); c.fill(); c.fillStyle = m.kind === 'home' || m.kind === 'now' ? '#e2513f' : '#fffaf0'; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill(); }
+    }
+    c.globalAlpha = 1;
+    // plane
+    if (this.plane) {
+      const a = this.plane.arc, p = this.plane.p, P = this.tv(arcAt(a, p)), P2 = this.tv(arcAt(a, Math.min(1, p + .02))), P1 = this.tv(arcAt(a, Math.max(0, p - .02)));
+      if (!(P[2] < 0 && P[0] * P[0] + P[1] * P[1] < 1)) {
+        let f = V.sub(P2, P1); if (V.len(f) < 1e-6) f = [1, 0, 0]; f = V.norm(f);
+        let u = V.norm(P); u = V.sub(u, V.mul(f, V.dot(u, f))); u = V.len(u) < 1e-4 ? [0, 0, 1] : V.norm(u);
+        const bank = Math.sin(p * Math.PI * 2) * .22; u = V.rot(u, f, bank);
+        drawPlane(c, cx + R * P[0], cy - R * P[1], R * (this.o.planeSize || .085), f, u, V.cross(f, u), this.t, { persp: 0, ow: 2.2, alpha: this.plane.alpha ?? 1 });
+      }
+    }
+    // labels
+    c.font = '500 10.5px "DM Mono", ui-monospace, monospace'; c.textBaseline = 'middle'; c.lineWidth = 3.4; c.strokeStyle = '#101b45';
+    for (const l of this.labels) {
+      const v = this.tv(l.v || (l.v = ll2v(l.geo.lon, l.geo.lat))); if (v[2] < .1) continue;
+      const x = cx + R * v[0], y = cy - R * v[1], left = l.side === 'l'; c.textAlign = left ? 'right' : 'left'; c.globalAlpha = smooth(.1, .3, v[2]);
+      const tx = x + (left ? -10 : 10), ty = y + (l.dy || 0); c.strokeText(l.text, tx, ty); c.fillStyle = l.col || '#f9e6cd'; c.fillText(l.text, tx, ty);
+    }
+    c.globalAlpha = 1;
+    if (this.mouse && this.mouse.dirty && !this.down) { this.mouse.dirty = false; this.setHover(this.pick(this.mouse.x, this.mouse.y)); }
+  }
+  line(c, n, fn) {        // a graticule line, visible part only
+    let pen = false;
+    for (let i = 0; i <= n; i++) { const v = this.tv(fn(i)); if (v[2] > 0) { const x = this.cx + this.R * v[0], y = this.cy - this.R * v[1]; if (pen) c.lineTo(x, y); else c.moveTo(x, y); pen = true; } else pen = false; }
+  }
+  arc(a, p, style) {
+    const c = this.c, { cx, cy, R } = this, end = clamp(p, 0, 1) * a.n, q = a.pts; let pen = false;
+    c.beginPath();
+    const put = v => { const hid = v[2] < 0 && v[0] * v[0] + v[1] * v[1] < 1; if (hid) { pen = false; return; } const x = cx + R * v[0], y = cy - R * v[1]; if (pen) c.lineTo(x, y); else c.moveTo(x, y); pen = true; };
+    for (let i = 0; i <= Math.floor(end); i++) put(this.tv([q[i * 3], q[i * 3 + 1], q[i * 3 + 2]]));
+    if (end % 1 > 1e-3 && end < a.n) put(this.tv(arcAt(a, p)));
+    if (style === 'ghost') { c.strokeStyle = 'rgba(255,250,240,.2)'; c.lineWidth = 1; }
+    else if (style === 'done') { c.strokeStyle = 'rgba(255,250,240,.34)'; c.lineWidth = 1.1; }
+    else if (style === 'ret') { c.strokeStyle = 'rgba(185,203,246,.75)'; c.lineWidth = 1.4; c.setLineDash([3, 5]); }
+    else if (style === 'plan') { c.strokeStyle = 'rgba(255,250,240,.4)'; c.lineWidth = 1.1; c.setLineDash([3, 5]); }
+    else if (style === 'planHot') { c.strokeStyle = '#e2513f'; c.lineWidth = 2.4; c.setLineDash([6, 6]); c.lineDashOffset = -this.t * 26; }
+    else { c.strokeStyle = 'rgba(16,27,69,.55)'; c.lineWidth = 5; c.stroke(); c.strokeStyle = '#fffaf0'; c.lineWidth = 2.3; }
+    c.stroke(); c.setLineDash([]);
+  }
+}
+const GLOBES = [];
+
+
+/* ════════════════════════════════════════════════════════════
+   UI · hero plate, logbook player, flight plan
+   ════════════════════════════════════════════════════════════ */
+const TICKS = [];
+const leftText = M => { const y = Math.floor(M.monthsLeft / 12), m = M.monthsLeft % 12; return m ? `${y} yr ${m} mo` : plural(y, 'year'); };
+const countryTip = c => `<b>${esc(c.geo.name)}</b>${plural(c.trips.length, 'visit')} · ${plural(c.nights, 'night')}<br><i>first stamped ${fmtMonYr(c.first.s)}</i>`;
+const jumpTo = (sel, off = 70) => scrollTo({ top: $(sel).getBoundingClientRect().top + scrollY + off, behavior: REDUCED ? 'auto' : 'smooth' });
+
+function trailbar(node, M) {
+  const n = M.target, done = Math.min(n, M.countries.length), pen = Math.min(M.wishlist.length, n - done), open = n - done - pen, pct = done / n * 100;
+  node.innerHTML = `<div class="tb-rail" role="img" aria-label="${done} of ${n} countries visited, ${pen} more pencilled in, ${open} open">
+    <i class="tb-line" style="width:${pct}%"></i><svg class="tb-plane" style="left:${pct}%"><use href="#ic-plane"/></svg>
+    <div class="tb-segs" style="--n:${n}">${Array.from({ length: n }, (_, i) => `<i class="${i < done ? 'd' : i < done + pen ? 'p' : ''}"></i>`).join('')}</div></div>
+    <div class="tb-key"><span><i class="d"></i><b>${done}</b> stamped</span><span><i class="p"></i><b>${pen}</b> pencilled in</span><span><i></i><b>${open}</b> open ${open === 1 ? 'seat' : 'seats'}</span></div>`;
+}
+
+function buildHero(M) {
+  $('#kSince').textContent = `since ${yearOf(M.trips[0].s)}`;
+  $('#kWhere').textContent = M.current ? `now in ${M.current.geo.name}` : 'between trips';
+  $('#lede').innerHTML = `<b>${M.countries.length}</b> countries stamped, <b>${M.need}</b> to go, <b>${leftText(M)}</b> on the clock.`;
+  trailbar($('#heroBar'), M);
+  $('#landH').textContent = M.need ? `${M.need} to go.` : 'Thirty. Done.';
+  $('#landP').textContent = `${M.countries.length} stamps down and ${leftText(M)} left before the big three-oh. Wheels up.`;
+  trailbar($('#landBar'), M);
+  $('#srcNote').textContent = M.src === 'embedded' ? '(embedded copy — serve this folder over http to read the live file)' : '';
+  $('#stampTotal').textContent = $('#gTarget').textContent = M.target;
+}
+
+/* ───────── logbook: the globe replays every leg ───────── */
+let Log = null;
+function buildLogbook(M) {
+  const outs = M.legs.filter(l => l.kind === 'out');
+  for (const l of M.legs) l.arc = arcPts(l.a, l.b);
+  const $year = $('#gYear'), $trip = $('#gTrip'), $unl = $('#gUnlocked'), card = $('#legCard'), list = $('#logList'), scrub = $('#scrub'), $play = $('#gPlay');
+  const P = { mode: 'overview', i: -1, p: 0, phase: 'idle', dwell: 0, dur: 1, speed: 1, playing: false, reached: new Set(), auto: false };
+  const mk = (geo, kind) => ({ geo, kind }), homeM = mk(M.home, 'home');
+  const allMarkers = () => [homeM, ...M.countries.map(c => mk(c.geo, M.current && c.key === M.current.place ? 'now' : 'visited'))];
+  const ghosts = () => outs.map(l => ({ ...l.arc, style: 'ghost', p: 1 }));
+  const restLabels = () => [{ geo: M.home, text: `${M.home.name} · home`, side: 'l' }, ...(M.current ? [{ geo: M.current.geo, text: `${M.current.geo.name} · now`, col: '#fffaf0', side: 'r' }] : [])];
+
+  function describe(h) {
+    if (h.type === 'place') { if (h.geo.isHome) return `<b>${esc(h.geo.name)}</b><i>home base</i>`; const c = M.byPlace.get(h.geo.key); return c ? countryTip(c) : `<b>${esc(h.geo.name)}</b>`; }
+    const c = M.byAtlas.get(h.name); if (c) return countryTip(c);
+    if (h.name === M.home.atlas) return `<b>${esc(h.name)}</b><i>home base</i>`;
+    const w = M.wishlist.find(x => x.atlas === h.name); if (w) return `<b>${esc(w.name)}</b><i>on the flight plan</i>`;
+    return `<b>${esc(h.name)}</b><i>not yet</i>`;
+  }
+  const g = new Globe($('#globe'), {
+    theme: THEME_LOG, lon: M.base.lon - 14, lat: 14, spin: 2.2,
+    onHover(h, m) { if (!h || !m || m.touch) { Tip.hide(); g.cv.style.cursor = ''; return; } Tip.show(describe(h), m.cx, m.cy); g.cv.style.cursor = (h.type === 'place' ? M.byPlace.has(h.geo.key) : M.byAtlas.has(h.name)) ? 'pointer' : ''; },
+    onPick(h) {
+      if (!h) return; const c = h.type === 'place' ? M.byPlace.get(h.geo.key) : M.byAtlas.get(h.name);
+      if (c) { playTrip(c.trips[c.trips.length - 1]); toast(`<b>${esc(c.geo.name)}</b><span>${plural(c.trips.length, 'visit')} · latest ${fmtMonYr(c.trips[c.trips.length - 1].s)}</span>`, 2600); }
+      else if (h.type === 'country' && M.wishlist.some(x => x.atlas === h.name)) toast(`<b>${esc(h.name)}</b><span>pencilled in · see the flight plan below</span>`, 2600);
+    },
+  });
+  GLOBES.push(g);
+
+  /* list + scrubber */
+  const fmtShort = t => { if (t.ongoing) return `${fmtDay(t.s)} →`; const a = new Date(t.s), b = new Date(t.e); return a.getUTCMonth() === b.getUTCMonth() ? `${a.getUTCDate()}–${b.getUTCDate()} ${MONTHS[b.getUTCMonth()]}` : `${fmtDay(t.s)} – ${fmtDay(t.e)}`; };
+  const noteFor = t => `${t.ongoing ? `day ${t.nights + 1} and counting` : plural(t.nights, 'night')} · ${t.kind === 'side' ? `side trip from ${t.from.name}` : t.kind === 'chain' ? `onward from ${t.from.name}` : 'from home'}`;
+  let html = '', yr = null;
+  for (const t of M.trips) {
+    const y = yearOf(t.s); if (y !== yr) { html += `<li class="yr">${y}</li>`; yr = y; }
+    html += `<li><button class="row" type="button" data-i="${t.i}"><span class="no">${pad2(t.no)}</span><span class="pl">${esc(t.geo.name)}${t.first ? '<span class="tag">new</span>' : ''}${t.ongoing ? '<span class="tag now">now</span>' : ''}</span><span class="dt">${fmtShort(t)}</span><span class="nt">${esc(noteFor(t))}</span></button></li>`;
+  }
+  list.innerHTML = html; const rows = []; for (const r of $$('.row', list)) { rows[+r.dataset.i] = r; r.onclick = () => playTrip(M.trips[+r.dataset.i]); }
+  $('#logMeta').textContent = `${M.trips.length} entries`;
+  const dots = [];
+  for (const [y, ts] of M.stats.perYear) {
+    const grp = el('div', { class: 'sg' }), row = el('div', { class: 'dots' });
+    for (const t of ts) { const b = el('button', { class: 'sd' + (t.first ? ' new' : ''), type: 'button', 'aria-label': `${t.geo.name}, ${fmtRange(t)}` }); b.onclick = () => playTrip(t); Tip.bind(b, () => `<b>${esc(t.geo.name)}</b>${fmtRange(t)}${t.first ? '<br><i>new country</i>' : ''}`); row.appendChild(b); dots[t.i] = b; }
+    grp.append(row, el('span', {}, `’${String(y).slice(2)}`)); scrub.appendChild(grp);
+  }
+  function mark(i) {
+    rows.forEach((r, k) => r.classList.toggle('on', k === i)); dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    const r = rows[i]; if (r) list.scrollTo({ top: r.offsetTop - list.clientHeight / 2 + r.clientHeight / 2, behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+  const setUnlocked = (n, pop) => { $unl.textContent = n; if (pop) { const u = $('#gUnlock'); u.classList.remove('pop'); void u.offsetWidth; u.classList.add('pop'); } };
+  const playBtn = () => { const lab = P.mode === 'replay' ? (P.playing ? 'Pause' : 'Resume') : 'Replay it all'; $play.innerHTML = `<svg><use href="#ic-${P.mode === 'replay' && P.playing ? 'pause' : 'play'}"/></svg><span>${lab}</span>`; };
+
+  function hudTrip(t) {
+    $year.textContent = yearOf(t.s); $trip.textContent = `Trip ${pad2(t.no)} / ${M.trips.length}`;
+    card.innerHTML = `<div class="lc-k"><span>No. ${pad2(t.no)}</span>${t.first ? '<span class="tag">new country</span>' : `<span class="tag soft">visit ${t.visit}</span>`}${t.ongoing ? '<span class="tag now">still here</span>' : ''}${t.kind === 'side' ? '<span class="tag soft">side trip</span>' : t.kind === 'chain' ? '<span class="tag soft">onward hop</span>' : ''}</div>
+      <div><div class="lc-place">${esc(t.geo.name)}</div><div class="lc-dates">${fmtRange(t)} · ${t.ongoing ? `day ${t.nights + 1}` : plural(t.nights, 'night')}</div></div>
+      <div class="lc-km">${fmt(t.leg.km)}<small>km on this leg</small></div>
+      <div class="lc-route">${esc(t.from.name)}${t.from.isHome ? ' (home)' : ''} → ${esc(t.geo.name)}${t.geo.city && t.geo.city !== t.geo.name ? ` · pin on ${esc(t.geo.city)}` : ''}</div>`;
+    mark(t.i);
+  }
+  function overview() {
+    P.mode = 'overview'; P.playing = false; P.phase = 'idle'; P.i = -1;
+    g.state.clear(); if (M.home.atlas) g.state.set(M.home.atlas, 'home'); for (const c of M.countries) if (c.geo.atlas) g.state.set(c.geo.atlas, 'visited');
+    g.arcs = ghosts(); g.live = null; g.plane = null; g.follow = null; g.spin = 2.2; g.markers = allMarkers(); g.labels = restLabels();
+    $year.textContent = yearOf(TODAY); $trip.textContent = `All ${M.trips.length} trips`; setUnlocked(M.countries.length); mark(-1); dots.forEach(d => d.classList.remove('done'));
+    card.innerHTML = `<div class="lc-k"><span>Overview</span>${M.current ? `<span class="tag now">now in ${esc(M.current.geo.name)}</span>` : ''}</div>
+      <div><div class="lc-place">${plural(M.countries.length, 'country').replace('countrys', 'countries')}</div><div class="lc-dates">${plural(M.trips.length, 'trip')} · ${yearOf(M.trips[0].s)} to ${yearOf(TODAY)}</div></div>
+      <div class="lc-km">${fmt(M.stats.km)}<small>km flown in total</small></div>
+      <div class="lc-route">Tap a trip, a dot or a lit-up country to fly that leg. Routes start from ${esc(M.home.name)} unless a trip follows on from another.</div>`;
+    playBtn();
+  }
+  function replay() {
+    P.mode = 'replay'; P.playing = true; P.reached.clear(); P.i = -1; g.state.clear(); if (M.home.atlas) g.state.set(M.home.atlas, 'home');
+    g.arcs = []; g.live = null; g.plane = null; g.markers = [homeM]; g.labels = [restLabels()[0]]; g.spin = 0; g.follow = null; setUnlocked(0); dots.forEach(d => d.classList.remove('done'));
+    g.flyTo(M.home.lon + 8, M.home.lat * .6, 700); P.phase = 'dwell'; P.dwell = .8; playBtn();
+  }
+  function startLeg(i) {
+    const leg = M.legs[i], east = wrap180(leg.b.lon - leg.a.lon) > 0; P.i = i; P.p = 0; P.phase = 'fly'; P.dur = (.62 + leg.ang * .95) * (leg.kind === 'ret' ? .5 : 1);
+    g.live = { ...leg.arc, p: 0, style: leg.kind === 'ret' ? 'ret' : 'live' }; g.plane = { arc: leg.arc, p: 0 };
+    g.labels = [{ geo: leg.a, text: leg.a.name, side: east ? 'l' : 'r' }, { geo: leg.b, text: leg.b.name, side: east ? 'r' : 'l', col: '#fffaf0' }];
+    if (leg.kind === 'out') hudTrip(leg.trip);
+  }
+  function arrive(leg) {
+    P.phase = 'dwell'; g.live = null; const t = leg.trip;
+    if (leg.kind !== 'out') { P.dwell = .1; return; }
+    g.arcs.push({ ...leg.arc, style: P.mode === 'single' ? 'live' : 'done', p: 1 });
+    let m = g.markers.find(x => x.geo.key === t.geo.key);
+    if (P.mode === 'replay') {
+      if (!P.reached.has(t.place)) { P.reached.add(t.place); if (t.geo.atlas) { g.state.set(t.geo.atlas, 'visited'); g.flash.set(t.geo.atlas, performance.now()); } setUnlocked(P.reached.size, true); }
+      if (!m) { m = mk(t.geo, 'visited'); g.markers.push(m); }
+      dots[t.i].classList.add('done');
+    }
+    if (m) m.pulse = performance.now();
+    P.dwell = t.first && P.mode === 'replay' ? .95 : .45;
+  }
+  function playTrip(t) {
+    if (!t || !t.leg) return;
+    P.mode = 'single'; P.playing = true; g.state.clear(); if (M.home.atlas) g.state.set(M.home.atlas, 'home'); for (const c of M.countries) if (c.geo.atlas) g.state.set(c.geo.atlas, 'visited');
+    g.markers = allMarkers(); g.arcs = ghosts(); g.spin = 0; setUnlocked(M.countries.length); dots.forEach(d => d.classList.remove('done')); startLeg(t.leg.i); playBtn();
+  }
+  TICKS.push(dt => {
+    if (!P.playing) return; const s = dt * P.speed;
+    if (P.phase === 'fly') {
+      P.p = Math.min(1, P.p + s / P.dur); const e = easeIO(P.p), leg = M.legs[P.i];
+      g.live.p = e; g.plane.p = e; const ll = v2ll(arcAt(leg.arc, e)); g.follow = { lon: ll.lon, lat: ll.lat * .85, rate: 2.6 };
+      if (P.p >= 1) arrive(leg);
+    } else if (P.phase === 'dwell') {
+      P.dwell -= s; if (P.dwell > 0) return;
+      if (P.mode === 'single') { P.playing = false; P.phase = 'idle'; return; }
+      if (P.i + 1 >= M.legs.length) { toast(`<b>All caught up</b><span>${M.countries.length} countries unlocked · ${M.need} to go</span>`); overview(); if (M.current) g.flyTo(M.current.geo.lon - 10, M.current.geo.lat * .6, 1200); return; }
+      startLeg(P.i + 1);
+    }
+  });
+  $play.onclick = () => { if (P.mode !== 'replay') replay(); else { P.playing = !P.playing; playBtn(); } };
+  $('#gSpeed').onclick = e => { P.speed = P.speed === 1 ? 2 : P.speed === 2 ? 4 : 1; e.currentTarget.textContent = `Speed ${P.speed}×`; };
+  $('#gAll').onclick = overview;
+  overview();
+  if (!REDUCED) new IntersectionObserver((es, io) => { if (es[0].isIntersecting && !P.auto) { P.auto = true; io.disconnect(); if (P.mode === 'overview') replay(); } }, { threshold: .6 }).observe(g.cv);
+  Log = { play(t) { jumpTo('#logbook', 120); playTrip(t); }, globe: g };
+}
+
+/* ───────── flight plan: boarding passes + a second globe ───────── */
+function buildPlan(M) {
+  const base = M.base, W = M.wishlist, done = M.countries.length, open = Math.max(0, M.need - W.length), read = $('#planRead'), listEl = $('#planList');
+  $('#planSub').innerHTML = `${M.need ? `<em>${M.need} to go.</em> ` : ''}${W.length} are pencilled in below${open ? `, ${plural(open, 'seat')} ${open === 1 ? 'is' : 'are'} still open` : ''}. Nothing is booked; distances are from ${esc(base.name)}, where I am now.`;
+  const g = new Globe($('#planGlobe'), {
+    theme: THEME_PLAN, lon: base.lon + 4, lat: 18, spin: 3, planeSize: .08,
+    onHover(h, m) {
+      const w = h && (h.type === 'place' ? W.find(x => x.key === h.geo.key) : W.find(x => x.atlas === h.name));
+      g.cv.style.cursor = w ? 'pointer' : '';
+      if (w) { focus(w.key, false); if (m && !m.touch) Tip.show(`<b>${esc(w.name)}</b>${fmt(w.km)} km from ${esc(base.name)}<br><i>pencilled in</i>`, m.cx, m.cy); }
+      else if (h && h.type === 'country' && m && !m.touch) { const c = M.byAtlas.get(h.name); Tip.show(c ? `<b>${esc(c.geo.name)}</b><i>already stamped</i>` : `<b>${esc(h.name)}</b><i>${h.name === M.home.atlas ? 'home base' : 'not on the list… yet'}</i>`, m.cx, m.cy); }
+      else Tip.hide();
+    },
+    onPick(h) { const w = h && (h.type === 'place' ? W.find(x => x.key === h.geo.key) : W.find(x => x.atlas === h.name)); if (w) { focus(w.key, false); const n = passEl.get(w.key); if (n) n.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); } },
+  });
+  GLOBES.push(g);
+  if (M.home.atlas) g.state.set(M.home.atlas, 'home');
+  for (const c of M.countries) if (c.geo.atlas) g.state.set(c.geo.atlas, 'visited');
+  for (const w of W) { if (w.atlas) g.state.set(w.atlas, 'wish'); w.arc = arcPts(base, w); }
+  const baseM = { geo: base, kind: 'now' }, wm = new Map(W.map(w => [w.key, { geo: w, kind: 'wish' }]));
+  g.markers = [baseM, ...wm.values()]; g.arcs = W.map(w => ({ ...w.arc, style: 'plan', p: 1 })); g.labels = [{ geo: base, text: `${base.name} · now`, side: 'l', col: '#fffaf0' }];
+  const idle = () => { read.innerHTML = `<b>Pick a boarding pass</b><span>tap or hover one, or a cream country on the globe</span>`; };
+  let cur = null, fp = 0;
+  const passEl = new Map();
+  function focus(key, move = true) {
+    if (cur && cur.key === key) return;
+    for (const m of wm.values()) m.hot = false; for (const n of passEl.values()) n.classList.remove('hot');
+    g.hot = null; cur = W.find(w => w.key === key) || null; fp = 0;
+    if (!cur) { g.live = null; g.plane = null; g.labels.length = 1; g.spin = 3; idle(); return; }
+    wm.get(key).hot = true; const n = passEl.get(key); if (n) n.classList.add('hot');
+    g.live = { ...cur.arc, p: 1, style: 'planHot' }; g.plane = { arc: cur.arc, p: 0 }; g.spin = 0;
+    g.labels[1] = { geo: cur, text: cur.name, side: wrap180(cur.lon - base.lon) > 0 ? 'r' : 'l', col: '#fffaf0' }; g.labels.length = 2;
+    if (move) { const mid = v2ll(arcAt(cur.arc, .5)); g.flyTo(mid.lon, mid.lat * .8, 850); }
+    read.innerHTML = `<b>${esc(cur.name)}</b><span>${esc(base.iata || base.code)} → ${esc(cur.iata || cur.code)} · ${fmt(cur.km)} km · about ${flightTime(cur.km)} in the air</span>`;
+  }
+  TICKS.push(dt => { if (!cur || !g.plane || !g.visible) return; fp = (fp + dt / (1.5 + cur.arc.w * .9)) % 1.25; g.plane.p = easeIO(Math.min(1, fp)); g.plane.alpha = fp > 1 ? 1 - (fp - 1) * 4 : Math.min(1, fp * 8); });
+
+  /* passes, grouped by region, nearest first */
+  const order = ['East Asia', 'Southeast Asia', 'South Asia', 'Oceania', 'Europe'], groups = new Map();
+  for (const w of [...W].sort((a, b) => a.km - b.km)) (groups.get(w.region) || groups.set(w.region, []).get(w.region)).push(w);
+  const regs = [...groups.keys()].sort((a, b) => (order.indexOf(a) + 99) % 99 - (order.indexOf(b) + 99) % 99);
+  const haveCont = new Set(M.stats.conts); let no = done, html = '';
+  for (const r of regs) {
+    const ws = groups.get(r);
+    html += `<h3 class="grp">${esc(r)} <small>${plural(ws.length, 'stamp')}${ws.length > 2 ? ' in one loop' : ''}</small></h3><div class="passes">`;
+    for (const w of ws) {
+      no++; const newC = !haveCont.has(w.cont);
+      html += `<div class="pw reveal"><article class="pass" tabindex="0" data-key="${esc(w.key)}" aria-label="${esc(w.name)}, ${fmt(w.km)} kilometres from ${esc(base.name)}, tentative">
+        <div class="p-main"><div class="p-route"><span>${esc(base.iata || base.code)}</span><i></i><svg><use href="#ic-plane"/></svg><span>${esc(w.iata || w.code)}</span></div>
+          <div class="p-name">${esc(w.name)}</div>
+          <div class="p-meta"><span>${esc(w.city)}</span><span><b>${fmt(w.km)}</b> km</span><span>~<b>${flightTime(w.km)}</b></span></div></div>
+        <div class="p-stub"><span class="p-no"><small>stamp no.</small>${no}</span><span class="p-tent${newC ? ' newc' : ''}">${newC ? 'new continent' : 'tentative'}</span><i class="barcode"></i></div>
+      </article></div>`;
+    }
+    html += '</div>';
+  }
+  if (open) {
+    html += `<h3 class="grp">Open seats <small>${plural(open, 'wildcard')}</small></h3><div class="wild">`;
+    for (let i = 0; i < open; i++) { no++; html += `<div class="wc reveal" data-no="${no}"><small>Stamp no. ${no} · unassigned</small><span class="q">? ? ?</span><button class="btn navy" type="button">Spin the globe</button></div>`; }
+    html += '</div>';
+  }
+  listEl.innerHTML = html;
+  for (const n of $$('.pass', listEl)) {
+    const key = n.dataset.key, wrap = n.parentElement; passEl.set(key, wrap);
+    n.addEventListener('pointerenter', () => focus(key)); n.addEventListener('focus', () => focus(key)); n.addEventListener('click', () => { cur = null; focus(key); });
+  }
+  /* wildcards: let the globe pick */
+  const taken = new Set([M.home.atlas, ...M.countries.map(c => c.geo.atlas), ...W.map(w => w.atlas)]);
+  for (const cardEl of $$('.wc', listEl)) {
+    const btn = $('.btn', cardEl);
+    btn.onclick = () => {
+      const pool = WILD_POOL.filter(n => WORLD_BY.has(n) && !taken.has(n)); if (!pool.length) return;
+      const name = pool[Math.random() * pool.length | 0], geo = geoFor(name), km = gcAngle(base, geo) * KM;
+      if (cardEl.dataset.pick) taken.delete(cardEl.dataset.pick); taken.add(name); cardEl.dataset.pick = name;
+      focus(null); g.hot = null; g.anim = null; g.vlon = 520 * (Math.random() < .5 ? -1 : 1); g.userUntil = performance.now() + 900; btn.disabled = true;
+      read.innerHTML = `<b>Spinning…</b><span>somewhere not on any list</span>`;
+      setTimeout(() => {
+        g.flyTo(geo.lon, geo.lat * .8, 900); g.hot = name; g.spin = 0; btn.disabled = false; btn.textContent = 'Spin again';
+        cardEl.classList.add('set'); $('.q', cardEl).textContent = name; $('small', cardEl).textContent = `Stamp no. ${cardEl.dataset.no} · wildcard · ${fmt(km)} km away`;
+        read.innerHTML = `<b>How about ${esc(name)}?</b><span>${fmt(km)} km from ${esc(base.name)} · about ${flightTime(km)} in the air</span>`;
+      }, REDUCED ? 0 : 850);
+    };
+  }
+  /* quick reads */
+  const chips = [];
+  if (W.length) {
+    const near = W.reduce((a, b) => a.km < b.km ? a : b), far = W.reduce((a, b) => a.km > b.km ? a : b);
+    chips.push(`nearest <b>${esc(near.name)}</b> · ${fmt(near.km)} km`, `farthest <b>${esc(far.name)}</b> · ${fmt(far.km)} km`);
+    const nc = [...new Set(W.filter(w => !haveCont.has(w.cont)).map(w => w.cont))]; if (nc.length) chips.push(`new continent${nc.length > 1 ? 's' : ''} <b>${esc(nc.join(', '))}</b>`);
+    const bigR = regs.map(r => [r, groups.get(r).length]).sort((a, b) => b[1] - a[1])[0]; if (bigR[1] > 2) chips.push(`<b>${bigR[1]}</b> stamps wait in ${esc(bigR[0])}`);
+  }
+  $('#planChips').innerHTML = chips.map(c => `<span class="chip">${c}</span>`).join('');
+  idle();
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   UI · instruments (the analytics), stamp hunt, HUD, boot
+   ════════════════════════════════════════════════════════════ */
+function buildInstruments(M) {
+  const S = M.stats, done = M.countries.length, n = M.target, pen = Math.min(M.wishlist.length, n - done), SURF = '#1a2f6c';
+  const first = M.trips[0], throttle = S.needPace / Math.max(.01, S.lifePace);
+  $('#instSub').innerHTML = `Altitude: <em>${done} of ${n}</em>. To make it by ${fmtMonYr(M.deadline)} the climb rate has to go from ${S.lifePace.toFixed(1)} to <em>${S.needPace.toFixed(1)} new countries a year</em>.`;
+  const cards = [];
+  const card = (cls, html, extra = '') => cards.push(`<article class="card ${cls} reveal" style="--rd:${(cards.length % 4) * .07}s" ${extra}>${html}</article>`);
+
+  /* 1 ─ altimeter: one ratio against its limit */
+  {
+    const cx = 130, cy = 128, r = 92, A = v => (135 + v / n * 270) * RAD, pt = (a, rr) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+    const arc = (v0, v1, rr = r) => { const p0 = pt(A(v0), rr), p1 = pt(A(v1), rr); return `M${p0[0].toFixed(2)} ${p0[1].toFixed(2)}A${rr} ${rr} 0 ${A(v1) - A(v0) > Math.PI ? 1 : 0} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`; };
+    let ticks = '';
+    for (let v = 0; v <= n; v++) { const a = A(v), major = v % 5 === 0 || v === n, p0 = pt(a, r + 10), p1 = pt(a, r + (major ? 18 : 14)); ticks += `<path d="M${p0[0].toFixed(1)} ${p0[1].toFixed(1)}L${p1[0].toFixed(1)} ${p1[1].toFixed(1)}" stroke="${v <= done ? '#f9e6cd' : 'rgba(185,203,246,.45)'}" stroke-width="${major ? 1.8 : 1}" stroke-linecap="round"/>`; if (major) { const q = pt(a, r + 28); ticks += `<text x="${q[0].toFixed(1)}" y="${(q[1] + 3).toFixed(1)}" text-anchor="middle">${v}</text>`; } }
+    const len = r * (A(done) - A(0));
+    card('c-goal', `<h3>Altimeter <small>countries, 0 to ${n}</small></h3>
+      <svg class="gauge" viewBox="0 0 260 218" role="img" aria-label="${done} of ${n} countries visited. ${pen} more are pencilled in.">
+        <path d="${arc(0, n)}" fill="none" stroke="rgba(138,169,236,.2)" stroke-width="12" stroke-linecap="round"/>
+        ${pen ? `<path d="${arc(done, done + pen)}" fill="none" stroke="rgba(245,211,174,.6)" stroke-width="12" stroke-dasharray="2.5 3.5"/>` : ''}
+        <path class="g-val" style="--len:${len.toFixed(1)}" d="${arc(0, done)}" fill="none" stroke="#f9e6cd" stroke-width="12" stroke-linecap="round"/>
+        ${ticks}
+        <g class="g-needle" style="--a:${(135 + done / n * 270 - 270).toFixed(1)}deg"><path d="M${cx - 4} ${cy}L${cx} ${cy - 83}L${cx + 4} ${cy}z" fill="#e2513f"/></g>
+        <circle cx="${cx}" cy="${cy}" r="42" fill="${SURF}"/><circle cx="${cx}" cy="${cy}" r="42" fill="none" stroke="rgba(245,211,174,.5)" stroke-width="1.2"/>
+        <text class="big" x="${cx}" y="${cy + 11}" text-anchor="middle" style="font-size:${done > 9 ? 44 : 50}px">${done}</text>
+        <text class="of" x="${cx}" y="${cy + 28}" text-anchor="middle">OF ${n}</text>
+      </svg>
+      <div class="tb-key" style="margin:2px 0 14px"><span><i class="d"></i><b>${done}</b> stamped</span><span><i class="p"></i><b>${pen}</b> pencilled in</span><span><i></i><b>${n - done - pen}</b> open</span></div>
+      <div class="trio"><div><b>${esc(leftText(M))}</b><span>left on the clock</span></div><div><b>${S.needPace.toFixed(1)}</b><span>new countries a year needed</span></div><div><b>${throttle.toFixed(1)}×</b><span>the lifetime pace</span></div></div>`);
+  }
+
+  /* 2 ─ the climb: countries unlocked over time, and the climb still needed */
+  {
+    const Wd = 720, Hd = 340, L = 30, R = 86, T = 22, B = 30, x0 = Math.floor(yearFrac(first.s)), x1 = yearFrac(M.deadline) + .2, ymax = n + 2;
+    const sx = y => L + (y - x0) / (x1 - x0) * (Wd - L - R), sy = v => Hd - B - v / ymax * (Hd - T - B), now = yearFrac(TODAY), dl = yearFrac(M.deadline);
+    let grid = '';
+    for (let v = 0; v <= n; v += 10) grid += `<path class="gl" d="M${L} ${sy(v)}H${Wd - R}"/><text x="${L - 7}" y="${sy(v) + 3.5}" text-anchor="end">${v}</text>`;
+    for (let y = Math.ceil(x0 / 5) * 5; y <= x1; y += 5) grid += `<text x="${sx(y)}" y="${Hd - 9}" text-anchor="middle">${y}</text><path class="gl" d="M${sx(y)} ${Hd - B}v4"/>`;
+    let d = `M${sx(x0)} ${sy(0)}`, pts = '';
+    M.countries.forEach((c, i) => { const x = sx(yearFrac(c.first.s)); d += `H${x.toFixed(1)}V${sy(i + 1).toFixed(1)}`; pts += `<g class="hot" tabindex="0" data-c="${i}"><circle cx="${x.toFixed(1)}" cy="${sy(i + 1).toFixed(1)}" r="13" fill="transparent"/><circle cx="${x.toFixed(1)}" cy="${sy(i + 1).toFixed(1)}" r="4.600" fill="#f9e6cd" stroke="${SURF}" stroke-width="2"/></g>`; });
+    d += `H${sx(now).toFixed(1)}`;
+    const oldEnd = Math.min(n, done + S.lifePace * (dl - now)), lastC = M.countries[done - 1];
+    card('c-climb', `<h3>The climb <small>countries unlocked, ${yearOf(first.s)} to ${yearOf(M.deadline)}</small></h3>
+      <div class="legend" style="margin-bottom:6px"><span><i></i>flown so far</span><span><i class="dash"></i>climb needed</span><span><i class="dot"></i>at the lifetime pace</span></div>
+      <div class="xscroll"><svg class="chart" id="climb" style="min-width:560px" viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Step chart of countries unlocked: ${M.countries.map(c => `${c.geo.name} ${yearOf(c.first.s)}`).join(', ')}. Reaching ${n} by ${fmtMonYr(M.deadline)} needs ${S.needPace.toFixed(1)} a year.">
+        ${grid}
+        <path d="${d}V${sy(0)}H${sx(x0)}z" fill="rgba(249,230,205,.1)"/>
+        <path d="M${sx(now)} ${sy(done)}L${sx(dl)} ${sy(oldEnd)}" stroke="rgba(185,203,246,.7)" stroke-width="2" stroke-dasharray="1 6" stroke-linecap="round" fill="none"/>
+        <path d="M${sx(now)} ${sy(done)}L${sx(dl)} ${sy(n)}" stroke="#8aa9ec" stroke-width="2" stroke-dasharray="7 6" stroke-linecap="round" fill="none"/>
+        <path d="${d}" fill="none" stroke="#f9e6cd" stroke-width="2.200" stroke-linejoin="round" stroke-linecap="round"/>
+        ${pts}
+        <path class="gl" d="M${sx(yearFrac(first.s))} ${sy(1) - 8}v-34" style="stroke:rgba(249,230,205,.5)"/><text class="lab" x="${sx(yearFrac(first.s)) + 6}" y="${sy(1) - 40}">${esc(first.geo.name)} ’${String(yearOf(first.s)).slice(2)}</text>
+        <text class="lab" x="${sx(yearFrac(lastC.first.s)) - 9}" y="${sy(done) - 9}" text-anchor="end">${esc(lastC.geo.name)} ’${String(yearOf(lastC.first.s)).slice(2)}</text>
+        <svg x="${sx(now) - 3}" y="${sy(done) - 13}" width="34" height="21" viewBox="0 0 48 30" style="color:#fffaf0;overflow:visible"><use href="#ic-plane"/></svg>
+        <text class="lab" x="${sx(now) + 16}" y="${sy(done) + 21}" text-anchor="middle">${done} today</text>
+        <circle cx="${sx(dl)}" cy="${sy(n)}" r="5" fill="#8aa9ec" stroke="${SURF}" stroke-width="2"/>
+        <text class="lab" x="${sx(dl) + 10}" y="${sy(n) + 1}">${n}</text><text x="${sx(dl) + 10}" y="${sy(n) + 14}">by ${fmtMonYr(M.deadline)}</text>
+        <circle cx="${sx(dl)}" cy="${sy(oldEnd)}" r="4" fill="rgba(185,203,246,.85)" stroke="${SURF}" stroke-width="2"/>
+        <text class="lab" x="${sx(dl) + 10}" y="${sy(oldEnd) + 1}">${Math.round(oldEnd)}</text><text x="${sx(dl) + 10}" y="${sy(oldEnd) + 14}">at old pace</text>
+      </svg></div>`);
+  }
+
+  /* 3 ─ four numbers */
+  const tile = (num, small, text) => card('tile', `<div class="num">${num}${small ? `<small>${small}</small>` : ''}</div><p>${text}</p>`);
+  tile(`<span data-count="${M.trips.length}">0</span>`, '', `<b>trips logged</b> since ${fmtMonYr(first.s)}, about ${(M.trips.length / S.spanYears).toFixed(1)} a year.`);
+  tile(`<span data-count="${S.days}">0</span>`, '', `<b>days abroad</b>${M.current ? `, the ${esc(M.current.geo.name)} stay included` : ''}. Roughly ${(S.days / 30.44).toFixed(0)} months.`);
+  tile(`<span data-count="${Math.round(S.km / 1000)}">0</span>`, 'k km', `<b>flown</b>, return legs included. That is ${(S.km / 40075).toFixed(1)} laps of the Earth.`);
+  tile(`${S.conts.length}`, '/ 7', `<b>continents</b>: ${esc(S.conts.join(', '))}.`);
+
+  /* 4 ─ where the stamps pile up */
+  {
+    const rows = [...M.countries].sort((a, b) => b.trips.length - a.trips.length || a.first.s - b.first.s);
+    card('c-most', `<h3>Repeat offenders <small>visits per country</small></h3><div class="most" id="most">${rows.map((c, i) => `<div class="mrow" tabindex="0" data-k="${esc(c.key)}"><span>${esc(c.geo.name)}</span><span class="bar" style="--i:${i}">${c.trips.map((_, k) => `<i style="--r:${k}"></i>`).join('')}<b>${c.trips.length}</b></span></div>`).join('')}</div>`);
+  }
+
+  /* 5 ─ which months */
+  {
+    const Wd = 330, Hd = 226, L = 22, T = 16, B = 26, max = Math.max(...S.perMonth, 1), top = Math.ceil(max / 2) * 2, band = (Wd - L - 4) / 12, bw = Math.min(16, band - 6);
+    const sy = v => Hd - B - v / top * (Hd - T - B), rank = [...S.perMonth].sort((a, b) => b - a)[2] || 1;
+    let s = '';
+    for (let v = 0; v <= top; v += 2) s += `<path class="gl" d="M${L} ${sy(v)}H${Wd - 2}"/><text x="${L - 6}" y="${sy(v) + 3.5}" text-anchor="end">${v}</text>`;
+    S.perMonth.forEach((v, m) => {
+      const x = L + band * m + (band - bw) / 2, y = sy(v), h = sy(0) - y, r = Math.min(4, h);
+      if (v) s += `<path d="M${x} ${sy(0)}V${y + r}q0 ${-r} ${r} ${-r}h${bw - 2 * r}q${r} 0 ${r} ${r}V${sy(0)}z" fill="${v >= rank ? '#f9e6cd' : '#6189de'}"/>`;
+      if (v && v >= rank) s += `<text class="lab" x="${x + bw / 2}" y="${y - 6}" text-anchor="middle">${v}</text>`;
+      s += `<text x="${x + bw / 2}" y="${Hd - 8}" text-anchor="middle">${MONTHS[m][0]}</text><rect class="hot" tabindex="0" data-m="${m}" x="${L + band * m}" y="${T - 8}" width="${band}" height="${Hd - T + 8}" fill="transparent"/>`;
+    });
+    const peak = S.perMonth.map((v, m) => [v, m]).filter(x => x[0] >= rank).map(x => MONTHS[x[1]]);
+    card('c-months', `<h3>Take-off season <small>trips by month</small></h3><svg class="chart" id="months" viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Trips by starting month: ${S.perMonth.map((v, m) => `${MONTHS[m]} ${v}`).join(', ')}">${s}</svg>
+      <p style="font:italic 400 14px/1.4 var(--serif);color:var(--peri2);margin-top:6px">${esc(peak.join(', ').replace(/, ([^,]*)$/, ' and $1'))} carry ${Math.round(S.perMonth.filter(v => v >= rank).reduce((a, b) => a + b, 0) / M.trips.length * 100)}% of all take-offs.</p>`);
+  }
+
+  /* 6 ─ records */
+  {
+    const far = S.farthest, li = (k, v, e) => `<li><span>${k}</span><b>${v}</b><em>${e}</em></li>`;
+    card('c-rec', `<h3>Records</h3><ul class="rec">
+      ${M.current ? li('Right now', `${esc(M.current.geo.name)}, day ${M.current.nights + 1}`, `since ${fmtDay(M.current.s)} ${yearOf(M.current.s)}`) : ''}
+      ${S.longest ? li('Longest stay', plural(S.longest.nights, 'night'), `${esc(S.longest.geo.name)}, ${yearOf(S.longest.s)}`) : ''}
+      ${S.shortest ? li('Shortest hop', plural(S.shortest.nights, 'night'), `${esc(S.shortest.geo.name)}, ${fmtMonYr(S.shortest.s)}`) : ''}
+      ${far ? li('Farthest from home', `${fmt(gcAngle(M.home, far.geo) * KM)} km`, esc(far.geo.name)) : ''}
+      ${S.busiest ? li('Busiest year', `${S.busiest[0]}`, `${plural(S.busiest[1].length, 'trip')}`) : ''}
+    </ul>`);
+  }
+
+  /* 7 ─ every trip on a year line; cream = a new country */
+  {
+    const y0 = yearOf(first.s), y1 = yearOf(TODAY), ny = y1 - y0 + 1, Wd = Math.max(760, ny * 46 + 40), L = 20, band = (Wd - L * 2) / ny, r = 6.5, gapY = 16.5, maxStack = Math.max(...[...S.perYear.values()].map(a => a.length)), Hd = 58 + maxStack * gapY, base = Hd - 30;
+    let s = `<path class="gl" d="M${L} ${base + 9}H${Wd - L}"/>`, run = null; const runs = [];
+    for (let y = y0; y <= y1; y++) { const ts = S.perYear.get(y) || []; if (!ts.length) { if (run == null) run = y; } else { if (run != null && y - run >= 2) runs.push([run, y - 1]); run = null; } }
+    for (const [a, b] of runs) { const xa = L + (a - y0) * band + 4, xb = L + (b - y0 + 1) * band - 4; s += `<rect x="${xa}" y="${base - 30}" width="${xb - xa}" height="38" rx="10" fill="rgba(138,169,236,.1)"/><text x="${(xa + xb) / 2}" y="${base - 8}" text-anchor="middle">grounded ${a}–${String(b).slice(2)}</text>`; }
+    for (let y = y0; y <= y1; y++) {
+      const x = L + (y - y0 + .5) * band, ts = S.perYear.get(y) || [];
+      s += `<text x="${x}" y="${Hd - 5}" text-anchor="middle">’${String(y).slice(2)}</text>`;
+      ts.forEach((t, k) => { const cy = base - k * gapY; s += `<g class="hot" tabindex="0" data-t="${t.i}"><circle cx="${x}" cy="${cy}" r="12" fill="transparent"/><circle cx="${x}" cy="${cy}" r="${r}" fill="${t.first ? '#f9e6cd' : '#6189de'}" stroke="${SURF}" stroke-width="2"/></g>`; });
+    }
+    card('c-years', `<h3>Flight strip <small>one dot per trip, ${y0} to ${y1}</small></h3>
+      <div class="legend" style="margin-bottom:4px"><span><i class="pt"></i>a new country</span><span><i class="pt rep"></i>a return visit</span></div>
+      <div class="xscroll"><svg class="chart" id="years" viewBox="0 0 ${Wd} ${Hd}" style="min-width:${Math.min(Wd, 720)}px" role="img" aria-label="Trips per year: ${[...S.perYear].map(([y, a]) => `${y}: ${a.length}`).join(', ')}">${s}</svg></div>`);
+  }
+
+  /* 8 ─ the passport page */
+  {
+    const ink = ['#22397d', '#c2402f', '#3a5fb8'], R = rng(77); let s = '';
+    M.countries.forEach((c, i) => { s += `<button class="st stamped" type="button" data-k="${esc(c.key)}" style="color:${ink[i % 3]}" aria-label="${esc(c.geo.name)}, first visited ${yearOf(c.first.s)}">${stampSVG(c.geo.code, c.geo.name, String(yearOf(c.first.s)), { rot: Math.round((R() - .5) * 26) })}</button>`; });
+    M.wishlist.slice(0, n - done).forEach(w => { s += `<button class="st pencil" type="button" data-w="${esc(w.key)}" style="color:#6c6a94" aria-label="${esc(w.name)}, pencilled in">${stampSVG(w.code, w.name, 'tentative', { rot: Math.round((R() - .5) * 20), pencil: true })}</button>`; });
+    for (let i = done + pen; i < n; i++) s += `<span class="st open" style="color:#a08f9d">${stampSVG('?', 'open seat', `no. ${i + 1}`, { pencil: true })}</span>`;
+    card('c-pass paper', `<div class="pp-head"><h3>Passport pages <small>${n} squares to fill</small></h3><div class="legend"><span><b style="color:#22397d">${done}</b>&nbsp;inked</span><span><b>${pen}</b>&nbsp;in pencil</span><span><b>${n - done - pen}</b>&nbsp;blank</span></div></div><div class="stamps" id="stamps">${s}</div>`);
+  }
+
+  $('#bento').innerHTML = cards.join('');
+  /* hover layer + cross-links */
+  for (const gEl of $$('#climb .hot')) { const c = M.countries[+gEl.dataset.c]; Tip.bind(gEl, `<b>${esc(c.geo.name)}</b>country no. ${+gEl.dataset.c + 1}<br><i>${fmtMonYr(c.first.s)}</i>`); gEl.addEventListener('click', () => Log.play(c.first)); }
+  for (const b of $$('#months .hot')) { const m = +b.dataset.m; Tip.bind(b, () => `<b>${MONTHS[m]}</b>${plural(S.perMonth[m], 'trip')}${S.perMonth[m] ? `<br><i>${esc([...new Set(M.trips.filter(t => monOf(t.s) === m).map(t => t.geo.name))].join(', '))}</i>` : ''}`); }
+  for (const gEl of $$('#years .hot')) { const t = M.trips[+gEl.dataset.t]; Tip.bind(gEl, `<b>${esc(t.geo.name)}</b>${fmtRange(t)}<br><i>${t.first ? 'new country' : `visit ${t.visit}`} · tap to replay</i>`); gEl.addEventListener('click', () => Log.play(t)); }
+  for (const r of $$('#most .mrow')) Tip.bind(r, countryTip(M.byPlace.get(r.dataset.k)));
+  for (const b of $$('#stamps .stamped')) { const c = M.byPlace.get(b.dataset.k); Tip.bind(b, () => countryTip(c) + '<br><i>tap to replay the latest trip</i>'); b.onclick = () => Log.play(c.trips[c.trips.length - 1]); }
+  for (const b of $$('#stamps .pencil')) { const w = M.wishlist.find(x => x.key === b.dataset.w); Tip.bind(b, `<b>${esc(w.name)}</b>pencilled in<br><i>${fmt(w.km)} km from ${esc(M.base.name)}</i>`); b.onclick = () => { const p = $(`.pass[data-key="${CSS.escape(w.key)}"]`); if (p) { p.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' }); p.focus({ preventScroll: true }); } }; }
+}
+
+/* ───────── the stamp hunt: fly into the floating stamps ───────── */
+const Tokens = (() => {
+  const SPOTS = [['#sky', 9, '25%'], ['#sky', 91, '31%'], ['#sky', 13, '60%'], ['#logbook', 23, '74px'], ['#logbook', 81, '118px'], ['#logbook', 7, 'calc(100% - 74px)'],
+    ['#instruments', 15, '96px'], ['#instruments', 87, '66px'], ['#instruments', 93, 'calc(100% - 84px)'], ['#plan', 71, '74px'], ['#plan', 29, '128px'], ['#plan', 8, 'calc(100% - 96px)'], ['#landing', 84, '170px']];
+  const list = []; let found = 0, M = null;
+  function init(model) {
+    M = model;
+    M.countries.slice(0, SPOTS.length).forEach((c, i) => {
+      const [sel, x, y] = SPOTS[i], b = el('button', { class: 'token', type: 'button', style: `left:${x}%;top:${y};--bd:${(-i * .37).toFixed(2)}s`, 'aria-label': `Collect the ${c.geo.name} stamp` }, stampSVG(c.geo.code, c.geo.name, String(yearOf(c.first.s))));
+      $(sel).appendChild(b); const t = { el: b, c, x: 0, y: 0, got: false }; list.push(t);
+      b.addEventListener('click', () => { if (!t.got) { measure(); Flyer.fetch(t.x, t.y); } });
+      Tip.bind(b, `<b>${esc(c.geo.name)}</b><i>fly the plane into me, or tap and it will come</i>`);
+    });
+    $('#stampTotal').textContent = list.length; measure();
+    Flyer.onHit((x, y, r) => { for (const t of list) if (!t.got) { const dx = t.x - x, dy = t.y - y; if (dx * dx + dy * dy < (r + 24) * (r + 24)) collect(t); } });
+    $('#stampMeter').onclick = () => { const left = list.filter(t => !t.got); if (!left.length) { toast('<b>Full passport</b><span>every hidden stamp is found</span>'); Flyer.celebrate(); return; } const y = scrollY + innerHeight / 2, near = left.reduce((a, b) => Math.abs(a.y - y) < Math.abs(b.y - y) ? a : b); toast(`<svg class="ts"><use href="#ic-stamp"/></svg><span><b>${left.length} still floating</b><br>fly into them with WASD, or tap one. Nearest: ${esc(near.c.geo.name)}.</span>`); scrollTo({ top: Math.max(0, near.y - innerHeight / 2), behavior: REDUCED ? 'auto' : 'smooth' }); };
+  }
+  function measure() { for (const t of list) if (!t.got) { const b = t.el.getBoundingClientRect(); t.x = b.left + b.width / 2; t.y = b.top + b.height / 2 + scrollY; } }
+  function collect(t) {
+    t.got = true; found++; t.el.classList.add('got'); Tip.hide(); Flyer.puff(t.x, t.y, 16, 'spark'); Flyer.release();
+    $('#stampCount').textContent = found; const m = $('#stampMeter'); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump');
+    const st = $(`#stamps .stamped[data-k="${CSS.escape(t.c.key)}"]`); if (st) { st.classList.add('found', 'thump'); }
+    toast(`<span class="ts" style="color:var(--peach)">${stampSVG(t.c.geo.code, t.c.geo.name, String(yearOf(t.c.first.s)))}</span><span><b>${esc(t.c.geo.name)}</b><br>stamp ${found}/${list.length} · first visited ${fmtMonYr(t.c.first.s)} · ${plural(t.c.trips.length, 'visit')}</span>`);
+    if (found === list.length) { m.classList.add('all'); setTimeout(() => { toast(`<b>Full passport!</b><span>all ${list.length} found. The other ${M.need} have to be earned the hard way.</span>`, 6000); Flyer.celebrate(); }, 700); }
+  }
+  return { init, measure };
+})();
+
+/* ───────── boot ───────── */
+(function boot() {
+  $('#grain').style.cssText += `background-image:url(${noiseTile().toDataURL()});background-size:150px 150px`;
+  mountAllClouds(); Flyer.resize();
+  const tabs = $$('.tabs a'), zones = tabs.map(a => $(a.getAttribute('href')));
+  let light = [1e9, 1e9];
+  const measure = () => { Clouds.measure(); Tokens.measure(); const p = $('#plan'), l = $('#landing'); light = [p.offsetTop + 330, l.offsetTop + l.offsetHeight * .34]; };
+  Flyer.setLight(y => y > light[0] && y < light[1]);
+  for (const a of [...tabs, $('.brand'), $('.descend')]) a.addEventListener('click', e => { e.preventDefault(); const id = a.getAttribute('href'); if (id === '#sky') scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' }); else jumpTo(id, 90); });
+  let lastTab = 0;
+  const syncTabs = () => { $('#pilot').classList.toggle('mini', scrollY > innerHeight * .5); const y = scrollY + innerHeight * .45; let k = 0; zones.forEach((z, i) => { if (z.offsetTop <= y) k = i; }); if (k !== lastTab) { lastTab = k; tabs.forEach((a, i) => a.classList.toggle('on', i === k)); } };
+  addEventListener('scroll', syncTabs, { passive: true });
+
+  requestAnimationFrame(() => { Clouds.paintAll(true); paintStars(); Flyer.initPose(); measure(); });
+  let last = performance.now();
+  (function loop(now) {
+    const dt = clamp((now - last) / 1000, .001, .05); last = now;
+    Clouds.parallax();
+    for (const g of GLOBES) if (g.visible) g.frame(dt);
+    for (const f of TICKS) f(dt);
+    Flyer.update(dt); Flyer.draw();
+    requestAnimationFrame(loop);
+  })(last);
+
+  let rt = 0;
+  addEventListener('resize', () => { clearTimeout(rt); Flyer.resize(); rt = setTimeout(() => { for (const g of GLOBES) g.resize(); Clouds.paintAll(); paintStars(); measure(); }, 200); });
+
+  loadData().then(raw => {
+    const M = buildModel(raw); window.TRAVEL = M;
+    buildHero(M); buildLogbook(M); buildInstruments(M); buildPlan(M); Tokens.init(M);
+    const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); for (const nd of $$('[data-count]', e.target)) countUp(nd); io.unobserve(e.target); } }, { threshold: .12 });
+    $$('.reveal').forEach(nd => io.observe(nd));
+    measure(); setTimeout(measure, 700); setTimeout(measure, 2500);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  }).catch(err => { console.error(err); toast('<b>Could not read the travel data</b><span>check travel.json</span>', 8000); });
+
+  function countUp(nd) {
+    const to = +nd.dataset.count; if (REDUCED) { nd.textContent = fmt(to); return; }
+    const t0 = performance.now();
+    (function f(now) { const k = clamp((now - t0) / 1400, 0, 1); nd.textContent = fmt(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); })(t0);
+  }
+})();
+
+</script>
+</body>
+</html>
