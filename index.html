@@ -68,6 +68,8 @@ em{font-family:var(--serif);font-style:normal;font-weight:400}
 /* ───────────── Sheet (fixed, camera-driven; only in story mode) ───────────── */
 #sheet{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:none;background:var(--bg)}
 .story #sheet{display:block}
+.veil{position:fixed;inset:0;z-index:25;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .28s ease}
+.veil.on{opacity:1}
 .sv{--k:1}
 .sv .gl{fill:none;stroke:var(--grid);stroke-width:1}
 .sv .d,.sv .f{fill:none;stroke:var(--text);stroke-width:calc(var(--k)*1.6px);stroke-linecap:round;stroke-linejoin:round}
@@ -720,13 +722,22 @@ const go=y=>{y=Math.max(0,y);if(reduce){scrollTo(0,y);return}
   if(lenis)lenis.scrollTo(y,{duration,easing:easeIO,lock:true,force:true});
   else{const t0=performance.now();const step=now=>{const t=Math.min(1,(now-t0)/(duration*1000));scrollTo(0,from+(y-from)*easeIO(t));if(t<1)requestAnimationFrame(step)};requestAnimationFrame(step)}};
 const targetY=p=>p===pages[0]?0:story?p._top+2:absTop(p)-62;
+// menu / dot jumps go straight to the page: fade to paper, cut to just before it, then glide in (no flying past other pages)
+const veil=document.createElement('div');veil.className='veil';veil.setAttribute('aria-hidden','true');document.body.appendChild(veil);
+function jumpTo(p){const y=targetY(p),cur=lenis?lenis.scroll:scrollY;
+  if(reduce||!story||Math.abs(cur-y)<vh*1.3){go(y);return}
+  veil.classList.add('on');
+  setTimeout(()=>{const pre=p===pages[0]?0:Math.max(0,y-.5*vh);
+    if(lenis)lenis.scrollTo(pre,{immediate:true,force:true});else scrollTo(0,pre);
+    camInit=false;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{veil.classList.remove('on');if(pre!==y)go(y)}))},300)}
 const menuBtn=$('#menuBtn'),menu=$('#menu'),menuLinks=$$('#menu a');
 const setMenu=o=>{menu.classList.toggle('open',o);menuBtn.setAttribute('aria-expanded',o);menuBtn.textContent=o?'Close':'Menu'};
 menuBtn.onclick=()=>setMenu(!menu.classList.contains('open'));
 addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
 document.addEventListener('click',e=>{if(!e.target.closest('#menu,#menuBtn'))setMenu(false);
   const a=e.target.closest('a[href^="#"]');if(!a)return;const p=document.getElementById(a.getAttribute('href').slice(1));if(!p||!pages.includes(p))return;
-  e.preventDefault();setMenu(false);go(targetY(p));if(p!==pages[0]){const h=$('h2',p);if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}});
+  e.preventDefault();setMenu(false);jumpTo(p);if(p!==pages[0]){const h=$('h2',p);if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}}});
 
 /* ═════════════ Loop ═════════════ */
 const hud=$('#hud'),hudN=$('#hudN'),hudT=$('#hudT'),prog=$('#prog');
