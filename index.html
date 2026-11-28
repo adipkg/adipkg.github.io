@@ -183,6 +183,28 @@ main{position:relative;z-index:1}
 .story .split .wd>span{display:inline-block;transform:translateY(110%);transition:transform .9s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i)*60ms)}
 .story .in .split .wd>span{transform:none}
 .story .fu{opacity:0;will-change:opacity,transform}
+
+/* ───────────── Phones & small tablets: the stacked layout ───────────── */
+html{overflow-x:hidden}
+html:not(.story) .bar{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+.ib{padding:10px 6px;margin-right:-6px}
+html:not(.story) .menu a{padding:12px 0}
+html:not(.story) .hero .copy{padding-top:calc(var(--bar) + 40px)}
+html:not(.story) .hero .slot{height:min(72vw,380px);margin-top:28px}
+html:not(.story) main > section.ch{border-top:1px dashed var(--line)}
+html:not(.story) .pg{padding:52px max(20px,env(safe-area-inset-right)) 44px max(20px,env(safe-area-inset-left))}
+html:not(.story) .ph h2{font-size:clamp(38px,10vw,56px)}
+html:not(.story) .items{gap:48px;margin-top:26px}
+html:not(.story) .slot{height:min(64vw,320px)}
+html:not(.story) .txt{--fs:16px;margin-top:12px}
+html:not(.story) .pg.about .slot{margin-top:28px}
+html:not(.story) .about{font-size:clamp(24px,6.6vw,32px)}
+html:not(.story) #contact .pg{padding-top:80px;padding-bottom:calc(48px + env(safe-area-inset-bottom))}
+@media (min-width:640px){html:not(.story) .items{grid-template-columns:1fr 1fr;gap:48px 32px}}
+@media (max-width:700px){html:not(.story) .slot[data-scene="hk"] .hkl{display:none}}
+/* blocks fade up as they scroll into view */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.rv.seen{opacity:1;transform:none}
 </style>
 </head>
 <body>
@@ -677,8 +699,11 @@ let story=false,vw=0,vh=0,keys=[],RT=0,route=null,routeBase=null,pen=null,penHal
 const absTop=e=>e.getBoundingClientRect().top+scrollY;
 function lenAtX(x){let lo=0,hi=RT;for(let k=0;k<24;k++){const m=(lo+hi)/2;route.getPointAtLength(m).x<x?lo=m:hi=m}return lo}
 
+const revealIO='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('seen');revealIO.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px'}):null;
+const revealEls=$$('main .ph, main .item, main .about, #contact .pg > *, .hero .copy > *');
+function setReveal(on){revealEls.forEach(e=>{if(on&&!reduce&&revealIO){if(!e.classList.contains('seen')){e.classList.add('rv');revealIO.observe(e)}}else{e.classList.remove('rv');revealIO&&revealIO.unobserve(e)}})}
 function layout(){
-  story=!reduce&&innerWidth>760;
+  story=!reduce&&innerWidth>=980&&innerHeight>=560;
   root.classList.toggle('story',story);
   vw=root.clientWidth;vh=innerHeight;
   if(story){
@@ -705,6 +730,7 @@ function layout(){
     pages.forEach(p=>{p._top=absTop(p);p._vis=undefined;p._st.classList.remove('vis');(p._fu||[]).forEach(e=>{e._o=undefined;e.style.opacity='';e.style.transform=''})});
   }
   if(SC.hk&&!story){const narrow=innerWidth<=700;SC.hk.own.setAttribute('viewBox',narrow?'360 -150 900 750':SC.hk.vb.join(' '))}
+  setReveal(!story);
   maxScroll=Math.max(1,root.scrollHeight-innerHeight);
   if(lenis)lenis.resize();
 }
@@ -741,7 +767,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('#menu,#menuBtn'))set
 
 /* ═════════════ Loop ═════════════ */
 const hud=$('#hud'),hudN=$('#hudN'),hudT=$('#hudT'),prog=$('#prog');
-let cur=-1,t0=null,prevT=0,camInit=false,cam=[0,0],penP=null,lastVB='';
+let lastFlatY=-1,cur=-1,t0=null,prevT=0,camInit=false,cam=[0,0],penP=null,lastVB='';
 function setCur(i){if(i===cur)return;cur=i;const p=pages[i];
   hud.classList.add('swap');setTimeout(()=>{hudN.textContent=p.dataset.n;hudT.textContent=p.dataset.ch;hud.classList.remove('swap')},200);
   pages.forEach((q,j)=>{q._rail.classList.toggle('on',j===i);q._rail.classList.toggle('done',j<i)});
@@ -769,8 +795,10 @@ function frame(t){
       if(!penP)penP=[q.x,q.y];const pf=1-Math.exp(-dt*14);penP[0]=lerp(penP[0],q.x,pf);penP[1]=lerp(penP[1],q.y,pf);
       [pen,penHalo].forEach(c=>{c.setAttribute('cx',penP[0].toFixed(1));c.setAttribute('cy',penP[1].toFixed(1))})}
   }else{
+    if(y!==lastFlatY||t-t0<4500){lastFlatY=y;
     Object.values(SC).forEach(s=>{if(s.id==='hk')return;const r=s.slot.getBoundingClientRect();setInk(s,reduce?1:range(vh-r.top,vh*.05,vh*.6))});
     let a=0;pages.forEach((p,i)=>{const r=p.getBoundingClientRect();if(r.top<vh*.8){p.classList.add('in');a=i}});setCur(a);
+    }
   }
   prog.style.transform=`scaleX(${clamp(y/maxScroll)})`;
   requestAnimationFrame(frame);
